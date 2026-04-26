@@ -1,0 +1,27 @@
+cat > ~/UOC/microservices/.gitignore << 'EOF'
+# Maven
+target/
+*.jar
+*.war
+*.class
+
+# IDE — IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# IDE — VSCode
+.vscode/
+
+# Spring Boot
+spring-shell.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+EOF
