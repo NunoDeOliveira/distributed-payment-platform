@@ -1,4 +1,4 @@
-# Logistics Warehouse Microservices: Saga Choreography
+# Microservices: Saga Choreography
 
 ## Overview
 This microservice is a prototype designed to efficiently and scalably manage the inventory of a distributed warehouse. Its main objective is to demonstrate the viability of the Saga pattern (Choreography) for maintaining eventual consistency in distributed transactions without requiring a central orchestrator.
