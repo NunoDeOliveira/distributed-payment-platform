@@ -26,8 +26,8 @@ The system is based on independent services built with Spring Boot that communic
 - Protocol: HTTP/REST
 
 #### Asynchronous (Internal Communication)
-- Production Service: RabbitMQ → Inventory Service
-- Delivey Service: RabbitMQ → Inventory Service
+- Production Service → RabbitMQ → Inventory Service
+- Delivey Service → RabbitMQ → Inventory Service
 - Protocol: Advanced Message Queuing Protocol (AMQP)
 
 
