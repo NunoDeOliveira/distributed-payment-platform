@@ -31,14 +31,6 @@ The system is based on independent services built with Spring Boot that communic
 - Protocol: Advanced Message Queuing Protocol (AMQP)
 
 
-## Technologies
-
-- **Spring Boot**: Microservice
-- **Spring Cloud**: API Gateway
-- **RabbitMQ**: Message broker for event-driven communication
-- **REST APIs**: External communication
-- **Maven**: Build tool
-- **
 
 ## Technologies
 
