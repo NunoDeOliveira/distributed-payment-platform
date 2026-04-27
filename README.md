@@ -10,12 +10,12 @@ The system is based on independent services built with Spring Boot that communic
 
 | Component          | Technology         | Role                                   | Port / Note                          |
 |--------------------|--------------------|----------------------------------------|--------------------------------------|
-| API Gateway        | Spring Cloud       | Entry point / routing                  | :8080                                |
-| Production Service | Spring Boot        | Production management                  | :8081                                |
-| Delivery Service   | Spring Boot        | Delivery lifecycle                     | :8082                                |
+| API Gateway        | Spring Cloud       | Entry point / routing                  | 8080                                |
+| Production Service | Spring Boot        | Production management                  | 8081                                |
+| Delivery Service   | Spring Boot        | Delivery lifecycle                     | 8082                                |
 | Inventory Service  | Spring Boot        | Stock & reservation (event-driven)     | Messaging only                       |
-| Messaging Broker   | RabbitMQ           | Asynchronous communication             | :5672 / :15672                       |
-| Database           | PostgreSQL         | Persistent storage                     | :5432                                |
+| Messaging Broker   | RabbitMQ           | Asynchronous communication             | 5672 / 15672                       |
+| Database           | PostgreSQL         | Persistent storage                     | 5432                                |
 
 
 ### Communication Model
