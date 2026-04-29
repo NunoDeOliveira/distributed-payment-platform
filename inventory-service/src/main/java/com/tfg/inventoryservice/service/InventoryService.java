@@ -46,7 +46,7 @@ public class InventoryService {
     // Given an ID and a quantity, reserve a stock quantity
     public void validateDelivery(Long id, int amount){
         // Get the stock availability for a production ID
-        int availabilityStock = getAvailabilityStock(id);
+        int availabilityStock = getAvailabilityStock();
 
         // Check if there are enough stock
         if (amount <= availabilityStock){

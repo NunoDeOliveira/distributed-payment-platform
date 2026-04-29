@@ -1,6 +1,7 @@
 package com.tfg.productionservice.event;
 
 public class ProductionEvent {
+
     private String event;
     private Long productionId;
     private Integer amount;

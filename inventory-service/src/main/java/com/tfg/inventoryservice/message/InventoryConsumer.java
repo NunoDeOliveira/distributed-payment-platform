@@ -1,9 +1,9 @@
 package com.tfg.inventoryservice.message;
 
-import com.tfg.inventoryservice.event.InventoryEvent;
 import com.tfg.inventoryservice.service.InventoryService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 public class InventoryConsumer {
@@ -14,19 +14,16 @@ public class InventoryConsumer {
         this.inventoryService = inventoryService;
     }
 
-    // This method receive two type of events to consume.
-    //
     @RabbitListener(queues = InventoryPublish.INVENTORY_QUEUE)
-    public void consume(InventoryEvent event) {
+    public void consume(JsonNode event) {
+        String eventType = event.path("event").asText();
+        Long productionId = event.path("productionId").asLong();
+        int amount = event.path("amount").asInt();
 
-        if ("production.requested".equals(event.getEventType())) {
-            inventoryService.validateProduction(
-                    event.getProductionId(), event.getAmount());
-        }
-
-        else if ("production.completed".equals(event.getEventType())) {
-            inventoryService.increaseStock(
-                    event.getProductionId(), event.getAmount());
+        if ("production.created".equals(eventType)) {
+            inventoryService.validateProduction(productionId, amount);
+        } else if ("production.completed".equals(eventType)) {
+            inventoryService.increaseStock(productionId, amount);
         }
     }
 }

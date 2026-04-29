@@ -5,6 +5,9 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 
 @Component
 public class InventoryPublish {
@@ -42,7 +45,7 @@ public class InventoryPublish {
     // Publish an event accepting production in the Production queue
     public void publishProductionAccepted(Long productionId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
-                "production.accepted", productionId, amount);
+                "production.approved", productionId, amount);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
