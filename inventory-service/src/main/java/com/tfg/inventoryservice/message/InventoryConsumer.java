@@ -17,13 +17,38 @@ public class InventoryConsumer {
     @RabbitListener(queues = InventoryPublish.INVENTORY_QUEUE)
     public void consume(JsonNode event) {
         String eventType = event.path("event").asText();
-        Long productionId = event.path("productionId").asLong();
         int amount = event.path("amount").asInt();
+        
+        Long productionId = null;
+        Long deliveryId = null;
+        if (eventType.startsWith("production")) {
+            productionId = event.path("productionId").asLong();
+        } else {
+            deliveryId = event.path("deliveryId").asLong();
+        }
 
-        if ("production.created".equals(eventType)) {
-            inventoryService.validateProduction(productionId, amount);
-        } else if ("production.completed".equals(eventType)) {
-            inventoryService.increaseStock(productionId, amount);
+        System.out.println("Inventory receive: " + eventType +
+                " productionId=" + productionId + " deliveryId=" + deliveryId);
+
+        switch (eventType) {
+            case "production.created":
+                inventoryService.validateProduction(productionId, amount);
+                break;
+            case "production.completed":
+                inventoryService.increaseStock(productionId, amount);
+                break;
+            case "delivery.created":
+                inventoryService.validateDelivery(deliveryId, amount);
+                break;
+            case "delivery.completed":
+                inventoryService.confirmDelivery(deliveryId, amount);
+                break;
+            // Compensating Transaction
+            case "delivery.rejected":
+                inventoryService.releaseReservedStock(deliveryId, amount);
+                break;
+            default:
+                System.out.println("Event unknown: " + eventType);
         }
     }
 }

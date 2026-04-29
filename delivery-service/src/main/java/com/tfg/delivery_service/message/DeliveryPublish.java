@@ -12,7 +12,7 @@ public class DeliveryPublish {
     // Define queue for sending Inventory messages
     public static final String INVENTORY_QUEUE = "inventory.queue";
     // Define queue for receiving Inventory messages
-    public static final String DELIVERY_QUEUE = "production.queue";
+    public static final String DELIVERY_QUEUE = "delivery.queue";
 
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
@@ -34,19 +34,13 @@ public class DeliveryPublish {
     }
 
     public void publishDeliveryCreated(Long deliveryId, int amount) {
-        DeliveryEvent event = new DeliveryEvent(
-                "delivery.created", deliveryId, amount);
-
-        // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
+                new DeliveryEvent("delivery.created", deliveryId, amount));
     }
 
     public void publishDeliveryCompleted(Long deliveryId, int amount) {
-        DeliveryEvent event = new DeliveryEvent(
-                "delivery.completed", deliveryId, amount);
-
-        // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
+                new DeliveryEvent("delivery.completed", deliveryId, amount));
     }
 
 }

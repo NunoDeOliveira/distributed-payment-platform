@@ -2,8 +2,8 @@ package com.tfg.delivery_service.message;
 
 import org.springframework.stereotype.Component;
 import com.tfg.delivery_service.service.DeliveryService;
-import com.tfg.delivery_service.event.DeliveryEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 public class DeliveryConsumer {
@@ -14,19 +14,23 @@ public class DeliveryConsumer {
         this.deliveryService = deliveryService;
     }
 
-    // This method receive two type of events.
-    // If event is approved the delivery starts,
-    // if the event is reject start the compensating transaction
     @RabbitListener(queues = DeliveryPublish.DELIVERY_QUEUE)
-    public void consume(DeliveryEvent event) {
+    public void consume(JsonNode event) {
+        // Extracting data using Jackson Path API
+        String eventType = event.path("eventType").asText();
+        Long deliveryId = event.path("productionId").asLong();
+        int amount = event.path("amount").asInt();
 
-        if ("production.approved".equals(event.getEvent())) {
-            deliveryService.startDelivery(event.getDeliveryId());
+        System.out.println("Delivery receive: " + event.toString());
+        
+        // Case delivery in which can start delivery 
+        if ("delivery.accepted".equals(eventType)) {
+            deliveryService.startDelivery(deliveryId);
         }
-
-        if ("production.rejected".equals(event.getEvent())) {
-            deliveryService.compensateRejectedDelivery(
-                    event.getDeliveryId(), event.getAmount());
+        
+        // Compensating Transaction
+        if ("delivery.rejected".equals(eventType)) {
+            deliveryService.compensateRejectedDelivery(deliveryId, amount);
         }
     }
 }

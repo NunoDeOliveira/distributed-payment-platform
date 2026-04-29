@@ -25,14 +25,11 @@ public class DeliveryService {
     // Given an ID and amount of a Delivery create a delivery
     public Delivery createDelivery(int amount) {
         Delivery newDelivery = new Delivery(amount,
-                DeliveryState.PENDING, LocalDateTime.now());
-
+                          DeliveryState.PENDING, LocalDateTime.now());
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
 
         deliveryPublish.publishDeliveryCreated(
-                storedDelivery.getId(),
-                storedDelivery.getAmount()
-        );
+                      storedDelivery.getId(), storedDelivery.getAmount());
 
         return storedDelivery;
     }
@@ -44,6 +41,13 @@ public class DeliveryService {
         delivery.start();
         // Update state in database
         deliveryRepository.save(delivery);
+        
+        try {
+            // Wait 60 seconds to send delivery completed
+            Thread.sleep(60000); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         // Apply the logic to finish delivery
         completeDelivery(id);
@@ -78,7 +82,8 @@ public class DeliveryService {
         Delivery storedDelivery = deliveryRepository.save(deliveryCompleted);
 
         // Method to send event to RabbitMQ
-        publishDeliveryCompleted(storedDelivery);
+        deliveryPublish.publishDeliveryCompleted(
+                        storedDelivery.getId(), storedDelivery.getAmount());
 
     }
 
@@ -91,16 +96,9 @@ public class DeliveryService {
         return deliveryToReturn;
     }
 
-    private void publishDeliveryCompleted(Delivery delivery) {
-        // send event to RabbitMQ
-        deliveryPublish.publishDeliveryCreated(
-                delivery.getId(), delivery.getAmount());
-    }
-
     // Get all the deliveries from the repository.
     // This query is to return to the user.
     public List<Delivery> getAllDeliveries() {
-
         return deliveryRepository.findAll();
     }
 
