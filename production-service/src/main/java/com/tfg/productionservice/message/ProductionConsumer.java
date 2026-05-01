@@ -16,14 +16,14 @@ public class ProductionConsumer {
 
     @RabbitListener(queues = ProductionPublish.PRODUCTION_QUEUE)
     public void consume(JsonNode event) {
-        System.out.println(">>> MENSAJE RECIBIDO: " + event.toString());
+        System.out.println("Message received: " + event.toString());
 
         String eventType = event.path("eventType").asText();
         Long productionId = event.path("productionId").asLong();
         int amount = event.path("amount").asInt();
 
-        System.out.println(">>> eventType: " + eventType);
-        System.out.println(">>> productionId: " + productionId);
+        System.out.println("EventType: " + eventType);
+        System.out.println("ProductionId: " + productionId);
 
         if ("production.approved".equals(eventType)) {
             productionService.startProduction(productionId);
