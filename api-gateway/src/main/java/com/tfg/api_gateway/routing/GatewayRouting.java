@@ -21,7 +21,7 @@ public class GatewayRouting {
                                 .stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("productionCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-production");
-                                }).addResponseHeader("X-Gateway", "Production-Service")
+                                }).addResponseHeader("Gateway-Service", "Production-Service")
                         )
                         //.uri("http://production-service:8081")
                         .uri("http://localhost:8081")
@@ -35,7 +35,7 @@ public class GatewayRouting {
                                 .stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("deliveryCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-delivery");
-                                }).addResponseHeader("X-Gateway", "Delivery-Service")
+                                }).addResponseHeader("Gateway-Service", "Delivery-Service")
                         )
                         //.uri("http://delivery-service:8082")
                         .uri("http://localhost:8082")
