@@ -1,3 +1,8 @@
+/**************************************************************
+     This class represents a reservation maked by Delivery 
+***************************************************************/
+
+
 package com.tfg.inventoryservice.model;
 
 import jakarta.persistence.*;

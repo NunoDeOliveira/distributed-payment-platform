@@ -1,8 +1,8 @@
 package com.tfg.inventoryservice.model;
 
-/**************************************************************************/
-/** this class represents a production received from Production Service  **/
-/**************************************************************************/
+/**************************************************************************
+   this class represents a production received from Production Service  
+***************************************************************************/
 
 import jakarta.persistence.*;
 import lombok.Setter;

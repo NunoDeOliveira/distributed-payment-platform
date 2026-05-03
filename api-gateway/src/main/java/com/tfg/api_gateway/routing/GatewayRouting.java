@@ -15,15 +15,13 @@ public class GatewayRouting {
 
                 // Production service
                 .route("production_route", r -> r
-                        .path("/production/**")
-                        .and()
+                        .path("/production/**").and()
                         .method(HttpMethod.GET, HttpMethod.POST)
                         .filters(f -> f
-                                .stripPrefix(1)
-                                .circuitBreaker(c -> {
+                                .stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("productionCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-production");
-                                }).addResponseHeader("X-Gateway", "Production-Service")
+                                }).addResponseHeader("Gateway-Service", "Production-Service")
                         )
                         //.uri("http://production-service:8081")
                         .uri("http://localhost:8081")
@@ -31,15 +29,13 @@ public class GatewayRouting {
 
                 // Delivery service
                 .route("delivery_route", r -> r
-                        .path("/delivery/**")
-                        .and()
+                        .path("/delivery/**").and()
                         .method(HttpMethod.GET, HttpMethod.POST)
                         .filters(f -> f
-                                .stripPrefix(1)
-                                .circuitBreaker(c -> {
+                                .stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("deliveryCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-delivery");
-                                }).addResponseHeader("X-Gateway", "Delivery-Service")
+                                }).addResponseHeader("Gateway-Service", "Delivery-Service")
                         )
                         //.uri("http://delivery-service:8082")
                         .uri("http://localhost:8082")

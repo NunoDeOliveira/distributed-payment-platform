@@ -11,8 +11,7 @@ public class Fallback {
 
     @GetMapping("/fallback-production")
     public Mono<ResponseEntity<String>> fallbackProduction() {
-        return Mono.just(
-                ResponseEntity
+        return Mono.just(ResponseEntity
                         .status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body("Production Service unavailable")
         );
@@ -20,8 +19,7 @@ public class Fallback {
 
     @GetMapping("/fallback-delivery")
     public Mono<ResponseEntity<String>> fallbackDelivery() {
-        return Mono.just(
-                ResponseEntity
+        return Mono.just(ResponseEntity
                         .status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body("Delivery Service unavailable")
         );

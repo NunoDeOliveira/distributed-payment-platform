@@ -23,13 +23,11 @@ public class ProductionController {
 
     @GetMapping("/{id}")
     public Production getProduction(@PathVariable Long id) {
-
         return productionService.getProduction(id);
     }
 
     @GetMapping
     public List<Production> getAllProductions() {
-
         return productionService.getAllProductions();
     }
 }

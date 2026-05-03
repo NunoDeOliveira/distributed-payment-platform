@@ -107,7 +107,6 @@ public class ProductionService {
     // Get all the production from the repository.
     // This query is to return to the user.
     public List<Production> getAllProductions() {
-
         return productionRepository.findAll();
     }
 }
