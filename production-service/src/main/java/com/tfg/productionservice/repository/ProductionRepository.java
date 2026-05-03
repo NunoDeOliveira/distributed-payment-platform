@@ -3,6 +3,8 @@ package com.tfg.productionservice.repository;
 import com.tfg.productionservice.model.Production;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import com.tfg.productionservice.model.ProductionState;
+import java.util.Optional;
 
 @Repository
 public interface ProductionRepository extends JpaRepository<Production, Long> {
