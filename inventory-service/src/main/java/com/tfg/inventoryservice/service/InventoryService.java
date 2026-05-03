@@ -60,7 +60,7 @@ public class InventoryService {
             // Publish an event accepting the delivery request
             eventPublish.publishDeliveryAccepted(id, amount);
         } else {
-            eventPublish.publishDeliveryRejected(id, amount);
+            eventPublish.publishDeliveryRejected(id, availabilityStock);
         }
     }
 

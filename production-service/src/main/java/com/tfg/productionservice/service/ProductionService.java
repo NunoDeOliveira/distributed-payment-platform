@@ -75,6 +75,14 @@ public class ProductionService {
         if (maxAllowedAmount > 0) {
             createProduction(maxAllowedAmount);
         }
+
+        // Save the rest of the production rejected as PENDING
+        int remainingAmount = originalAmount - maxAllowedAmount;
+        if (remainingAmount > 0) {
+            Production pendingProduction = new Production(
+                    remainingAmount, ProductionState.PENDING, LocalDateTime.now());
+            productionRepository.save(pendingProduction);
+        }
     }
 
     // When the production is completed save production in repository
@@ -87,6 +95,15 @@ public class ProductionService {
         // Method to send event to RabbitMQ
         publishProductionCompleted(storedProduction);
 
+        // Check if there are pending productions and launch the next one
+        Optional<Production> next = productionRepository
+                .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
+
+        if (next.isPresent()) {
+            Production pending = next.get();
+            productionPublish.publishProductionCreated(
+                    pending.getId(), pending.getAmount());
+        }
     }
 
     private void publishProductionCompleted(Production production) {
@@ -107,6 +124,7 @@ public class ProductionService {
     // Get all the production from the repository.
     // This query is to return to the user.
     public List<Production> getAllProductions() {
+
         return productionRepository.findAll();
     }
 }
