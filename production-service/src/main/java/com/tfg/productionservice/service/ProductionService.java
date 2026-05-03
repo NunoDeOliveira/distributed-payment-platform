@@ -70,6 +70,7 @@ public class ProductionService {
         Production production = getProduction(rejectedProductionId);
         production.reject();
         productionRepository.save(production);
+         int originalAmount = production.getAmount();
 
         // Create a new production limited by the given amount
         if (maxAllowedAmount > 0) {
