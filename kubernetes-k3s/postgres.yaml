@@ -1,0 +1,127 @@
+# PostgreSQL for Production Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-production
+  labels:
+    app: postgres-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-production
+  template:
+    metadata:
+      labels:
+        app: postgres-production
+    spec:
+      containers:
+      - name: postgres-production
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "productiondb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-production
+spec:
+  selector:
+    app: postgres-production
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+
+# PostgreSQL for Delivery Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-delivery
+  labels:
+    app: postgres-delivery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-delivery
+  template:
+    metadata:
+      labels:
+        app: postgres-delivery
+    spec:
+      containers:
+      - name: postgres-delivery
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "deliverydb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-delivery
+spec:
+  selector:
+    app: postgres-delivery
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+
+# PostgreSQL for Inventory Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-inventory
+  labels:
+    app: postgres-inventory
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-inventory
+  template:
+    metadata:
+      labels:
+        app: postgres-inventory
+    spec:
+      containers:
+      - name: postgres-inventory
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "inventorydb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-inventory
+spec:
+  selector:
+    app: postgres-inventory
+  ports:
+    - port: 5432
+      targetPort: 5432

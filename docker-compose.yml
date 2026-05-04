@@ -1,0 +1,26 @@
+# Define a docker compose file for rabbit & postgresql
+ 
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-tfg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: productiondb,deliverydb,inventorydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq-tfg
+    environment:
+      RABBITMQ_DEFAULT_USER: nuno
+      RABBITMQ_DEFAULT_PASS: rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
