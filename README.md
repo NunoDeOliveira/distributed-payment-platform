@@ -42,3 +42,4 @@ The system is based on independent services built with Spring Boot that communic
 - **PostgreSQL**: Relational database
 - **Maven**: Build and dependency management
 - **Java**: Programming language
+###### Update
