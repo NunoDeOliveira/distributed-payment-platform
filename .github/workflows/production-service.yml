@@ -61,6 +61,31 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file production-service/pom.xml
 
+    # Authentation in Docker Hub 
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Generate image metadata
+    - name: Extract metadata for production-service
+      id: meta
+      uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+      with:
+        images: nunohenriquedeoliveira/production-service
+
+    # Building and publishing the Docker image
+    - name: Build and push production-service
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      with:
+        context: ./production-service
+        file: ./production-service/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     #- name: Update dependency graph
      # uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
