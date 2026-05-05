@@ -17,7 +17,6 @@ The system is based on independent services built with Spring Boot that communic
 | Messaging Broker   | RabbitMQ           | Asynchronous communication             | 5672 / 15672                       |
 | Database           | PostgreSQL         | Persistent storage                     | 5432                                |
 
-
 ### Communication Model
 
 #### Synchronous (External Access)
@@ -42,5 +41,4 @@ The system is based on independent services built with Spring Boot that communic
 - **PostgreSQL**: Relational database
 - **Maven**: Build and dependency management
 - **Java**: Programming language
-###### Update
-##############Update
+
