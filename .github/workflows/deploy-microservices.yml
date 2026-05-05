@@ -1,99 +1,21 @@
-# This workflow uses actions. Is a example from github docs
-name: Publish Docker image and Deploy to K3s
-
+name: Deploy to K3s
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: 
+      - "Java CI with Maven - production-service"
+      - "Java CI with Maven - delivery-service"
+      - "Java CI with Maven - inventory-service"
+      - "Java CI with Maven - api-gateway"
+    types: [completed]
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub and Deploy to K3s
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
-
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Check out the repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # production-service
-      - name: Extract metadata for production-service
-        id: meta-production
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: nunohenriquedeoliveira/production-service
-
-      - name: Build and push production-service
-        id: push-production
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: ./production-service
-          file: ./production-service/Dockerfile
-          push: true
-          tags: ${{ steps.meta-production.outputs.tags }}
-          labels: ${{ steps.meta-production.outputs.labels }}
-
-      # delivery-service
-      - name: Extract metadata for delivery-service
-        id: meta-delivery
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: nunohenriquedeoliveira/delivery-service
-
-      - name: Build and push delivery-service
-        id: push-delivery
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: ./delivery-service
-          file: ./delivery-service/Dockerfile
-          push: true
-          tags: ${{ steps.meta-delivery.outputs.tags }}
-          labels: ${{ steps.meta-delivery.outputs.labels }}
-
-      # inventory-service
-      - name: Extract metadata for inventory-service
-        id: meta-inventory
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: nunohenriquedeoliveira/inventory-service
-
-      - name: Build and push inventory-service
-        id: push-inventory
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: ./inventory-service
-          file: ./inventory-service/Dockerfile
-          push: true
-          tags: ${{ steps.meta-inventory.outputs.tags }}
-          labels: ${{ steps.meta-inventory.outputs.labels }}
-
-      # api-gateway
-      - name: Extract metadata for api-gateway
-        id: meta-gateway
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: nunohenriquedeoliveira/api-gateway
-
-      - name: Build and push api-gateway
-        id: push-gateway
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: ./api-gateway
-          file: ./api-gateway/Dockerfile
-          push: true
-          tags: ${{ steps.meta-gateway.outputs.tags }}
-          labels: ${{ steps.meta-gateway.outputs.labels }}
-
-      # Deploy to K3s
       - name: Copy manifests to K3s control plane
         uses: appleboy/scp-action@v0.1.7
         with:
