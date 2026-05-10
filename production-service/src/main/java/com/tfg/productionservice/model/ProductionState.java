@@ -4,5 +4,7 @@ public enum ProductionState {
     PENDING,
     PREPARING,
     COMPLETED,
-    REJECTED
+    REJECTED,
+    TIMEOUT,
+    FAILED
 }

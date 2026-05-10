@@ -6,5 +6,7 @@ public enum DeliveryState {
     PENDING,
     READY_FOR_DELIVERY,
     COMPLETED,
-    REJECTED
+    REJECTED,
+    TIMEOUT,
+    FAILED
 }

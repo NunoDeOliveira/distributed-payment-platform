@@ -36,35 +36,32 @@ public class DeliveryService {
 
     // Given an ID of delivery from the RabbitMQ, start a new delivery
     @Async
-    public void startDelivery(Long id) {
-        Delivery delivery = getDelivery(id);
+    public void startDelivery(Delivery delivery) {
         delivery.start();
         // Update state in database
         deliveryRepository.save(delivery);
         
         try {
             // Wait 60 seconds to send delivery completed
-            Thread.sleep(60000); 
+            Thread.sleep(30000); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
         // Apply the logic to finish delivery
-        completeDelivery(id);
+        completeDelivery(delivery);
     }
 
     // Method for saving a rejected delivery in the DB
-    public void rejectDelivery(Long id) {
-        Delivery delivery = getDelivery(id);
+    public void rejectDelivery(Delivery delivery) {
         delivery.reject();
         deliveryRepository.save(delivery);
     }
 
     // Saga compensating transaction method.
     // Given a rejected delivery and the maximum amount allowed for that delivery
-    public void compensateRejectedDelivery(Long rejectedDeliveryId, int maxAllowedAmount) {
+    public void compensateRejectedDelivery(Delivery delivery, int maxAllowedAmount) {
         // Update the delivery state to reject
-        Delivery delivery = getDelivery(rejectedDeliveryId);
         delivery.reject();
         deliveryRepository.save(delivery);
 
@@ -76,15 +73,13 @@ public class DeliveryService {
 
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
-    public void completeDelivery(Long id) {
-        Delivery deliveryCompleted = getDelivery(id);
-        deliveryCompleted.complete();
-        Delivery storedDelivery = deliveryRepository.save(deliveryCompleted);
+    public void completeDelivery(Delivery delivery) {
+        delivery.complete();
+        deliveryRepository.save(delivery);
 
         // Method to send event to RabbitMQ
         deliveryPublish.publishDeliveryCompleted(
-                        storedDelivery.getId(), storedDelivery.getAmount());
-
+                        delivery.getId(), delivery.getAmount());
     }
 
     // Get delivery by ID
@@ -101,6 +96,16 @@ public class DeliveryService {
     public List<Delivery> getAllDeliveries() {
         return deliveryRepository.findAll();
     }
-
-
+    
+    // If inventory connection fail get timeout state
+    public void getTimeoutState(Delivery delivery) {
+        delivery.timeout();
+        deliveryRepository.save(delivery);
+    }
+    
+    // When the third retry fails, the state is failed
+    public void getFailedSate(Delivery delivery) {
+        delivery.fail();
+        deliveryRepository.save(delivery);
+    }
 }

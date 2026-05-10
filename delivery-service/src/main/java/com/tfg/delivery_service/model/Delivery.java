@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 @Getter
 @Setter
 @Entity
 @Table(name = "deliveries")
-
 public class Delivery {
 
     @Id
@@ -21,7 +21,7 @@ public class Delivery {
 
     @Enumerated(EnumType.STRING)
     private DeliveryState state;
-
+    
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -49,6 +49,18 @@ public class Delivery {
     // Switch state to REJECTED and record time
     public void reject() {
         this.state = DeliveryState.REJECTED;
+        this.endTime = LocalDateTime.now();
+    }
+    
+    // Switch state to TIMEOUT and record time
+    public void timeout() {
+        this.state = DeliveryState.TIMEOUT;
+        this.endTime = LocalDateTime.now();
+    }
+    
+    // Switch state to FAILED and record time
+    public void fail() {
+        this.state = DeliveryState.FAILED;
         this.endTime = LocalDateTime.now();
     }
 

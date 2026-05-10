@@ -13,7 +13,6 @@ public class DeliveryPublish {
     public static final String INVENTORY_QUEUE = "inventory.queue";
     // Define queue for receiving Inventory messages
     public static final String DELIVERY_QUEUE = "delivery.queue";
-
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
 

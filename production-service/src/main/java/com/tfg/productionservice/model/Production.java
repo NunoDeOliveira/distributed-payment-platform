@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 @Getter
@@ -20,8 +21,10 @@ public class Production {
 
     @Enumerated(EnumType.STRING)
     private ProductionState state;
-
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     public Production() {}
@@ -48,5 +51,17 @@ public class Production {
         this.state = ProductionState.REJECTED;
         this.endTime = LocalDateTime.now();
     }
-
+    
+    // tIme-out if inventory fail
+    public void timeout() {
+        this.state = ProductionState.TIMEOUT;
+        this.endTime = LocalDateTime.now();
+    }
+    
+    // When inventory connection fail 3 times the state will be failed 
+    public void fail() {
+        this.state = ProductionState.FAILED;
+        this.endTime = LocalDateTime.now();
+    }
+    
 }

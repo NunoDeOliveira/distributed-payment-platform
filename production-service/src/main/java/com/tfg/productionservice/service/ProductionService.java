@@ -39,8 +39,7 @@ public class ProductionService {
 
     // Given an ID of production from the RabbitMQ start a new production
     @Async
-    public void startProduction(Long id) {
-        Production production = getProduction(id);
+    public void startProduction(Production production) {
         production.start();
         // Update state in database
         productionRepository.save(production);
@@ -53,21 +52,19 @@ public class ProductionService {
             System.out.println(e);
         }
         // Apply the logic for a completed production when de production finish
-        completeProduction(id);
+        completeProduction(production);
     }
 
     // Method for saving a rejected production in the DB
-    public void rejectProduction(Long id) {
-        Production production = getProduction(id);
+    public void rejectProduction(Production production) {
         production.reject();
         productionRepository.save(production);
     }
 
     // Saga compensating transaction method.
     // Given a rejected production and the maximum amount allowed for that production
-    public void compensateRejectedProduction(Long rejectedProductionId, int maxAllowedAmount) {
+    public void compensateRejectedProduction(Production production, int maxAllowedAmount) {
         // Update the production state to reject
-        Production production = getProduction(rejectedProductionId);
         production.reject();
         productionRepository.save(production);
          int originalAmount = production.getAmount();
@@ -81,20 +78,18 @@ public class ProductionService {
         int remainingAmount = originalAmount - maxAllowedAmount;
         if (remainingAmount > 0) {
             Production pendingProduction = new Production(
-                    remainingAmount, ProductionState.PENDING, LocalDateTime.now());
+                              remainingAmount, ProductionState.PENDING, LocalDateTime.now());
             productionRepository.save(pendingProduction);
         }
     }
 
     // When the production is completed save production in repository
     // and publish an event on RabbitMQ
-    public void completeProduction(Long id) {
-        Production productionCompleted = getProduction(id);
-        productionCompleted.complete();
-        Production storedProduction = productionRepository.save(productionCompleted);
-
+    public void completeProduction(Production production) {
+        production.complete();
+        productionRepository.save(production);
         // Method to send event to RabbitMQ
-        publishProductionCompleted(storedProduction);
+        publishProductionCompleted(production);
 
         // Check if there are pending productions and launch the next one
         Optional<Production> next = productionRepository
@@ -112,7 +107,19 @@ public class ProductionService {
         productionPublish.publishProductionCompleted(
                                     production.getId(), production.getAmount());
     }
-
+    
+    // If inventory connection fail get timeout state
+    public void getTimeoutState(Production production) {
+        production.timeout();
+        productionRepository.save(production);
+    }
+    
+    // When the third retry fails, the state is failed
+    public void getFailedSate(Production production) {
+        production.fail();
+        productionRepository.save(production);
+    }
+    
     // Get production by ID
     public Production getProduction(Long id) {
         Optional<Production> pro = productionRepository.findById(id);
@@ -125,7 +132,6 @@ public class ProductionService {
     // Get all the production from the repository.
     // This query is to return to the user.
     public List<Production> getAllProductions() {
-
         return productionRepository.findAll();
     }
 }
