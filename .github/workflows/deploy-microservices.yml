@@ -24,16 +24,6 @@ jobs:
           key: ${{ secrets.K3S_SSH_KEY }}
           source: "kubernetes-k3s/*.yaml"
           target: "~/"
-      
-      - name: Copy monitoring manifests
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.K3S_HOST }}
-          username: ubuntu
-          key: ${{ secrets.K3S_SSH_KEY }}
-          source: "kubernetes-k3s/monitoring/*.yaml"
-          target: "~/kubernetes-k3s/monitoring"
-          strip_components: 2
 
       - name: Deploy to K3s
         uses: appleboy/ssh-action@v1.0.0
