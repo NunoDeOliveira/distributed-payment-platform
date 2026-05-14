@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.K3S_HOST }}
           username: ubuntu
           key: ${{ secrets.K3S_SSH_KEY }}
-          source: "kubernetes-k3s/*.yaml"
+          source: "kubernetes-k3s/.yaml"
           target: "~/"
 
       - name: Deploy to K3s
