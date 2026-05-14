@@ -36,14 +36,22 @@ spec:
           value: "rabbit"
         - name: SERVER_PORT
           value: "8081"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: production-service
 spec:
+  type: NodePort
   selector:
     app: production-service
   ports:
     - port: 8081
       targetPort: 8081
+      nodePort: 30081

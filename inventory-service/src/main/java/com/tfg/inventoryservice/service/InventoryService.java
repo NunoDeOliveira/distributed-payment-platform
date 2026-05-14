@@ -7,6 +7,7 @@ import com.tfg.inventoryservice.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 import com.tfg.inventoryservice.model.StockReservation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Optional;
 
@@ -16,8 +17,9 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final InventoryPublish eventPublish;
     private final ReservationRepository reservationRepository;
-
-    private static final int MAX_STOCK = 30;
+    
+    @Value("${inventory.stock.limit:30}")
+    private int MAX_STOCK;
 
     public InventoryService(InventoryRepository inventoryRepository,
                             InventoryPublish eventPublish,

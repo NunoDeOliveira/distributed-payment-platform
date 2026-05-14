@@ -28,6 +28,12 @@ spec:
           value: "nuno"
         - name: RABBITMQ_DEFAULT_PASS
           value: "rabbit"
+        resources:
+          requests:
+            memory: "256Mi"
+          limits:
+            memory: "512Mi"
+
 ---
 
 # Service of RabbitMQ

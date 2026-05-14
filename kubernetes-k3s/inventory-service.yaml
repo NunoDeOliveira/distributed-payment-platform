@@ -5,7 +5,7 @@ metadata:
   labels:
     app: inventory-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: inventory-service
@@ -36,14 +36,25 @@ spec:
           value: "rabbit"
         - name: SERVER_PORT
           value: "8083"
+        - name: INVENTORY_STOCK_LIMIT
+          value: "30"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: inventory-service
 spec:
+  type: NodePort
   selector:
     app: inventory-service
   ports:
     - port: 8083
       targetPort: 8083
+      nodePort: 30083
+      
