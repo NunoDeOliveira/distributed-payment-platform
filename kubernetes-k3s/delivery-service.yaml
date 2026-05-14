@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: delivery-service
-        image: nunohenriquedeoliveira/delivery-service:latest
+        image: nunohenriquedeoliveira/delivery-service:main
         ports:
         - containerPort: 8082
         env:

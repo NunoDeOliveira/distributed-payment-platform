@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: production-service
-        image: nunohenriquedeoliveira/production-service:latest
+        image: nunohenriquedeoliveira/production-service:main
         ports:
         - containerPort: 8081
         env:

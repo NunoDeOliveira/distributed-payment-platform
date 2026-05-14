@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inventory-service
-        image: nunohenriquedeoliveira/inventory-service:latest
+        image: nunohenriquedeoliveira/inventory-service:main
         ports:
         - containerPort: 8083
         env:
