@@ -32,5 +32,5 @@ jobs:
           username: ubuntu
           key: ${{ secrets.K3S_SSH_KEY }}
           script: |
-            sudo k3s kubectl apply -f ~/kubernetes-k3s/
+            sudo k3s kubectl apply -R -f ~/kubernetes-k3s/
             sudo k3s kubectl rollout restart deployment
