@@ -7,7 +7,6 @@ on:
       - "Java CI with Maven - inventory-service"
       - "Java CI with Maven - api-gateway"
     types: [completed]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,7 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Copy manifests to K3s control plane
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -24,7 +22,6 @@ jobs:
           key: ${{ secrets.K3S_SSH_KEY }}
           source: "kubernetes-k3s/*.yaml"
           target: "~/"
-
       - name: Deploy to K3s
         uses: appleboy/ssh-action@v1.0.0
         with:
