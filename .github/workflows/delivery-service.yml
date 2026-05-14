@@ -73,7 +73,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
       with:
-        images: nunohenriquedeoliveira/production-service
+        images: nunohenriquedeoliveira/delivery-service
 
     # Building and publishing the Docker image
     - name: Build and push production-service
