@@ -23,8 +23,8 @@ public class GatewayRouting {
                                     c.setFallbackUri("forward:/fallback-production");
                                 }).addResponseHeader("Gateway-Service", "Production-Service")
                         )
-                        //.uri("http://production-service:8081")
-                        .uri("http://localhost:8081")
+                        .uri("http://production-service:8081")
+                        //.uri("http://localhost:8081")
                 )
 
                 // Delivery service
@@ -37,8 +37,8 @@ public class GatewayRouting {
                                     c.setFallbackUri("forward:/fallback-delivery");
                                 }).addResponseHeader("Gateway-Service", "Delivery-Service")
                         )
-                        //.uri("http://delivery-service:8082")
-                        .uri("http://localhost:8082")
+                        .uri("http://delivery-service:8082")
+                        //.uri("http://localhost:8082")
                 )
                 .build();
     }

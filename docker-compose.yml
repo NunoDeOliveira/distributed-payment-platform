@@ -41,3 +41,11 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=nuno
       - GF_SECURITY_ADMIN_PASSWORD=grafana
+    # added 14 may
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:
