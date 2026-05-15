@@ -42,8 +42,8 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
         
         try {
-            // Wait 60 seconds to send delivery completed
-            Thread.sleep(30000); 
+            // Wait 5 seconds to send delivery completed
+            Thread.sleep(5000); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
