@@ -35,7 +35,7 @@ public class InventoryService {
         int currentStock = getAvailabilityStock();
         int allowedCapacity = MAX_STOCK - currentStock;
 
-        // Evaluate if the amount received is rejected or accepted
+        // Evaluate whether the amount received is rejected or accepted
         if (amount <= allowedCapacity){
             eventPublish.publishProductionAccepted(id, amount);
         } else {
@@ -90,24 +90,29 @@ public class InventoryService {
         stockEntry.setProductionId(id);
         stockEntry.setAmount(amount);
 
+        // Add new production to entry stock
         inventoryRepository.save(stockEntry);
+        // Notify delivery service that stock is available
+        eventPublish.publishStockAvailable(amount);
     }
 
-    //
+    // Given and id of product and amount release a reservation
     @Transactional
     public void confirmDelivery(Long id, int amount){
+        // Get reservation from repository
         StockReservation reservation = reservationRepository.findByReservationId(id);
-
         if (reservation == null) {
             return;
         }
-        //
+        // Discount delivery from repository
         StockEntry stockEntry = new StockEntry();
         stockEntry.setProductionId(id);
         stockEntry.setAmount(-reservation.getReservationAmount());
 
         inventoryRepository.save(stockEntry);
         reservationRepository.delete(reservation);
+        // Notify to production sevice when a delivery is completed
+        eventPublish.publishCapacityAvailable(reservation.getReservationAmount());
     }
 
     @Transactional
