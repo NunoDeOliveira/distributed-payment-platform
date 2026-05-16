@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.tfg.productionservice.model.ProductionState;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface ProductionRepository extends JpaRepository<Production, Long> {
@@ -12,4 +13,6 @@ public interface ProductionRepository extends JpaRepository<Production, Long> {
     Optional<Production> findFirstByStateOrderByStartTimeAsc(ProductionState state);
     // Method of consulting for count state
     long countByState(ProductionState state);
+    // Added to get all the pendings
+    List<Production> findByStateOrderByStartTimeAsc(ProductionState state);
 }

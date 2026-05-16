@@ -90,16 +90,6 @@ public class ProductionService {
         productionRepository.save(production);
         // Method to send event to RabbitMQ
         publishProductionCompleted(production);
-
-        // Check if there are pending productions and launch the next one
-        Optional<Production> next = productionRepository
-                .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
-
-        if (next.isPresent()) {
-            Production pending = next.get();
-            productionPublish.publishProductionCreated(
-                    pending.getId(), pending.getAmount());
-        }
     }
 
     private void publishProductionCompleted(Production production) {
@@ -133,14 +123,13 @@ public class ProductionService {
     // and is assigned as PENDING, this method start this a pending production
     public void startNextPending(int availableCapacity) {
         // Find in the respository the production with PENDING state and the lowest ID
-        Optional<Production> next = productionRepository
-                        .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
-        // Check if the Optional containe a value
-        if (next.isPresent()) {
-            // Get the production found 
-            Production production = next.get();
-            // Check if the amount of production found is less or equal than stock availability
-            if (production.getAmount() <= availableCapacity) {
+        List<Production> pending = productionRepository
+                        .findByStateOrderByStartTimeAsc(ProductionState.PENDING);
+        
+        int remaining = availableCapacity;
+        for (Production production : pending) {
+            if (production.getAmount() <= remaining) {
+                remaining -= production.getAmount();
                 productionPublish.publishProductionCreated(
                                   production.getId(), production.getAmount());
             }

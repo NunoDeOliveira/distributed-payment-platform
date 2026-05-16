@@ -43,7 +43,7 @@ public class DeliveryService {
         
         try {
             // Wait 5 seconds to send delivery completed
-            Thread.sleep(5000); 
+            Thread.sleep(3000); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -93,18 +93,19 @@ public class DeliveryService {
     // This method publish start a delivivery
     public void startNextPending(int availableStock) {
         // Find in the respository the delivery with PENDING state and the lowest ID
-        Optional<Delivery> next = deliveryRepository
-                          .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
-        // Check if the Optional containe a value
-        if (next.isPresent()) {
-            // Get the delivery found 
-            Delivery delivery = next.get();
-            // Check if the amount of delivery found is less or equal than stock availability
-            if (delivery.getAmount() <= availableStock) {
+        List<Delivery> pending = deliveryRepository
+                          .findByStateOrderByStartTimeAsc(DeliveryState.PENDING);
+        
+        int remaining = availableStock;
+        for (Delivery delivery : pending) {
+            if (delivery.getAmount() <= remaining) {
+                remaining -= delivery.getAmount();
                 startDelivery(delivery);
             }
         }
     }
+    
+    
 
     // Get all the deliveries from the repository.
     // This query is to return to the user.
