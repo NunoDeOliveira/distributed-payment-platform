@@ -99,8 +99,9 @@ public class DeliveryService {
         int remaining = availableStock;
         for (Delivery delivery : pending) {
             if (delivery.getAmount() <= remaining) {
-                remaining -= delivery.getAmount();
-                startDelivery(delivery);
+		remaining -= delivery.getAmount();
+                deliveryPublish.publishDeliveryCreated(
+                delivery.getId(), delivery.getAmount());
             }
         }
     }
