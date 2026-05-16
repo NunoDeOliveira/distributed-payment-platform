@@ -28,7 +28,8 @@ public class InventoryService {
         this.eventPublish = eventPublish;
         this.reservationRepository = reservationRepository;
     }
-
+    
+    @Transactional
     // Given an ID and a production quantity, validate it.
     public void validateProduction(Long id, int amount){
         // Calculate the stock that can still be added
@@ -41,7 +42,6 @@ public class InventoryService {
         } else {
             eventPublish.publishProductionRejected(id, allowedCapacity);
         }
-
     }
 
     @Transactional
@@ -92,8 +92,11 @@ public class InventoryService {
 
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
+        
         // Notify delivery service that stock is available
         eventPublish.publishStockAvailable(amount);
+        // Notify production service that capacity is available
+        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
 
     // Given and id of product and amount release a reservation
@@ -111,8 +114,11 @@ public class InventoryService {
 
         inventoryRepository.save(stockEntry);
         reservationRepository.delete(reservation);
+        
         // Notify to production sevice when a delivery is completed
-        eventPublish.publishCapacityAvailable(reservation.getReservationAmount());
+        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
+        // Notify delivery service that stock may have changed
+        eventPublish.publishStockAvailable(getAvailabilityStock());
     }
 
     @Transactional

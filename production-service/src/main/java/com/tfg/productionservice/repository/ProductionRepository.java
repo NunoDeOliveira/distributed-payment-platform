@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ProductionRepository extends JpaRepository<Production, Long> {
     // Method to search a production in order by state if a production is rejected
     Optional<Production> findFirstByStateOrderByStartTimeAsc(ProductionState state);
+    // Method of consulting for count state
+    long countByState(ProductionState state);
 }

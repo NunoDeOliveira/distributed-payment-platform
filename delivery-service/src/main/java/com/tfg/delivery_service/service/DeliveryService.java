@@ -47,7 +47,6 @@ public class DeliveryService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
         // Apply the logic to finish delivery
         completeDelivery(delivery);
     }
@@ -89,6 +88,22 @@ public class DeliveryService {
                 -> new RuntimeException("Delivery " + id + "not found"));
 
         return deliveryToReturn;
+    }
+    
+    // This method publish start a delivivery
+    public void startNextPending(int availableStock) {
+        // Find in the respository the delivery with PENDING state and the lowest ID
+        Optional<Delivery> next = deliveryRepository
+                          .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
+        // Check if the Optional containe a value
+        if (next.isPresent()) {
+            // Get the delivery found 
+            Delivery delivery = next.get();
+            // Check if the amount of delivery found is less or equal than stock availability
+            if (delivery.getAmount() <= availableStock) {
+                startDelivery(delivery);
+            }
+        }
     }
 
     // Get all the deliveries from the repository.

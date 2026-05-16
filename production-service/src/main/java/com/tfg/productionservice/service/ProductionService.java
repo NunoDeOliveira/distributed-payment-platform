@@ -128,9 +128,27 @@ public class ProductionService {
 
         return productionToReturn;
     }
+    
+    // When a production is rejected because it excceds the stock 
+    // and is assigned as PENDING, this method start this a pending production
+    public void startNextPending(int availableCapacity) {
+        // Find in the respository the production with PENDING state and the lowest ID
+        Optional<Production> next = productionRepository
+                        .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
+        // Check if the Optional containe a value
+        if (next.isPresent()) {
+            // Get the production found 
+            Production production = next.get();
+            // Check if the amount of production found is less or equal than stock availability
+            if (production.getAmount() <= availableCapacity) {
+                productionPublish.publishProductionCreated(
+                                  production.getId(), production.getAmount());
+            }
+        }
+    }
 
-    // Get all the production from the repository.
-    // This query is to return to the user.
+    // Get all the production from the repository
+    // This query is to return to the user
     public List<Production> getAllProductions() {
         return productionRepository.findAll();
     }
