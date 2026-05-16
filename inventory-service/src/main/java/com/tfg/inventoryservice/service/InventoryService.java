@@ -94,7 +94,7 @@ public class InventoryService {
         inventoryRepository.save(stockEntry);
         
         // Notify delivery service that stock is available
-        eventPublish.publishStockAvailable(amount);
+        eventPublish.publishStockAvailable(getAvailabilityStock()); // 16 may from amount to actual
         // Notify production service that capacity is available
         eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
