@@ -29,5 +29,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.K3S_SSH_KEY }}
           script: |
+            sleep 90
             sudo k3s kubectl apply --validate=false -f ~/kubernetes-k3s/
             sudo k3s kubectl rollout restart deployment
