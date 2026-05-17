@@ -57,9 +57,9 @@ public class DeliveryConsumer {
                     deliveryService.compensateRejectedDelivery(delivery, amount);
                 }
                 break;
-            case "stock.available":
+            /*case "stock.available":
                 deliveryService.startNextPending(amount);
-                break;
+                break;*/
             default:
                 System.out.println("Event unknown: " + eventType);
         }

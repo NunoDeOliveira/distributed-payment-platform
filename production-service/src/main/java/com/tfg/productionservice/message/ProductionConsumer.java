@@ -56,9 +56,9 @@ public class ProductionConsumer {
                     productionService.compensateRejectedProduction(production, amount);
                 }
                 break;
-            case "stock.available":
+            /*case "stock.available":
                 productionService.startNextPending(amount);
-                break;
+                break;*/
             default:
                 System.out.println("Event unknown: " + eventType);
         }

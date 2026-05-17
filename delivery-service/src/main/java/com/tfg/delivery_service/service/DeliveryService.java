@@ -91,20 +91,19 @@ public class DeliveryService {
     }
     
     // This method publish start a delivivery
-    public void startNextPending(int availableStock) {
+    /*public void startNextPending(int availableStock) {
         // Find in the respository the delivery with PENDING state and the lowest ID
         List<Delivery> pending = deliveryRepository
-                          .findByStateOrderByStartTimeAsc(DeliveryState.PENDING);
-        
+                          .findByStateOrderByStartTimeAsc(DeliveryState.PENDING);       
         int remaining = availableStock;
         for (Delivery delivery : pending) {
             if (delivery.getAmount() <= remaining) {
-		remaining -= delivery.getAmount();
+		            remaining -= delivery.getAmount();
                 deliveryPublish.publishDeliveryCreated(
                 delivery.getId(), delivery.getAmount());
             }
         }
-    }
+    }*/
     
     
 

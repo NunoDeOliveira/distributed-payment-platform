@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.tfg.inventoryservice.model.StockReservation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
-
 import java.util.Optional;
 
 
@@ -94,9 +93,9 @@ public class InventoryService {
         inventoryRepository.save(stockEntry);
         
         // Notify delivery service that stock is available
-        eventPublish.publishStockAvailable(getAvailabilityStock()); // 16 may from amount to actual
+        //eventPublish.publishStockAvailable(getAvailabilityStock()); // 16 may from amount to actual
         // Notify production service that capacity is available
-        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
+        //eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
 
     // Given and id of product and amount release a reservation
@@ -116,9 +115,9 @@ public class InventoryService {
         reservationRepository.delete(reservation);
         
         // Notify to production sevice when a delivery is completed
-        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
+        //eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
         // Notify delivery service that stock may have changed
-        eventPublish.publishStockAvailable(getAvailabilityStock());
+        //eventPublish.publishStockAvailable(getAvailabilityStock());
     }
 
     @Transactional

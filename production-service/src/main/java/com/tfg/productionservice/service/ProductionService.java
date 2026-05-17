@@ -73,7 +73,6 @@ public class ProductionService {
         if (maxAllowedAmount > 0) {
             createProduction(maxAllowedAmount);
         }
-
         // Save the rest of the production rejected as PENDING
         int remainingAmount = originalAmount - maxAllowedAmount;
         if (remainingAmount > 0) {
@@ -121,7 +120,7 @@ public class ProductionService {
     
     // When a production is rejected because it excceds the stock 
     // and is assigned as PENDING, this method start this a pending production
-    public void startNextPending(int availableCapacity) {
+    /*public void startNextPending(int availableCapacity) {
         // Find in the respository the production with PENDING state and the lowest ID
         List<Production> pending = productionRepository
                         .findByStateOrderByStartTimeAsc(ProductionState.PENDING);
@@ -134,7 +133,7 @@ public class ProductionService {
                                   production.getId(), production.getAmount());
             }
         }
-    }
+    }*/
 
     // Get all the production from the repository
     // This query is to return to the user
