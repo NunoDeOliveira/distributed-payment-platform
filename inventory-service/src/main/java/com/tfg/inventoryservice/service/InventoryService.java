@@ -19,7 +19,7 @@ public class InventoryService {
     private final InventoryPublish eventPublish;
     private final ReservationRepository reservationRepository;
     
-    @Value("${inventory.stock.limit:30}")
+    @Value("${inventory.stock.limit:70}")
     private int MAX_STOCK;
 
     public InventoryService(InventoryRepository inventoryRepository,
@@ -30,9 +30,10 @@ public class InventoryService {
         this.reservationRepository = reservationRepository;
     }
     
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     // Given an ID and a production quantity, validate it.
     public void validateProduction(Long id, int amount){
+        System.out.println("MAX_STOCK=" + MAX_STOCK + " currentStock=" + getAvailabilityStock() + " amount=" + amount); ///temporal
         // Calculate the stock that can still be added
         int currentStock = getAvailabilityStock();
         int allowedCapacity = MAX_STOCK - currentStock;
