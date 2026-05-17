@@ -14,7 +14,7 @@ public class DeliveryMetrics {
         for (DeliveryState state : DeliveryState.values()) {
             Gauge.builder("delivery.state.current",
                             deliveryRepository,
-                            repo -> repo.countByState(state))
+                            repo -> repo.sumAmountByState(state))
                             .tag("state", state.name())
                             .register(meterRegistry);
         }
