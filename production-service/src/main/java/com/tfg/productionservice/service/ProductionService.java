@@ -127,7 +127,7 @@ public class ProductionService {
     
     // When a production is rejected because it excceds the stock 
     // and is assigned as PENDING, this method start this a pending production
-    /*@Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 10000)
     public void processPendingProductions() {
         Optional<Production> pending = productionRepository
                   .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
@@ -135,7 +135,7 @@ public class ProductionService {
             productionPublish.publishProductionCreated(
                               pending.get().getId(), pending.get().getAmount());
         }
-    }*/
+    }
 
     // Get all the production from the repository
     // This query is to return to the user
