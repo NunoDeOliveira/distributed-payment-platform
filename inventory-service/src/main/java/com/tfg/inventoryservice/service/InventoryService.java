@@ -88,30 +88,15 @@ public class InventoryService {
     @Transactional
     // Given an id and amount of a Production increase the stock of DB
     public void increaseStock(Long id, int amount){
-        int currentStock = getAvailabilityStock();
-        int allowedCapacity = MAX_STOCK - currentStock;     
-        
-        if (allowedCapacity <= 0) {
-            eventPublish.publishProductionRejected(id, amount);
+        if (amount <= 0) {
             return;
         }
-        
-        if (amount > allowedCapacity) {
-            eventPublish.publishProductionRejected(id, amount);
-            return;
-        }
-    
+
         StockEntry stockEntry = new StockEntry();
         stockEntry.setProductionId(id);
         stockEntry.setAmount(amount);
-
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
-        
-        // Notify delivery service that stock is available
-        //eventPublish.publishStockAvailable(getAvailabilityStock()); // 16 may from amount to actual
-        // Notify production service that capacity is available
-        //eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
     
 
