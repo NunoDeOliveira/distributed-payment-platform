@@ -9,6 +9,8 @@ import com.tfg.inventoryservice.model.StockReservation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -28,7 +30,7 @@ public class InventoryService {
         this.reservationRepository = reservationRepository;
     }
     
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     // Given an ID and a production quantity, validate it.
     public void validateProduction(Long id, int amount){
         // Calculate the stock that can still be added
