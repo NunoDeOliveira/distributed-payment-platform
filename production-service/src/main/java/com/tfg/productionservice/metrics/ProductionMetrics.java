@@ -14,7 +14,7 @@ public class ProductionMetrics {
         for (ProductionState state : ProductionState.values()) {
             Gauge.builder("production.state.current",
                             productionRepository,
-                            repo -> repo.countByState(state))
+                            repo -> repo.sumAmountByState(state))
                             .tag("state", state.name())
                             .register(meterRegistry);
         }

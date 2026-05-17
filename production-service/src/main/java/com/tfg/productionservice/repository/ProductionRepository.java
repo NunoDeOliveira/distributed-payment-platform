@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 import com.tfg.productionservice.model.ProductionState;
 import java.util.Optional;
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 
 @Repository
 public interface ProductionRepository extends JpaRepository<Production, Long> {
@@ -15,4 +18,7 @@ public interface ProductionRepository extends JpaRepository<Production, Long> {
     long countByState(ProductionState state);
     // Added to get all the pendings
     List<Production> findByStateOrderByStartTimeAsc(ProductionState state);
+    // Sum amount by state 
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Production p WHERE p.state = :state")
+    long sumAmountByState(@Param("state") ProductionState state);
 }
