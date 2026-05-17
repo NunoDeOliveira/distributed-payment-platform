@@ -64,4 +64,9 @@ public class Production {
         this.endTime = LocalDateTime.now();
     }
     
+    public void pending() {
+        this.state = ProductionState.PENDING;
+        this.endTime = null;
+    }
+    
 }

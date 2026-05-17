@@ -92,7 +92,7 @@ public class DeliveryService {
     }
     
     // This method publish start a delivivery
-    @Scheduled(fixedDelay = 10000)
+    /*@Scheduled(fixedDelay = 10000)
     public void processPendingDeliveries() {
         Optional<Delivery> pending = deliveryRepository
                 .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
@@ -101,7 +101,7 @@ public class DeliveryService {
             deliveryPublish.publishDeliveryCreated(
                             pending.get().getId(), pending.get().getAmount());
         }
-    }
+    }*/
     
     
 
