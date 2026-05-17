@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 
 @Service
@@ -67,14 +68,15 @@ public class ProductionService {
         // Update the production state to reject
         production.reject();
         productionRepository.save(production);
-         int originalAmount = production.getAmount();
+        
+        int originalAmount = production.getAmount();
+        int remainingAmount = originalAmount - maxAllowedAmount;
 
         // Create a new production limited by the given amount
         if (maxAllowedAmount > 0) {
             createProduction(maxAllowedAmount);
         }
         // Save the rest of the production rejected as PENDING
-        int remainingAmount = originalAmount - maxAllowedAmount;
         if (remainingAmount > 0) {
             Production pendingProduction = new Production(
                               remainingAmount, ProductionState.PENDING, LocalDateTime.now());
@@ -120,20 +122,15 @@ public class ProductionService {
     
     // When a production is rejected because it excceds the stock 
     // and is assigned as PENDING, this method start this a pending production
-    /*public void startNextPending(int availableCapacity) {
-        // Find in the respository the production with PENDING state and the lowest ID
-        List<Production> pending = productionRepository
-                        .findByStateOrderByStartTimeAsc(ProductionState.PENDING);
-        
-        int remaining = availableCapacity;
-        for (Production production : pending) {
-            if (production.getAmount() <= remaining) {
-                remaining -= production.getAmount();
-                productionPublish.publishProductionCreated(
-                                  production.getId(), production.getAmount());
-            }
+    @Scheduled(fixedDelay = 10000)
+    public void processPendingProductions() {
+        Optional<Production> pending = productionRepository
+                  .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
+        if (pending.isPresent()) {
+            productionPublish.publishProductionCreated(
+                              pending.get().getId(), pending.get().getAmount());
         }
-    }*/
+    }
 
     // Get all the production from the repository
     // This query is to return to the user

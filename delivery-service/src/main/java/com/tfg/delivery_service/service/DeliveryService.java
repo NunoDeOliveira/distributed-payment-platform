@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 public class DeliveryService {
@@ -91,19 +92,16 @@ public class DeliveryService {
     }
     
     // This method publish start a delivivery
-    /*public void startNextPending(int availableStock) {
-        // Find in the respository the delivery with PENDING state and the lowest ID
-        List<Delivery> pending = deliveryRepository
-                          .findByStateOrderByStartTimeAsc(DeliveryState.PENDING);       
-        int remaining = availableStock;
-        for (Delivery delivery : pending) {
-            if (delivery.getAmount() <= remaining) {
-		            remaining -= delivery.getAmount();
-                deliveryPublish.publishDeliveryCreated(
-                delivery.getId(), delivery.getAmount());
-            }
+    @Scheduled(fixedDelay = 10000)
+    public void processPendingDeliveries() {
+        Optional<Delivery> pending = deliveryRepository
+                .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
+                
+        if (pending.isPresent()) {
+            deliveryPublish.publishDeliveryCreated(
+                            pending.get().getId(), pending.get().getAmount());
         }
-    }*/
+    }
     
     
 
