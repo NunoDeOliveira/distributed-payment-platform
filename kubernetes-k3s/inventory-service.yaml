@@ -5,7 +5,7 @@ metadata:
   labels:
     app: inventory-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: inventory-service
@@ -17,6 +17,7 @@ spec:
       containers:
       - name: inventory-service
         image: nunohenriquedeoliveira/inventory-service:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 8083
         env:

@@ -17,6 +17,7 @@ spec:
       containers:
       - name: delivery-service
         image: nunohenriquedeoliveira/delivery-service:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 8082
         env:

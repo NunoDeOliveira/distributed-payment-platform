@@ -17,6 +17,7 @@ spec:
       containers:
       - name: production-service
         image: nunohenriquedeoliveira/production-service:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         env:
