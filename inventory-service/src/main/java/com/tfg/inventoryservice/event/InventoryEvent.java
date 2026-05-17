@@ -12,6 +12,7 @@ import lombok.Getter;
 public class InventoryEvent {
     private String eventType;
     private Long productionId;
+    private Long deliveryId; // added 17 may
     private Integer amount;
 
 
