@@ -57,35 +57,43 @@ public class ProductionService {
     }
 
     // Method for saving a rejected production in the DB
-    public void rejectProduction(Production production) {
-        production.reject();
-        productionRepository.save(production);
+    public void rejectProduction(Production productionRejected, int amountAllowed) {   
+        int originalAmount = productionRejected.getAmount();
+        // Case the stock is completed
+        if (amountAllowed == 0) {
+            productionRejected.pending(); // must be for the scheduler
+            productionRepository.save(productionRejected);
+            return;
+        }
+        // Case needed compensation transaction. Stock is not completed
+        else if (amountAllowed > 0 && amountAllowed < originalAmount) {
+            productionRejected.reject(); // just mark when there is compensation 
+            productionRepository.save(productionRejected);
+            compensateRejectedProduction(productionRejected, amountAllowed);
+        }
+        // This case should not happen  
+        else {
+            System.out.println("WARNING: There is an error with productionId=" 
+            + productionRejected.getId() + " amount=" + productionRejected.getAmount() 
+            + " amountAllowed=" + amountAllowed);
+        }
+ 
     }
 
     // Saga compensating transaction method.
     // Given a rejected production and the maximum amount allowed for that production
-    public void compensateRejectedProduction(Production production, int maxAllowedAmount) {     
-        int originalAmount = production.getAmount();
-        
-        // Create a new production limited by the given amount
-        if (maxAllowedAmount == 0) {
-            production.pending();
-            productionRepository.save(production);
-            return;
-        }
-        
-        // Update the production state to reject
-        production.reject();
-        productionRepository.save(production);
+    public void compensateRejectedProduction(Production productionRejected, int maxAllowedAmount) {
+        int originalAmount = productionRejected.getAmount();
+        int pendingAmount = originalAmount - maxAllowedAmount;
+      
         // Create new protuction with allowd amount
         createProduction(maxAllowedAmount);
         
         // Save the rest of the production rejected as PENDING
-        int remainingAmount = originalAmount - maxAllowedAmount;
-        if (remainingAmount > 0) {
-            Production pendingProduction = new Production(
-                              remainingAmount, ProductionState.PENDING, LocalDateTime.now());
-            productionRepository.save(pendingProduction);
+        if (pendingAmount > 0) {
+            Production newPending = new Production(
+                                    pendingAmount, ProductionState.PENDING, LocalDateTime.now());
+            productionRepository.save(newPending);
         }
     }
 
@@ -118,8 +126,8 @@ public class ProductionService {
     
     // Get production by ID
     public Production getProduction(Long id) {
-        Optional<Production> pro = productionRepository.findById(id);
-        Production productionToReturn = pro.orElseThrow(()
+        Optional<Production> production = productionRepository.findById(id);
+        Production productionToReturn = production.orElseThrow(()
                     -> new RuntimeException("Production " + id + "not found"));
 
         return productionToReturn;

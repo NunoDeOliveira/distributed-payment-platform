@@ -18,18 +18,20 @@ public class ProductionConsumer {
     
     @RabbitListener(queues = ProductionPublish.PRODUCTION_QUEUE)
     public void consume(JsonNode event, 
-              @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
-        System.out.println("Message received: " + event.toString());
-
+        @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
+        //System.out.println("Message received: " + event.toString());
+        
+        // Extract data
         String eventType = event.path("eventType").asText();
         Long productionId = event.path("productionId").asLong();
-        int amount = event.path("amount").asInt();
-
+        int amountAllowed = event.path("amount").asInt();   // this is the amount allowed
         System.out.println("EventType: " + eventType + "ProductionId: " + productionId);
 
         try {
-            processEvent(eventType, productionId, amount);
+            ///// procecess event received
+            processEvent(eventType, productionId, amountAllowed);
         } catch (Exception e) {
+            ///// Manage timeout or failed
             if (productionId != 0) {
                 Production production = productionService.getProduction(productionId);
                 // count retries, if the retries are less than 2, get timeout
@@ -44,25 +46,20 @@ public class ProductionConsumer {
         }       
     }
     
-    // Given an event type, production ID and amount process the event given
-    private void processEvent(String eventType, Long productionId, int amount) {
+    // Process the event given. Case aproved or case rejected
+    private void processEvent(String eventType, Long productionId, int amountAllowed) {
         switch (eventType) {
             case "production.approved":
-            case "production.rejected":
                 Production production = productionService.getProduction(productionId);
-                if ("production.approved".equals(eventType)) {
-                    productionService.startProduction(production);
-                } else {
-                    productionService.compensateRejectedProduction(production, amount);
-                }
+                productionService.startProduction(production);
                 break;
-            /*case "stock.available":
-                productionService.startNextPending(amount);
-                break;*/
+            case "production.rejected":
+                Production productionRejected = productionService.getProduction(productionId);
+                productionService.rejectProduction(productionRejected, amountAllowed);
+                break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }
     }
-    
-    
+        
 }
