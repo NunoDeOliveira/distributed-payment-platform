@@ -46,9 +46,9 @@ public class InventoryService {
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     // Given an ID and a quantity, reserve a stock quantity
-    public void validateDelivery(Long id, int amount){
+    public synchronized void validateDelivery(Long id, int amount){
         // Get the stock availability for a production ID
         int availabilityStock = getAvailabilityStock();
 
