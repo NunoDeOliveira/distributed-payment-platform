@@ -77,7 +77,6 @@ public class ProductionService {
             + productionRejected.getId() + " amount=" + productionRejected.getAmount() 
             + " amountAllowed=" + amountAllowed);
         }
- 
     }
 
     // Saga compensating transaction method.

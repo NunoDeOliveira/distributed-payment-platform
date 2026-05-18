@@ -63,5 +63,10 @@ public class Delivery {
         this.state = DeliveryState.FAILED;
         this.endTime = LocalDateTime.now();
     }
+    
+    public void pending() {
+        this.state = DeliveryState.PENDING;
+        this.endTime = null;
+    }
 
 }

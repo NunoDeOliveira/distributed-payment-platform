@@ -53,18 +53,22 @@ public class DeliveryService {
     }
 
     // Method for saving a rejected delivery in the DB
-    public void rejectDelivery(Delivery delivery) {
+    public void rejectDelivery(Delivery delivery, int maxAllowedAmount) {
+        // Case the stock is completed
+        if (maxAllowedAmount == 0) {
+            delivery.pending(); // must be for the scheduler
+            deliveryRepository.save(delivery);
+            return;
+        }   
+        // Save state and call compesation method
         delivery.reject();
         deliveryRepository.save(delivery);
+        compensateRejectedDelivery(delivery, maxAllowedAmount);
     }
 
     // Saga compensating transaction method.
     // Given a rejected delivery and the maximum amount allowed for that delivery
     public void compensateRejectedDelivery(Delivery delivery, int maxAllowedAmount) {
-        // Update the delivery state to reject
-        delivery.reject();
-        deliveryRepository.save(delivery);
-
         // Create a new delivery limited by the given amount
         if (maxAllowedAmount > 0) {
             createDelivery(maxAllowedAmount);

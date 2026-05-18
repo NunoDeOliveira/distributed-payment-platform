@@ -19,17 +19,19 @@ public class DeliveryConsumer {
 
     @RabbitListener(queues = DeliveryPublish.DELIVERY_QUEUE)
     public void consume(JsonNode event,
-            @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
+        @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
 
+        // Extract data
         String eventType = event.path("eventType").asText();
         Long deliveryId = event.path("deliveryId").asLong();
         int amount = event.path("amount").asInt();
-
         System.out.println("Delivery receive: " + eventType + " deliveryId=" + deliveryId);
 
         try {
+            ///// procecess event received
             processEvent(eventType, deliveryId, amount);
         } catch (Exception e) {
+            ///// Manage timeout or failed
             if (deliveryId != 0) {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
                 // count retries, if the retries are less than 2, get timeout
@@ -43,23 +45,20 @@ public class DeliveryConsumer {
             throw e;
         }
     }
-
-    private void processEvent(String eventType, Long deliveryId, int amount) {
+    
+    // Process the event given. Case aproved or case rejected
+    private void processEvent(String eventType, Long deliveryId, int amountAllowed) {
         switch (eventType) {
             // Case delivery in which can start delivery 
             case "delivery.accepted":
+                Delivery acceptedDelivery = deliveryService.getDelivery(deliveryId);
+                deliveryService.startDelivery(acceptedDelivery);
+                break;
             // Compensating Transaction
             case "delivery.rejected":
-                Delivery delivery = deliveryService.getDelivery(deliveryId);
-                if ("delivery.accepted".equals(eventType)) {
-                    deliveryService.startDelivery(delivery);
-                } else {
-                    deliveryService.compensateRejectedDelivery(delivery, amount);
-                }
+                Delivery rejectedDelivery = deliveryService.getDelivery(deliveryId);
+                deliveryService.rejectDelivery(rejectedDelivery, amountAllowed);
                 break;
-            /*case "stock.available":
-                deliveryService.startNextPending(amount);
-                break;*/
             default:
                 System.out.println("Event unknown: " + eventType);
         }
