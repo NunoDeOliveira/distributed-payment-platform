@@ -61,19 +61,19 @@ public class DeliveryService {
             return;
         }   
         // Save state and call compesation method
-        delivery.reject();
-        deliveryRepository.save(delivery);
-        compensateRejectedDelivery(delivery, maxAllowedAmount);
+        //delivery.reject();
+        //deliveryRepository.save(delivery);
+        //compensateRejectedDelivery(delivery, maxAllowedAmount);
     }
 
     // Saga compensating transaction method.
     // Given a rejected delivery and the maximum amount allowed for that delivery
-    public void compensateRejectedDelivery(Delivery delivery, int maxAllowedAmount) {
+    /*public void compensateRejectedDelivery(Delivery delivery, int maxAllowedAmount) {
         // Create a new delivery limited by the given amount
         if (maxAllowedAmount > 0) {
             createDelivery(maxAllowedAmount);
         }
-    }
+    }*/
 
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
