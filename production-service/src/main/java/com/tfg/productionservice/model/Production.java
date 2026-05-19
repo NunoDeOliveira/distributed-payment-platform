@@ -22,9 +22,12 @@ public class Production {
     @Enumerated(EnumType.STRING)
     private ProductionState state;
     
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "register", length = 5000)
+    private String register = "";
+    
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     public Production() {}
@@ -33,40 +36,48 @@ public class Production {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
+        this.register += "PENDING " + startTime + " | ";
     }
 
     // Switch to PREPARING state and record the production start time
     public void start() {
+        LocalDateTime now = LocalDateTime.now();
         this.state = ProductionState.PREPARING;
         this.startTime = LocalDateTime.now();
+        this.register += "PREPARING " + now + " | ";
     }
 
     // Switch to COMPLETED state and record the production start time
     public void complete() {
         this.state = ProductionState.COMPLETED;
         this.endTime = LocalDateTime.now();
+        this.register += "COMPLETED " + LocalDateTime.now();
     }
 
     public void reject() {
         this.state = ProductionState.REJECTED;
         this.endTime = LocalDateTime.now();
+        this.register += "REJECTED " + LocalDateTime.now();
     }
     
     // tIme-out if inventory fail
     public void timeout() {
         this.state = ProductionState.TIMEOUT;
         this.endTime = LocalDateTime.now();
+        this.register += "TIMEOUT " + LocalDateTime.now();
     }
     
     // When inventory connection fail 3 times the state will be failed 
     public void fail() {
         this.state = ProductionState.FAILED;
         this.endTime = LocalDateTime.now();
+        this.register += "FAILED " + LocalDateTime.now();
     }
     
     public void pending() {
         this.state = ProductionState.PENDING;
         this.endTime = null;
+        this.register += "PENDING " + LocalDateTime.now() + " | ";
     }
     
 }

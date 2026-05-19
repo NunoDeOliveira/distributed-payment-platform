@@ -25,7 +25,7 @@ public class Delivery {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "register", length = 5000)
     private String register = "";
 
     public Delivery() {
