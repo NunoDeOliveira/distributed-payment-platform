@@ -58,6 +58,10 @@ public class DeliveryService {
         if (delivery.getRetryCount() >= 3) {
             delivery.fail();
             deliveryRepository.save(delivery);
+        } else if (delivery.getRetryCount() >= 2) {    
+            delivery.timeout();
+            deliveryRepository.save(delivery);
+            compensateRejectedDelivery(delivery);
         } else {
             delivery.pending(); // must be for the scheduler
             deliveryRepository.save(delivery);
