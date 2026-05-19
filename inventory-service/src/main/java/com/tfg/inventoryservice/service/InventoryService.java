@@ -49,8 +49,14 @@ public class InventoryService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     // Given an ID and a quantity, reserve a stock quantity
     public synchronized void validateDelivery(Long id, int amount){
+        if (amount <= 0) {
+            return;
+        }
         // Get the stock availability for a production ID
         int availabilityStock = getAvailabilityStock();
+        if (availabilityStock < 0) {
+            return;
+        }
 
         // Check if there are enough stock
         if (amount <= availabilityStock){
@@ -60,7 +66,6 @@ public class InventoryService {
 
             // Save reservation in DB
             reservationRepository.save(reservation);
-
             // Publish an event accepting the delivery request
             eventPublish.publishDeliveryAccepted(id, amount);
         } else {

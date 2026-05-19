@@ -43,10 +43,14 @@ public class InventoryConsumer {
             case "delivery.completed":
                 inventoryService.confirmDelivery(deliveryId, amount);
                 break;
+            // Rejected delivery
+            //case "delivery.rejected":
+                //inventoryService.releaseReservedStock(deliveryId, amount);
+                //break;
             // Compensating Transaction
-            case "delivery.rejected":
+            case "delivery.reservation.release":
                 inventoryService.releaseReservedStock(deliveryId, amount);
-                break;
+            break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

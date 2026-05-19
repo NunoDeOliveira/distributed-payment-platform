@@ -34,12 +34,19 @@ public class DeliveryPublish {
 
     public void publishDeliveryCreated(Long deliveryId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                new DeliveryEvent("delivery.created", deliveryId, amount));
+                       new DeliveryEvent("delivery.created", deliveryId, amount));
     }
 
     public void publishDeliveryCompleted(Long deliveryId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                new DeliveryEvent("delivery.completed", deliveryId, amount));
+                       new DeliveryEvent("delivery.completed", deliveryId, amount));
+    }
+    
+    // Given an ID of delivery and the amount of delivery 
+    // publishes an event to Inventory to release the stock reservation
+    public void publishReservationRelease(Long deliveryId, int amount) {
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
+                new DeliveryEvent("delivery.reservation.release", deliveryId, amount));
     }
 
 }

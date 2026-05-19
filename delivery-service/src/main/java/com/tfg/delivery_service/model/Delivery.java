@@ -36,7 +36,7 @@ public class Delivery {
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time
     public void start() {
-        this.state = DeliveryState.READY_FOR_DELIVERY;
+        this.state = DeliveryState.ON_DELIVERY;
         this.startTime = LocalDateTime.now();
     }
 
@@ -67,6 +67,12 @@ public class Delivery {
     public void pending() {
         this.state = DeliveryState.PENDING;
         this.endTime = null;
+    }
+    
+    // Switch  to reserving state and record time
+    public void reserving() {
+        this.state = DeliveryState.RESERVING;
+        this.endTime = LocalDateTime.now();
     }
 
 }

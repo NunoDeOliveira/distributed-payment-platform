@@ -26,11 +26,11 @@ public class DeliveryService {
     // Given an ID and amount of a Delivery create a delivery
     public Delivery createDelivery(int amount) {
         Delivery newDelivery = new Delivery(amount,
-                          DeliveryState.PENDING, LocalDateTime.now());
+                               DeliveryState.RESERVING, LocalDateTime.now());
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
 
         deliveryPublish.publishDeliveryCreated(
-                      storedDelivery.getId(), storedDelivery.getAmount());
+                        storedDelivery.getId(), storedDelivery.getAmount());
 
         return storedDelivery;
     }
@@ -53,27 +53,18 @@ public class DeliveryService {
     }
 
     // Method for saving a rejected delivery in the DB
-    public void rejectDelivery(Delivery delivery, int maxAllowedAmount) {
-        // Case the stock is completed
-        if (maxAllowedAmount == 0) {
-            delivery.pending(); // must be for the scheduler
-            deliveryRepository.save(delivery);
-            return;
-        }   
-        // Save state and call compesation method
-        //delivery.reject();
-        //deliveryRepository.save(delivery);
-        //compensateRejectedDelivery(delivery, maxAllowedAmount);
+    public void rejectDelivery(Delivery delivery) {
+        delivery.pending(); // must be for the scheduler
+        deliveryRepository.save(delivery);
+        compensateRejectedDelivery(delivery);
     }
 
     // Saga compensating transaction method.
-    // Given a rejected delivery and the maximum amount allowed for that delivery
-    /*public void compensateRejectedDelivery(Delivery delivery, int maxAllowedAmount) {
-        // Create a new delivery limited by the given amount
-        if (maxAllowedAmount > 0) {
-            createDelivery(maxAllowedAmount);
-        }
-    }*/
+    // Given a rejected delivery release delivery reserved
+    public void compensateRejectedDelivery(Delivery delivery) {
+        deliveryPublish.publishReservationRelease(
+                        delivery.getId(), delivery.getAmount());
+    }
 
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
@@ -108,7 +99,6 @@ public class DeliveryService {
     }
     
     
-
     // Get all the deliveries from the repository.
     // This query is to return to the user.
     public List<Delivery> getAllDeliveries() {

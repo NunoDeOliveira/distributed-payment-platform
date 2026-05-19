@@ -4,7 +4,8 @@ import jakarta.persistence.Enumerated;
 
 public enum DeliveryState {
     PENDING,
-    READY_FOR_DELIVERY,
+    RESERVING,
+    ON_DELIVERY,
     COMPLETED,
     REJECTED,
     TIMEOUT,
