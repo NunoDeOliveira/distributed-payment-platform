@@ -35,7 +35,7 @@ public class Delivery {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
-        this.register = "PENDING " + startTime + " | ";
+        this.register = "RESERVING " + startTime + " | ";
     }
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time
