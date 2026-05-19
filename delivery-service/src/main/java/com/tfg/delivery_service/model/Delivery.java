@@ -24,6 +24,9 @@ public class Delivery {
     
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    
+    @Column(columnDefinition = "TEXT")
+    private String register = "";
 
     public Delivery() {
     }
@@ -32,18 +35,21 @@ public class Delivery {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
+        this.register = "PENDING " + startTime + " | ";
     }
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time
     public void start() {
         this.state = DeliveryState.ON_DELIVERY;
         this.startTime = LocalDateTime.now();
+        this.register += "ON_DELIVERY " + LocalDateTime.now() + " | ";
     }
 
     // Switch state COMPLETED state and record the delivery start time
     public void complete() {
         this.state = DeliveryState.COMPLETED;
         this.endTime = LocalDateTime.now();
+        this.register += "COMPLETED " + LocalDateTime.now();
     }
 
     // Switch state to REJECTED and record time
@@ -56,23 +62,27 @@ public class Delivery {
     public void timeout() {
         this.state = DeliveryState.TIMEOUT;
         this.endTime = LocalDateTime.now();
+        this.register += "TIMEOUT " + LocalDateTime.now();
     }
     
     // Switch state to FAILED and record time
     public void fail() {
         this.state = DeliveryState.FAILED;
         this.endTime = LocalDateTime.now();
+        this.register += "FAILED " + LocalDateTime.now();
     }
     
     public void pending() {
         this.state = DeliveryState.PENDING;
         this.endTime = null;
+        this.register += "PENDING " + LocalDateTime.now() + " | ";
     }
     
     // Switch  to reserving state and record time
     public void reserving() {
         this.state = DeliveryState.RESERVING;
         this.endTime = LocalDateTime.now();
+        this.register += "RESERVING " + LocalDateTime.now() + " | ";
     }
 
 }
