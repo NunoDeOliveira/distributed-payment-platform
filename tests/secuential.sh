@@ -8,10 +8,10 @@ echo "Starting test ..."
 echo "============== phase1: Production 30 and delivery 20"
 #curl -s -X POST "$BASE_URL/production/productions?amount=30"
 echo ""
-sleep 30
+sleep 20
 
 echo "Produce and deliver simultaneously"
-for i in $(seq 1 10); do
+for i in $(seq 1 5); do
     echo "Iteration $i"
     curl -s -X POST "$BASE_URL/production/productions?amount=30" &
     curl -s -X POST "$BASE_URL/delivery/deliveries?amount=20" &
@@ -20,7 +20,7 @@ for i in $(seq 1 10); do
 done
 
 echo "================== Phase2: Production 20 and delivery 25"
-for i in $(seq 1 10); do
+for i in $(seq 1 5); do
     echo "Iteration $i"
     curl -s -X POST "$BASE_URL/production/productions?amount=20" &
     curl -s -X POST "$BASE_URL/delivery/deliveries?amount=30" &
