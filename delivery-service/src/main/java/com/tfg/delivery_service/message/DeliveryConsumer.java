@@ -34,13 +34,7 @@ public class DeliveryConsumer {
             ///// Manage timeout or failed
             if (deliveryId != 0) {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
-                // count retries, if the retries are less than 2, get timeout
-                if (retryCount < 2) {
-                    deliveryService.getTimeoutState(delivery);
-                } else {
-                    // else get failed status 
-                    deliveryService.getFailedSate(delivery);
-                }
+                deliveryService.getFailedSate(delivery);
             }
             throw e;
         }

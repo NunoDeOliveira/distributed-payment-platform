@@ -54,9 +54,15 @@ public class DeliveryService {
 
     // Method for saving a rejected delivery in the DB
     public void rejectDelivery(Delivery delivery) {
-        delivery.pending(); // must be for the scheduler
-        deliveryRepository.save(delivery);
-        compensateRejectedDelivery(delivery);
+        delivery.incrementRetry();
+        if (delivery.getRetryCount() >= 3) {
+            delivery.fail();
+            deliveryRepository.save(delivery);
+        } else {
+            delivery.pending(); // must be for the scheduler
+            deliveryRepository.save(delivery);
+            compensateRejectedDelivery(delivery);
+        }
     }
 
     // Saga compensating transaction method.
