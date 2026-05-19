@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test script for Saga pattern evaluation
-BASE_URL="http://13.41.132.138:30000"
+BASE_URL="http://16.60.108.50:30000"
 
 
 echo "Starting test ..."
