@@ -18,6 +18,7 @@ public class Delivery {
     private Long id;
 
     private int amount;
+    private int retryCount = 0;
 
     @Enumerated(EnumType.STRING)
     private DeliveryState state;
@@ -83,6 +84,11 @@ public class Delivery {
         this.state = DeliveryState.RESERVING;
         this.endTime = LocalDateTime.now();
         this.register += "RESERVING " + LocalDateTime.now() + " | ";
+    }
+    
+    public void incrementRetry() {
+        this.retryCount++;
+        this.register += "RETRY_" + retryCount + " " + LocalDateTime.now() + " | ";
     }
 
 }
