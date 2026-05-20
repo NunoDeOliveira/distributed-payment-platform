@@ -36,16 +36,23 @@ public class ProductionPublish {
 
     public void publishProductionCreated(Long productionId, int amount) {
         ProductionEvent event = new ProductionEvent(
-                "production.created", productionId, amount);
+                                "production.created", productionId, amount);
 
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
     }
 
     public void publishProductionCompleted(Long productionId, int amount) {
         ProductionEvent event = new ProductionEvent(
-                "production.completed", productionId, amount);
+                                "production.completed", productionId, amount);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
     }
+    
+    public void publishProductionPending(Long productionId, int amount) {
+        ProductionEvent productionEvent = new ProductionEvent(
+                                        "production.pending", productionId, amount);
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE, productionEvent);
+    }
+    
 }

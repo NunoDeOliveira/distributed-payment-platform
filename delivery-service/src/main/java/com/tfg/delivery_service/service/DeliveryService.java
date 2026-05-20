@@ -22,7 +22,7 @@ public class DeliveryService {
         this.deliveryRepository = deliveryRepository;
         this.deliveryPublish = deliveryPublish;
     }
-
+    
     // Given an ID and amount of a Delivery create a delivery
     public Delivery createDelivery(int amount) {
         Delivery newDelivery = new Delivery(amount,
@@ -97,13 +97,13 @@ public class DeliveryService {
     }
     
     // This method publish start a delivivery
-    @Scheduled(fixedDelay = 10000)
+    //@Scheduled(fixedDelay = 10000)
     public void processPendingDeliveries() {
         Optional<Delivery> pending = deliveryRepository
                 .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
                 
         if (pending.isPresent()) {
-            deliveryPublish.publishDeliveryCreated(
+            deliveryPublish.publishDeliveryPending(
                             pending.get().getId(), pending.get().getAmount());
         }
     }

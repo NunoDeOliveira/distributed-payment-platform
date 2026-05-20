@@ -88,7 +88,6 @@ public class Delivery {
     
     public void incrementRetry() {
         this.retryCount++;
-        this.register += "RETRY_" + retryCount + " " + LocalDateTime.now() + " | ";
     }
 
 }

@@ -61,24 +61,44 @@ public class ProductionService {
         int originalAmount = productionRejected.getAmount();
         // Case the stock is completed
         if (amountAllowed == 0) {
-            productionRejected.pending(); // must be for the scheduler
-            productionRepository.save(productionRejected);
+            handleRetry(productionRejected);
             return;
-        }
-        // Case needed compensation transaction. Stock is not completed
-        else if (amountAllowed > 0 && amountAllowed < originalAmount) {
+            
+        // Case needed compensation transaction. Stock is not completed    
+        } else if (amountAllowed > 0 && amountAllowed < originalAmount) {
             productionRejected.reject(); // just mark when there is compensation 
             productionRepository.save(productionRejected);
             compensateRejectedProduction(productionRejected, amountAllowed);
-        }
-        // This case should not happen  
-        else {
+            
+         // This case should not happen   
+        } else {
             System.out.println("WARNING: There is an error with productionId=" 
             + productionRejected.getId() + " amount=" + productionRejected.getAmount() 
-            + " amountAllowed=" + amountAllowed);
+                                                  + " amountAllowed=" + amountAllowed);
         }
     }
-
+    
+    // Given an rejeted production manage timeout and fail 
+    private void handleRetry(Production productionRejected) {
+        productionRejected.incrementRetry();
+        
+        // Case faill 3 times the state will be failed
+        if (productionRejected.getRetryCount() >= 3) {
+            productionRejected.fail();
+            productionRepository.save(productionRejected);
+            
+        // case fail 2 times the state will be timeout
+        } else if (productionRejected.getRetryCount() >= 2) {
+            productionRejected.timeout();
+            productionRepository.save(productionRejected);
+            
+        // case fail 1 time the state will be pending
+        } else {
+            productionRejected.pending();
+            productionRepository.save(productionRejected);
+        }
+    }
+    
     // Saga compensating transaction method.
     // Given a rejected production and the maximum amount allowed for that production
     public void compensateRejectedProduction(Production productionRejected, int maxAllowedAmount) {
@@ -134,12 +154,12 @@ public class ProductionService {
     
     // When a production is rejected because it excceds the stock 
     // and is assigned as PENDING, this method start this a pending production
-    @Scheduled(fixedDelay = 10000)
+    //@Scheduled(fixedDelay = 10000)
     public void processPendingProductions() {
         Optional<Production> pending = productionRepository
                   .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
         if (pending.isPresent()) {
-            productionPublish.publishProductionCreated(
+            productionPublish.publishProductionPending(
                               pending.get().getId(), pending.get().getAmount());
         }
     }

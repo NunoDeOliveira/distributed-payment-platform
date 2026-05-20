@@ -48,5 +48,12 @@ public class DeliveryPublish {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
                 new DeliveryEvent("delivery.reservation.release", deliveryId, amount));
     }
+    
+    // Given an Id and amount of delivery publish a pending delivery
+    public void publishDeliveryPending(Long deliveryId, int amount) {
+        DeliveryEvent deliveryEvent = new DeliveryEvent(
+                                      "delivery.pending", deliveryId, amount);
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE, deliveryEvent);
+    }
 
 }

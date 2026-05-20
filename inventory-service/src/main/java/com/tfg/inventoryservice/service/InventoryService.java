@@ -76,7 +76,6 @@ public class InventoryService {
     // Given an id production method to get the stock availability
     public int getAvailabilityStock(){
         int totalStock = getTotalStock() - getReservedStock();
-
         return totalStock;
     }
 
@@ -102,6 +101,8 @@ public class InventoryService {
         stockEntry.setAmount(amount);
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
+        // Publish in queue that there is available stock
+        eventPublish.publishStockAvailable(getAvailabilityStock());
     }
     
 
@@ -122,9 +123,7 @@ public class InventoryService {
         reservationRepository.delete(reservation);
         
         // Notify to production sevice when a delivery is completed
-        //eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
-        // Notify delivery service that stock may have changed
-        //eventPublish.publishStockAvailable(getAvailabilityStock());
+        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
 
     @Transactional

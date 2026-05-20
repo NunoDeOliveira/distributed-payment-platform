@@ -24,6 +24,7 @@ public class Production {
     
     @Column(name = "register", length = 5000)
     private String register = "";
+    private int retryCount = 0;
     
     //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
@@ -78,6 +79,10 @@ public class Production {
         this.state = ProductionState.PENDING;
         this.endTime = null;
         this.register += "PENDING " + LocalDateTime.now() + " | ";
+    }
+    
+    public void incrementRetry() {
+        this.retryCount++;
     }
     
 }

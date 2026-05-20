@@ -57,6 +57,9 @@ public class ProductionConsumer {
                 Production productionRejected = productionService.getProduction(productionId);
                 productionService.rejectProduction(productionRejected, amountAllowed);
                 break;
+            case "stock.available":
+                productionService.processPendingProductions();
+            break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

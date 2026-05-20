@@ -53,6 +53,10 @@ public class DeliveryConsumer {
                 Delivery rejectedDelivery = deliveryService.getDelivery(deliveryId);
                 deliveryService.rejectDelivery(rejectedDelivery);
                 break;
+            // case a new stock available
+            case "stock.available":
+                deliveryService.processPendingDeliveries();
+                break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

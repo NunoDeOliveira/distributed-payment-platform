@@ -91,5 +91,6 @@ public class InventoryPublish {
                                             "stock.available", null, null, amount);
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }
+    
 
 }
