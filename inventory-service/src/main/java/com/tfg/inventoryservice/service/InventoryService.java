@@ -45,8 +45,9 @@ public class InventoryService {
             eventPublish.publishProductionRejected(id, allowedCapacity);
         }
     }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    
+    @Transactional
+    //@Transactional(isolation = Isolation.SERIALIZABLE)    
     // Given an ID and a quantity, reserve a stock quantity
     public synchronized void validateDelivery(Long id, int amount){
         if (amount <= 0) {

@@ -12,6 +12,7 @@ public class DeliveryMetrics {
     public DeliveryMetrics(MeterRegistry meterRegistry,
                            DeliveryRepository deliveryRepository) {
         for (DeliveryState state : DeliveryState.values()) {
+            if (state == DeliveryState.REJECTED) continue;
             Gauge.builder("delivery.state.current",
                             deliveryRepository,
                             repo -> repo.sumAmountByState(state))
@@ -21,3 +22,5 @@ public class DeliveryMetrics {
     }
 
 }
+
+

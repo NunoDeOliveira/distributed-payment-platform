@@ -27,7 +27,7 @@ public class ProductionService {
     // Given an ID and amount of Products create a Production
     public Production createProduction(int amount) {
         Production newProduction = new Production(
-                    amount, ProductionState.PENDING, LocalDateTime.now());
+                    amount, ProductionState.WAITING, LocalDateTime.now());
 
         Production storedProduction = productionRepository.save(newProduction);
 
@@ -85,11 +85,6 @@ public class ProductionService {
         // Case faill 3 times the state will be failed
         if (productionRejected.getRetryCount() >= 3) {
             productionRejected.fail();
-            productionRepository.save(productionRejected);
-            
-        // case fail 2 times the state will be timeout
-        } else if (productionRejected.getRetryCount() >= 2) {
-            productionRejected.timeout();
             productionRepository.save(productionRejected);
             
         // case fail 1 time the state will be pending

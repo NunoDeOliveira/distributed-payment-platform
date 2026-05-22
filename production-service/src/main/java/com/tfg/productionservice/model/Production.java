@@ -37,7 +37,15 @@ public class Production {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
-        this.register += "PENDING " + startTime + " | ";
+        this.register += "WAITING " + startTime + " | ";
+    }
+    
+    // Switch to PREPARING state and record the production start time
+    public void waitting() {
+        LocalDateTime now = LocalDateTime.now();
+        this.state = ProductionState.WAITING;
+        this.startTime = LocalDateTime.now();
+        this.register += "WAITING " + now + " | ";
     }
 
     // Switch to PREPARING state and record the production start time

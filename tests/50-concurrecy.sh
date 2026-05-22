@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test script for Saga pattern evaluation
-BASE_URL="http://13.41.132.138:30000"
+BASE_URL="http://3.11.16.193:30000"
 
 echo "Starting medium load test..."
 
@@ -11,7 +11,6 @@ for i in $(seq 1 5); do
         curl -s -X POST "$BASE_URL/delivery/deliveries?amount=20" &
     done
     wait
-    sleep 2
 done
 sleep 30
 

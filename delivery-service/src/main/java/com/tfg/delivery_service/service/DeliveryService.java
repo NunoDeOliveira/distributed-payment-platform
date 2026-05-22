@@ -26,7 +26,7 @@ public class DeliveryService {
     // Given an ID and amount of a Delivery create a delivery
     public Delivery createDelivery(int amount) {
         Delivery newDelivery = new Delivery(amount,
-                               DeliveryState.RESERVING, LocalDateTime.now());
+                               DeliveryState.RESERVED, LocalDateTime.now());
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
 
         deliveryPublish.publishDeliveryCreated(
@@ -58,10 +58,6 @@ public class DeliveryService {
         if (delivery.getRetryCount() >= 3) {
             delivery.fail();
             deliveryRepository.save(delivery);
-        } else if (delivery.getRetryCount() >= 2) {    
-            delivery.timeout();
-            deliveryRepository.save(delivery);
-            compensateRejectedDelivery(delivery);
         } else {
             delivery.pending(); // must be for the scheduler
             deliveryRepository.save(delivery);

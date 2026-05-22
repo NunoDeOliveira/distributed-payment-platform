@@ -34,13 +34,7 @@ public class ProductionConsumer {
             ///// Manage timeout or failed
             if (productionId != 0) {
                 Production production = productionService.getProduction(productionId);
-                // count retries, if the retries are less than 2, get timeout
-                if (retryCount < 2) {
-                    productionService.getTimeoutState(production);
-                // else get failed status 
-                } else {
-                    productionService.getFailedSate(production);
-                } 
+                productionService.getTimeoutState(production);
             }
             throw e;
         }       

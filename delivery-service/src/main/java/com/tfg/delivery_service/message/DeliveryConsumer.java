@@ -34,7 +34,7 @@ public class DeliveryConsumer {
             ///// Manage timeout or failed
             if (deliveryId != 0) {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
-                deliveryService.getFailedSate(delivery);
+                deliveryService.getTimeoutState(delivery);
             }
             throw e;
         }

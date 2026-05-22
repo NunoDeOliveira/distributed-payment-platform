@@ -12,6 +12,8 @@ public class ProductionMetrics {
     public ProductionMetrics(MeterRegistry meterRegistry,
                              ProductionRepository productionRepository) {
         for (ProductionState state : ProductionState.values()) {
+            if (state == ProductionState.REJECTED) continue;
+            if (state == ProductionState.TIMEOUT) continue;
             Gauge.builder("production.state.current",
                             productionRepository,
                             repo -> repo.sumAmountByState(state))

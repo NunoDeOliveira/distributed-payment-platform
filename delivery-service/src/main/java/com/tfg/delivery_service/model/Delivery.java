@@ -52,7 +52,7 @@ public class Delivery {
         this.endTime = LocalDateTime.now();
         this.register += "COMPLETED " + LocalDateTime.now();
     }
-
+    
     // Switch state to REJECTED and record time
     public void reject() {
         this.state = DeliveryState.REJECTED;
@@ -81,9 +81,9 @@ public class Delivery {
     
     // Switch  to reserving state and record time
     public void reserving() {
-        this.state = DeliveryState.RESERVING;
+        this.state = DeliveryState.RESERVED;
         this.endTime = LocalDateTime.now();
-        this.register += "RESERVING " + LocalDateTime.now() + " | ";
+        this.register += "RESERVED " + LocalDateTime.now() + " | ";
     }
     
     public void incrementRetry() {
