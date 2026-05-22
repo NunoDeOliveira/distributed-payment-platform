@@ -11,7 +11,7 @@ echo ""
 sleep 30
 
 echo "Produce and deliver simultaneously"
-for i in $(seq 1 10); do
+for i in $(seq 1 20); do
     echo "Iteration $i"
     curl -s -X POST "$BASE_URL/production/productions?amount=20" &
     curl -s -X POST "$BASE_URL/delivery/deliveries?amount=20" &

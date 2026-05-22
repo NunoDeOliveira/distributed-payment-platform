@@ -112,7 +112,8 @@ public class InventoryService {
     @Transactional
     public void confirmDelivery(Long id, int amount){
         // Get reservation from repository
-        StockReservation reservation = reservationRepository.findByReservationId(id);
+        StockReservation reservation = reservationRepository
+                                        .findFirstByReservationId(id);
         if (reservation == null) {
             return;
         }
@@ -132,7 +133,8 @@ public class InventoryService {
     public void releaseReservedStock(Long id, int amount){
         // If the order fails, the reservation is rejected
         // so that the stock becomes available again.
-        StockReservation reservation = reservationRepository.findByReservationId(id);
+        StockReservation reservation = reservationRepository
+                                        .findFirstByReservationId(id);
 
         if (reservation != null) {
             reservationRepository.delete(reservation);

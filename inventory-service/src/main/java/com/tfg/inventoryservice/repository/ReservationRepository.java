@@ -8,7 +8,7 @@ public interface ReservationRepository extends JpaRepository<StockReservation, L
     @Query("SELECT SUM(reservation.reservationAmount) FROM StockReservation reservation")
     Integer getTotalReservedStock();
 
-    StockReservation findByReservationId(Long reservationId);
+    StockReservation findFirstByReservationId(Long reservationId);
 
     void deleteByReservationId(Long reservationId);
 }
