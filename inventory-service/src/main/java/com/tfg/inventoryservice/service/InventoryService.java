@@ -30,8 +30,8 @@ public class InventoryService {
         this.reservationRepository = reservationRepository;
     }
     
-    //@Transactional
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
+    //@Transactional(isolation = Isolation.SERIALIZABLE)
     // Given an ID and a production quantity, validate it.
     public void validateProduction(Long id, int amount){
         System.out.println("MAX_STOCK=" + MAX_STOCK + " currentStock=" + getAvailabilityStock() + " amount=" + amount); ///temporal
@@ -47,10 +47,11 @@ public class InventoryService {
         }
     }
     
-    //@Transactional
-    @Transactional(isolation = Isolation.SERIALIZABLE)    
+    @Transactional
+    public void validateDelivery(Long id, int amount){
+    //@Transactional(isolation = Isolation.SERIALIZABLE)    
     // Given an ID and a quantity, reserve a stock quantity
-    public synchronized void validateDelivery(Long id, int amount){
+    //public synchronized void validateDelivery(Long id, int amount){
         if (amount <= 0) {
             return;
         }
