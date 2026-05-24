@@ -78,9 +78,16 @@ public class DeliveryService {
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
     public void completeDelivery(Delivery delivery) {
+        Delivery deliveryReceived = deliveryRepository.findById(delivery.getId()).orElse(null);
+        // Chech if the delivery received is cancelled
+        // the delivery cancelled cannot save as completed delivery 
+        if (deliveryReceived == null || 
+            deliveryReceived.getState() == DeliveryState.CANCELLED) {
+            return;
+        }
+    
         delivery.complete();
         deliveryRepository.save(delivery);
-
         // Method to send event to RabbitMQ
         deliveryPublish.publishDeliveryCompleted(
                         delivery.getId(), delivery.getAmount());

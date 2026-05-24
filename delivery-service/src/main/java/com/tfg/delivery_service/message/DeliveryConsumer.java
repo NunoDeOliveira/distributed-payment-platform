@@ -25,6 +25,7 @@ public class DeliveryConsumer {
         String eventType = event.path("eventType").asText();
         Long deliveryId = event.path("deliveryId").asLong();
         Long productionId = event.path("productionId").asLong();
+        System.out.println("Event JSON: " + event.toString()); // temporal
         int amount = event.path("amount").asInt();
         System.out.println("Delivery receive: " + eventType + " deliveryId=" + deliveryId);
 
