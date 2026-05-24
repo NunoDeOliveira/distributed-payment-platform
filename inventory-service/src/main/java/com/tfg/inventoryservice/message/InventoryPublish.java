@@ -45,7 +45,7 @@ public class InventoryPublish {
     // Publish an event accepting production in the Production queue
     public void publishProductionAccepted(Long productionId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
-                                            "production.approved", productionId, null,amount);
+                                            "production.accepted", productionId, null,amount);
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }

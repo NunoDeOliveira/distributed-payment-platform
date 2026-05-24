@@ -19,7 +19,7 @@ public class InventoryService {
     private final InventoryPublish eventPublish;
     private final ReservationRepository reservationRepository;
     
-    @Value("${inventory.stock.limit:70}")
+    @Value("${inventory.stock.limit:100}")
     private int MAX_STOCK;
 
     public InventoryService(InventoryRepository inventoryRepository,
