@@ -53,21 +53,15 @@ public class DeliveryService {
     }
 
     // Method for saving a rejected delivery in the DB
-    public void rejectDelivery(Delivery delivery) {
-        delivery.incrementRetry();
-        if (delivery.getRetryCount() >= 3) {
-            delivery.fail();
-            deliveryRepository.save(delivery);
-        } else {
-            delivery.pending(); // must be for the scheduler
-            deliveryRepository.save(delivery);
-            compensateRejectedDelivery(delivery);
-        }
+    public void cancelDelivery(Delivery delivery) {
+        delivery.cancelled();
+        deliveryRepository.save(delivery);
+        compensateCancelledDelivery(delivery);
     }
 
     // Saga compensating transaction method.
     // Given a rejected delivery release delivery reserved
-    public void compensateRejectedDelivery(Delivery delivery) {
+    public void compensateCancelledDelivery(Delivery delivery) {
         deliveryPublish.publishReservationRelease(
                         delivery.getId(), delivery.getAmount());
     }
@@ -91,9 +85,16 @@ public class DeliveryService {
 
         return deliveryToReturn;
     }
+            
+    // Get all the deliveries from the repository.
+    // This query is to return to the user.
+    public List<Delivery> getAllDeliveries() {
+        return deliveryRepository.findAll();
+    }
     
+    
+    /*
     // This method publish start a delivivery
-    //@Scheduled(fixedDelay = 10000)
     public void processPendingDeliveries() {
         Optional<Delivery> pending = deliveryRepository
                 .findFirstByStateOrderByStartTimeAsc(DeliveryState.PENDING);
@@ -102,24 +103,18 @@ public class DeliveryService {
             deliveryPublish.publishDeliveryPending(
                             pending.get().getId(), pending.get().getAmount());
         }
-    }
+    }*/
     
-    
-    // Get all the deliveries from the repository.
-    // This query is to return to the user.
-    public List<Delivery> getAllDeliveries() {
-        return deliveryRepository.findAll();
-    }
-    
+    /*
     // If inventory connection fail get timeout state
     public void getTimeoutState(Delivery delivery) {
         delivery.timeout();
         deliveryRepository.save(delivery);
     }
-    
+
     // When the third retry fails, the state is failed
     public void getFailedSate(Delivery delivery) {
         delivery.fail();
         deliveryRepository.save(delivery);
-    }
+    }*/
 }

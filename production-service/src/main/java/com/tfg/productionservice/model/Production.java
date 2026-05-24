@@ -26,9 +26,8 @@ public class Production {
     private String register = "";
     private int retryCount = 0;
     
-    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+
     private LocalDateTime startTime;
-    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     public Production() {}
@@ -62,7 +61,16 @@ public class Production {
         this.endTime = LocalDateTime.now();
         this.register += "COMPLETED " + LocalDateTime.now();
     }
-
+    
+    // Switch to CANCELLED state and record the production CANCELLED time
+    public void cancelled() {
+        this.state = ProductionState.CANCELLED;
+        this.endTime = LocalDateTime.now();
+        this.register += "CANCELLED " + LocalDateTime.now();
+    }
+    
+    
+    /*
     public void reject() {
         this.state = ProductionState.REJECTED;
         this.endTime = LocalDateTime.now();
@@ -91,6 +99,6 @@ public class Production {
     
     public void incrementRetry() {
         this.retryCount++;
-    }
+    }*/
     
 }

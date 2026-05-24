@@ -17,8 +17,7 @@ public class GatewayRouting {
                 .route("production_route", r -> r
                         .path("/production/**").and()
                         .method(HttpMethod.GET, HttpMethod.POST)
-                        .filters(f -> f
-                                .stripPrefix(1).circuitBreaker(c -> {
+                        .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("productionCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-production");
                                 }).addResponseHeader("Gateway-Service", "Production-Service")
@@ -30,9 +29,8 @@ public class GatewayRouting {
                 // Delivery service
                 .route("delivery_route", r -> r
                         .path("/delivery/**").and()
-                        .method(HttpMethod.GET, HttpMethod.POST)
-                        .filters(f -> f
-                                .stripPrefix(1).circuitBreaker(c -> {
+                        .method(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
+                        .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("deliveryCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-delivery");
                                 }).addResponseHeader("Gateway-Service", "Delivery-Service")

@@ -49,6 +49,12 @@ public class DeliveryPublish {
                 new DeliveryEvent("delivery.reservation.release", deliveryId, amount));
     }
     
+    // Given an Id and amount of delivery publish a cancelled delivery
+    public void publishDeliveryCancelled(Long deliveryId, int amount) {
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
+            new DeliveryEvent("delivery.cancelled", deliveryId, amount));
+    }
+    
     // Given an Id and amount of delivery publish a pending delivery
     public void publishDeliveryPending(Long deliveryId, int amount) {
         DeliveryEvent deliveryEvent = new DeliveryEvent(

@@ -46,7 +46,6 @@ public class InventoryPublish {
     public void publishProductionAccepted(Long productionId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
                                             "production.approved", productionId, null,amount);
-
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }
@@ -55,7 +54,6 @@ public class InventoryPublish {
     public void publishProductionRejected(Long productionId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
                                             "production.rejected", productionId, null, amount);
-
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }
@@ -64,7 +62,6 @@ public class InventoryPublish {
     public void publishDeliveryAccepted(Long deliveryId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
                                             "delivery.accepted", null, deliveryId, amount);
-
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
     }
@@ -73,9 +70,15 @@ public class InventoryPublish {
     public void publishDeliveryRejected(Long deliveryId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
                                             "delivery.rejected", null, deliveryId, amount);
-
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
+    }
+    
+    // Notify production cancellation 
+    public void publishProductionCancelled(Long deliveryId, int amount) {
+        InventoryEvent event = new InventoryEvent(
+                              "production.cancelled", null, deliveryId, amount);
+        rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, event);
     }
 
     // Notify delivery service that stock is available

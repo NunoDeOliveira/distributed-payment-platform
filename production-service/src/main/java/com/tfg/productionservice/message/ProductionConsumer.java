@@ -32,10 +32,10 @@ public class ProductionConsumer {
             processEvent(eventType, productionId, amountAllowed);
         } catch (Exception e) {
             ///// Manage timeout or failed
-            if (productionId != 0) {
+            /*if (productionId != 0) {
                 Production production = productionService.getProduction(productionId);
                 productionService.getTimeoutState(production);
-            }
+            }*/
             throw e;
         }       
     }
@@ -43,7 +43,7 @@ public class ProductionConsumer {
     // Process the event given. Case aproved or case rejected
     private void processEvent(String eventType, Long productionId, int amountAllowed) {
         switch (eventType) {
-            case "production.approved":
+            case "production.accepted":
                 Production production = productionService.getProduction(productionId);
                 productionService.startProduction(production);
                 break;
@@ -51,9 +51,12 @@ public class ProductionConsumer {
                 Production productionRejected = productionService.getProduction(productionId);
                 productionService.rejectProduction(productionRejected, amountAllowed);
                 break;
-            case "stock.available":
-                productionService.processPendingProductions();
-            break;
+            case "production.cancelled":
+                productionService.cancelProduction(productionId);
+                break;
+            //case "stock.available":
+                //productionService.processPendingProductions();
+                //break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

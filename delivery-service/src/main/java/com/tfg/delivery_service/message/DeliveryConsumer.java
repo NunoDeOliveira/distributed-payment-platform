@@ -29,19 +29,20 @@ public class DeliveryConsumer {
 
         try {
             ///// procecess event received
-            processEvent(eventType, deliveryId);
+            processEvent(eventType, deliveryId, amount);
         } catch (Exception e) {
+            System.out.println("Error processing event: " + e.getMessage());
             ///// Manage timeout or failed
-            if (deliveryId != 0) {
+            /*if (deliveryId != 0) {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
                 deliveryService.getTimeoutState(delivery);
-            }
+            }*/
             throw e;
         }
     }
     
     // Process the event given. Case aproved or case rejected
-    private void processEvent(String eventType, Long deliveryId) {
+    private void processEvent(String eventType, Long deliveryId, int amount) {
         switch (eventType) {
             // Case delivery in which can start delivery 
             case "delivery.accepted":
@@ -49,13 +50,13 @@ public class DeliveryConsumer {
                 deliveryService.startDelivery(acceptedDelivery);
                 break;
             // Compensating Transaction
-            case "delivery.rejected":
+            /*case "delivery.rejected":
                 Delivery rejectedDelivery = deliveryService.getDelivery(deliveryId);
                 deliveryService.rejectDelivery(rejectedDelivery);
-                break;
+                break;*/
             // case a new stock available
             case "stock.available":
-                deliveryService.processPendingDeliveries();
+                deliveryService.createDelivery(amount);
                 break;
             default:
                 System.out.println("Event unknown: " + eventType);

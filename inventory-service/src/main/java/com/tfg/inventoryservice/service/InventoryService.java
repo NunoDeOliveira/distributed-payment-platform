@@ -105,7 +105,7 @@ public class InventoryService {
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
         // Publish in queue that there is available stock
-        eventPublish.publishStockAvailable(getAvailabilityStock());
+        eventPublish.publishStockAvailable(amount);
     }
     
 
@@ -140,6 +140,12 @@ public class InventoryService {
         if (reservation != null) {
             reservationRepository.delete(reservation);
         }
+    }
+    
+    //Given an id of delivery and amount, cancell delivery
+    public void cancelDelivery(Long id, int amount) {
+        releaseReservedStock(id, amount);
+        eventPublish.publishProductionCancelled(id, amount);
     }
 
 }

@@ -44,16 +44,19 @@ public class InventoryConsumer {
                 inventoryService.confirmDelivery(deliveryId, amount);
                 break;
             // Case for productions pendings
-            case "production.pending":
-                inventoryService.validateProduction(productionId, amount);
+            //case "production.pending":
+                //inventoryService.validateProduction(productionId, amount);
+                //break;
+            case "delivery.cancelled":
+                inventoryService.cancelDelivery(deliveryId, amount); 
                 break;
             // Compensating Transaction
             case "delivery.reservation.release":
                 inventoryService.releaseReservedStock(deliveryId, amount);
                 break;
-            case "delivery.pending":
-                inventoryService.validateDelivery(deliveryId, amount);
-            break;
+            //case "delivery.pending":
+                //inventoryService.validateDelivery(deliveryId, amount);
+                //break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

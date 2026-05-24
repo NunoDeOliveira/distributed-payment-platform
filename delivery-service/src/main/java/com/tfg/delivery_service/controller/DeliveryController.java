@@ -17,20 +17,23 @@ public class DeliveryController {
 
     @PostMapping
     public Delivery createProduction(@RequestParam int amount) {
-
         return deliveryService.createDelivery(amount);
     }
 
     @GetMapping("/{id}")
     public Delivery getDelivery(@PathVariable Long id) {
-
         return deliveryService.getDelivery(id);
     }
 
     @GetMapping
     public List<Delivery> getAllProductions() {
-
         return deliveryService.getAllDeliveries();
     }
-
+    
+    @DeleteMapping("/{id}")
+    public void cancelDelivery(@PathVariable Long id) {
+        Delivery delivery = deliveryService.getDelivery(id);
+        deliveryService.cancelDelivery(delivery);
+    }
+    
 }

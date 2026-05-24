@@ -36,7 +36,7 @@ public class Delivery {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
-        this.register = "RESERVING " + startTime + " | ";
+        this.register = "RESERVED " + startTime + " | ";
     }
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time
@@ -53,6 +53,15 @@ public class Delivery {
         this.register += "COMPLETED " + LocalDateTime.now();
     }
     
+    // Switch state CANCELLED state and record the delivery cancelled time
+    public void cancelled() {
+        this.state = DeliveryState.CANCELLED;
+        this.endTime = LocalDateTime.now();
+        this.register += "CANCELLED " + LocalDateTime.now();
+    }
+    
+    
+    /*
     // Switch state to REJECTED and record time
     public void reject() {
         this.state = DeliveryState.REJECTED;
@@ -67,10 +76,10 @@ public class Delivery {
     }
     
     // Switch state to FAILED and record time
-    public void fail() {
-        this.state = DeliveryState.FAILED;
+    public void cancell() {
+        this.state = DeliveryState.CANCELLED;
         this.endTime = LocalDateTime.now();
-        this.register += "FAILED " + LocalDateTime.now();
+        this.register += "CANCELLED " + LocalDateTime.now();
     }
     
     public void pending() {
@@ -88,6 +97,6 @@ public class Delivery {
     
     public void incrementRetry() {
         this.retryCount++;
-    }
+    }*/
 
 }
