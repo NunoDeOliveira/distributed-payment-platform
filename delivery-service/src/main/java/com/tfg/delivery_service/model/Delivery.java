@@ -16,6 +16,7 @@ public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long productionId;
 
     private int amount;
     private int retryCount = 0;

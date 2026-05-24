@@ -16,8 +16,9 @@ public class DeliveryController {
     }
 
     @PostMapping
-    public Delivery createProduction(@RequestParam int amount) {
-        return deliveryService.createDelivery(amount);
+    public Delivery createDelivery(@RequestParam Long productionId, 
+                                        @RequestParam int amount) {
+        return deliveryService.createDelivery(productionId, amount);
     }
 
     @GetMapping("/{id}")
@@ -35,5 +36,6 @@ public class DeliveryController {
         Delivery delivery = deliveryService.getDelivery(id);
         deliveryService.cancelDelivery(delivery);
     }
-    
+   
+   
 }

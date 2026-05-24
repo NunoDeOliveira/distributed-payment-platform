@@ -24,12 +24,13 @@ public class DeliveryConsumer {
         // Extract data
         String eventType = event.path("eventType").asText();
         Long deliveryId = event.path("deliveryId").asLong();
+        Long productionId = event.path("productionId").asLong();
         int amount = event.path("amount").asInt();
         System.out.println("Delivery receive: " + eventType + " deliveryId=" + deliveryId);
 
         try {
             ///// procecess event received
-            processEvent(eventType, deliveryId, amount);
+            processEvent(eventType, deliveryId, amount, productionId);
         } catch (Exception e) {
             System.out.println("Error processing event: " + e.getMessage());
             ///// Manage timeout or failed
@@ -42,7 +43,7 @@ public class DeliveryConsumer {
     }
     
     // Process the event given. Case aproved or case rejected
-    private void processEvent(String eventType, Long deliveryId, int amount) {
+    private void processEvent(String eventType, Long deliveryId, int amount, Long productionId) {
         switch (eventType) {
             // Case delivery in which can start delivery 
             case "delivery.accepted":
@@ -56,7 +57,7 @@ public class DeliveryConsumer {
                 break;*/
             // case a new stock available
             case "stock.available":
-                deliveryService.createDelivery(amount);
+                deliveryService.createDelivery(productionId, amount);
                 break;
             default:
                 System.out.println("Event unknown: " + eventType);

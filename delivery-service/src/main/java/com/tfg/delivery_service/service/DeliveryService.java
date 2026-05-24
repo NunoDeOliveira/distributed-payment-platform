@@ -24,9 +24,10 @@ public class DeliveryService {
     }
     
     // Given an ID and amount of a Delivery create a delivery
-    public Delivery createDelivery(int amount) {
+    public Delivery createDelivery(Long recivedId, int amount) {
         Delivery newDelivery = new Delivery(amount,
                                DeliveryState.RESERVED, LocalDateTime.now());
+        newDelivery.setProductionId(recivedId); 
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
 
         deliveryPublish.publishDeliveryCreated(
@@ -52,17 +53,25 @@ public class DeliveryService {
         completeDelivery(delivery);
     }
 
-    // Method for saving a rejected delivery in the DB
+    // Method for saving a cancelled delivery in the DB
     public void cancelDelivery(Delivery delivery) {
+        if (delivery.getState() == DeliveryState.COMPLETED ||
+            delivery.getState() == DeliveryState.CANCELLED) {
+            return;
+        }
+    
         delivery.cancelled();
         deliveryRepository.save(delivery);
+        
         compensateCancelledDelivery(delivery);
     }
 
     // Saga compensating transaction method.
-    // Given a rejected delivery release delivery reserved
+    // Given a cancelled delivery release delivery reserved
     public void compensateCancelledDelivery(Delivery delivery) {
         deliveryPublish.publishReservationRelease(
+                          delivery.getId(), delivery.getAmount());
+        deliveryPublish.publishDeliveryCancelled(
                         delivery.getId(), delivery.getAmount());
     }
 
