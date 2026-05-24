@@ -2,7 +2,7 @@ package com.tfg.productionservice.event;
 
 public class ProductionEvent {
 
-    private String event;
+    private String eventType;
     private Long productionId;
     private Integer amount;
 
@@ -10,13 +10,13 @@ public class ProductionEvent {
     }
 
     public ProductionEvent(String event, Long productionId, Integer amount) {
-        this.event = event;
+        this.eventType = event;
         this.productionId = productionId;
         this.amount = amount;
     }
 
-    public String getEvent() {
-        return event;
+    public String getEventType() {
+        return eventType;
     }
 
     public Long getProductionId() {

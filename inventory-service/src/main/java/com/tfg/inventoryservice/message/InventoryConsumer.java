@@ -16,7 +16,7 @@ public class InventoryConsumer {
 
     @RabbitListener(queues = InventoryPublish.INVENTORY_QUEUE)
     public void consume(JsonNode event) {
-        String eventType = event.path("event").asText();
+        String eventType = event.path("eventType").asText();
         int amount = event.path("amount").asInt();
         
         Long productionId = null;
