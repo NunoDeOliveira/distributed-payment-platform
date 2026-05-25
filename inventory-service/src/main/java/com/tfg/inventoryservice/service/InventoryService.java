@@ -31,8 +31,8 @@ public class InventoryService {
     }
     
     // Given an ID and a production quantity, validate it.
-    @Transactional
-    //@Transactional(isolation = Isolation.SERIALIZABLE)
+    //@Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void validateProduction(Long id, int amount){
         System.out.println("MAX_STOCK=" + MAX_STOCK + " currentStock=" + getAvailabilityStock() + " amount=" + amount); ///temporal
         // Calculate the stock that can still be added
@@ -50,10 +50,10 @@ public class InventoryService {
     
    
     // Given an ID and a quantity, reserve a stock quantity
-    @Transactional
-    public void validateDelivery(Long id, int amount){
-    //@Transactional(isolation = Isolation.SERIALIZABLE) 
-    //public synchronized void validateDelivery(Long id, int amount){
+    //@Transactional
+    //public void validateDelivery(Long id, int amount){
+    @Transactional(isolation = Isolation.SERIALIZABLE) 
+    public synchronized void validateDelivery(Long id, int amount){
         if (amount <= 0) {
             return;
         }
