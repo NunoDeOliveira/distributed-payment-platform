@@ -57,12 +57,21 @@ public class InventoryService {
         if (amount <= 0) {
             return;
         }
+        
+        // Create a new reservation for an delivery given
+        StockReservation reservation = new StockReservation(); 
+        reservation.setReservationId(id);
+        reservation.setReservationAmount(amount);
+        // Save reservation in DB
+        reservationRepository.save(reservation);
+        // Publish an event accepting the delivery request
+        eventPublish.publishDeliveryAccepted(id, amount);
+        
         // Get the stock availability for a production ID
-        int availabilityStock = getAvailabilityStock();
+        /*int availabilityStock = getAvailabilityStock();
         if (availabilityStock < 0) {
             return;
         }
-
         // Check if there are enough stock
         if (amount <= availabilityStock){
             StockReservation reservation = new StockReservation();
@@ -75,7 +84,7 @@ public class InventoryService {
             eventPublish.publishDeliveryAccepted(id, amount);
         } else {
             eventPublish.publishDeliveryRejected(id, availabilityStock);
-        }
+        }*/
     }
 
     // Given an id production method to get the stock availability
