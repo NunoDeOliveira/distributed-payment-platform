@@ -6,6 +6,7 @@ import com.tfg.delivery_service.model.DeliveryState;
 import com.tfg.delivery_service.repository.DeliveryRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +53,8 @@ public class DeliveryService {
         // Apply the logic to finish delivery
         completeDelivery(delivery);
     }
-
+    
+    @Transactional
     // Method for saving a cancelled delivery in the DB
     public void cancelDelivery(Delivery delivery) {
         if (delivery.getState() == DeliveryState.COMPLETED ||
@@ -73,7 +75,8 @@ public class DeliveryService {
         deliveryPublish.publishDeliveryCancelled(
                         delivery.getId(), delivery.getProductionId(), delivery.getAmount());
     }
-
+    
+    @Transactional
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
     public void completeDelivery(Delivery delivery) {

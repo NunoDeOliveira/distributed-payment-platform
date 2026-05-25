@@ -6,6 +6,7 @@ import com.tfg.productionservice.model.ProductionState;
 import com.tfg.productionservice.repository.ProductionRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -100,10 +101,17 @@ public class ProductionService {
             productionRepository.save(newPending);
         }*/
     }
-
+    
+    @Transactional
     // When the production is completed save production in repository
     // and publish an event on RabbitMQ
     public void completeProduction(Production production) {
+        Production prod = productionRepository.findById(production.getId()).orElse(null);
+        
+        if (prod == null || prod.getState() == ProductionState.CANCELLED) {
+            return;
+        }
+        
         production.complete();
         productionRepository.save(production);
         // Method to send event to RabbitMQ
