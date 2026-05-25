@@ -48,6 +48,10 @@ public class ProductionService {
         try{
             // Simulate the production processing (30 seconds)
             Thread.sleep(3000);
+            Production produ = productionRepository.findById(production.getId()).orElse(null);
+            if (produ != null && produ.getState() == ProductionState.CANCELLED) {
+                return;
+            }
         } catch (InterruptedException e){
             Thread.currentThread().interrupt();
             System.out.println(e);
