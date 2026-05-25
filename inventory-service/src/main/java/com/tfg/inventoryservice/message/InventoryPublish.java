@@ -75,16 +75,16 @@ public class InventoryPublish {
     }
     
     // Notify production cancellation 
-    public void publishProductionCancelled(Long deliveryId, int amount) {
+    public void publishProductionCancelled(Long productionId, int amount) {
         InventoryEvent event = new InventoryEvent(
-                              "production.cancelled", null, deliveryId, amount);
+                                    "production.cancelled", productionId, null, amount);
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, event);
     }
 
     // Notify delivery service that stock is available
-    public void publishStockAvailable(int amount) {
+    public void publishStockAvailable(Long productionId, int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent( 
-                                            "stock.available", null, null, amount);
+                                      "stock.available", productionId, null, amount);
         rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
     }
     

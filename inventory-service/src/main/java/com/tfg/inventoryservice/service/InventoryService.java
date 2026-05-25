@@ -30,9 +30,9 @@ public class InventoryService {
         this.reservationRepository = reservationRepository;
     }
     
-    @Transactional
-    //@Transactional(isolation = Isolation.SERIALIZABLE)
     // Given an ID and a production quantity, validate it.
+    //@Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void validateProduction(Long id, int amount){
         System.out.println("MAX_STOCK=" + MAX_STOCK + " currentStock=" + getAvailabilityStock() + " amount=" + amount); ///temporal
         // Calculate the stock that can still be added
@@ -47,11 +47,12 @@ public class InventoryService {
         }
     }
     
-    @Transactional
-    public void validateDelivery(Long id, int amount){
-    //@Transactional(isolation = Isolation.SERIALIZABLE)    
+   
     // Given an ID and a quantity, reserve a stock quantity
-    //public synchronized void validateDelivery(Long id, int amount){
+    //@Transactional
+    //public void validateDelivery(Long id, int amount){
+    @Transactional(isolation = Isolation.SERIALIZABLE) 
+    public synchronized void validateDelivery(Long id, int amount){
         if (amount <= 0) {
             return;
         }
@@ -105,7 +106,7 @@ public class InventoryService {
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
         // Publish in queue that there is available stock
-        eventPublish.publishStockAvailable(amount);
+        eventPublish.publishStockAvailable(id, amount);
     }
     
 
@@ -143,9 +144,9 @@ public class InventoryService {
     }
     
     //Given an id of delivery and amount, cancell delivery
-    public void cancelDelivery(Long id, int amount) {
-        releaseReservedStock(id, amount);
-        eventPublish.publishProductionCancelled(id, amount);
+    public void cancelDelivery(Long deliveryId, Long productionId, int amount) {
+        releaseReservedStock(deliveryId, amount);
+        eventPublish.publishProductionCancelled(productionId, amount);
     }
 
 }

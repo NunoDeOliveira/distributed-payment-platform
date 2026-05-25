@@ -25,6 +25,9 @@ public class InventoryConsumer {
             productionId = event.path("productionId").asLong();
         } else {
             deliveryId = event.path("deliveryId").asLong();
+            if (eventType.equals("delivery.cancelled")) {
+                productionId = event.path("productionId").asLong();
+            }
         }
 
         System.out.println("Inventory receive: " + eventType +
@@ -48,7 +51,7 @@ public class InventoryConsumer {
                 //inventoryService.validateProduction(productionId, amount);
                 //break;
             case "delivery.cancelled":
-                inventoryService.cancelDelivery(deliveryId, amount); 
+                inventoryService.cancelDelivery(deliveryId, productionId, amount); 
                 break;
             // Compensating Transaction
             case "delivery.reservation.release":

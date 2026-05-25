@@ -69,10 +69,9 @@ public class DeliveryService {
     // Saga compensating transaction method.
     // Given a cancelled delivery release delivery reserved
     public void compensateCancelledDelivery(Delivery delivery) {
-        deliveryPublish.publishReservationRelease(
-                          delivery.getId(), delivery.getAmount());
+        deliveryPublish.publishReservationRelease(delivery.getId(), delivery.getAmount());
         deliveryPublish.publishDeliveryCancelled(
-                        delivery.getId(), delivery.getAmount());
+                        delivery.getId(), delivery.getProductionId(), delivery.getAmount());
     }
 
     // When the delivery is completed save delivery in the repository

@@ -12,5 +12,6 @@ import lombok.Setter;
 public class DeliveryEvent {
     private String eventType;
     private Long deliveryId;
+    private Long productionId;
     private Integer amount;
 }

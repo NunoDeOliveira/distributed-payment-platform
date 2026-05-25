@@ -127,7 +127,7 @@ public class ProductionService {
         if (production.getState() == ProductionState.PREPARING) {
             production.cancelled();
             productionRepository.save(production);
-        }
+        } 
     }
 
     // Get all the production from the repository
