@@ -50,7 +50,7 @@ public class DeliveryService {
         
         try {
             // Wait 0,001 seconds to send delivery completed
-            Thread.sleep(500); 
+            Thread.sleep(1000); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

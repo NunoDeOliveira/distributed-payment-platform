@@ -1,7 +1,7 @@
 #!/bin/bash
 BASE_URL="http://localhost:8080"
-USERS=5
-REQUESTS_PER_USER=80
+USERS=50
+REQUESTS_PER_USER=10
 
 echo "========== Concurrent test - $USERS users ========="
 
