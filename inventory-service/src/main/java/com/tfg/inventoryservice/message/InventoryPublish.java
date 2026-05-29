@@ -95,5 +95,13 @@ public class InventoryPublish {
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }
     
+    // Given an amount publish 
+    public void publishForCreateDelivery(int amount) {
+        InventoryEvent inventoryEvent = new InventoryEvent("create.delivery",
+                                                            null, null, amount);
+
+        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
+    }
+    
 
 }

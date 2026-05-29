@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -33,7 +32,7 @@ public class InventoryService {
     // Given an ID and a production quantity, validate it.
     //@Transactional
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public synchronized void validateProduction(Long id, int amount){  
+    public synchronized void validateProduction(Long id, int amount) {  
         if (amount <= 0) {
             return;
         }
@@ -43,25 +42,30 @@ public class InventoryService {
         int allowedCapacity = MAX_STOCK - currentStock;
 
         // Evaluate whether the amount received is rejected or accepted
-        if (amount <= allowedCapacity){
+        if (amount <= allowedCapacity) {
             eventPublish.publishProductionAccepted(id, amount);
             eventPublish.publishStockAvailable(id, amount);
-        } else {
+        } else {            
             int allowedAmount = allowedCapacity;
             if (allowedAmount < 0) {
                 allowedAmount = 0;
             }
             // publish allowed amount if the amount is => than allowed Capacity
-            eventPublish.publishProductionRejected(id, allowedAmount);
+            eventPublish.publishProductionRejected(id, allowedAmount);         
+            // Check if there is enough stock already stored
+            int availableStock = getAvailabilityStock();
+            // If there is enough stock, create a new delivery 
+            if (availableStock >= amount) {
+                eventPublish.publishForCreateDelivery(amount);
+            }    
         }
     }
-    
-   
+       
     // Given an ID and a quantity, reserve a stock quantity
     //@Transactional
     //public void validateDelivery(Long id, int amount){
     @Transactional(isolation = Isolation.SERIALIZABLE) 
-    public void reserveDeliveryStock(Long id, int amount){
+    public void reserveDeliveryStock(Long id, int amount) {
         if (amount <= 0) {
             return;
         }
@@ -81,29 +85,10 @@ public class InventoryService {
         reservationRepository.save(reservation);
         // Publish an event accepting the delivery request
         eventPublish.publishDeliveryAccepted(id, amount);
-        
-        // Get the stock availability for a production ID
-        /*int availabilityStock = getAvailabilityStock();
-        if (availabilityStock < 0) {
-            return;
-        }
-        // Check if there are enough stock
-        if (amount <= availabilityStock){
-            StockReservation reservation = new StockReservation();
-            reservation.setReservationId(id);
-            reservation.setReservationAmount(amount);
-
-            // Save reservation in DB
-            reservationRepository.save(reservation);
-            // Publish an event accepting the delivery request
-            eventPublish.publishDeliveryAccepted(id, amount);
-        } else {
-            eventPublish.publishDeliveryRejected(id, availabilityStock);
-        }*/
     }
 
     // Given an id production method to get the stock availability
-    public int getAvailabilityStock(){
+    public int getAvailabilityStock() {
         int availableStock = getTotalStock() - getReservedStock();
         return availableStock;
     }
@@ -120,7 +105,7 @@ public class InventoryService {
 
     @Transactional
     // Given an id and amount of a Production increase the stock of DB
-    public void increaseStock(Long id, int amount){
+    public void increaseStock(Long id, int amount) {
         if (amount <= 0) {
             return;
         }
@@ -137,7 +122,7 @@ public class InventoryService {
 
     // Given and id of product and amount release a reservation
     @Transactional
-    public void confirmDelivery(Long id, int amount){
+    public void confirmDelivery(Long id, int amount) {
         // Get reservation from repository
         StockReservation reservation = reservationRepository
                                         .findFirstByReservationId(id);
@@ -160,12 +145,11 @@ public class InventoryService {
     }
 
     @Transactional
-    public void releaseReservedStock(Long id, int amount){
+    public void releaseReservedStock(Long id, int amount) {
         // If the order fails, the reservation is rejected
         // so that the stock becomes available again.
         StockReservation reservation = reservationRepository
                                         .findFirstByReservationId(id);
-
         if (reservation != null) {
             reservationRepository.delete(reservation);
         }
@@ -177,5 +161,6 @@ public class InventoryService {
         releaseReservedStock(deliveryId, amount);
         eventPublish.publishProductionCancelled(productionId, amount);
     }
-
+    
+    
 }

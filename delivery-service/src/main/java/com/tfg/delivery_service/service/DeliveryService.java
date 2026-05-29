@@ -103,6 +103,22 @@ public class DeliveryService {
         // Method to send event to RabbitMQ
         deliveryPublish.publishDeliveryCompleted(delivery.getId(), delivery.getAmount());
     }
+    
+    // Given an amount create a delivery from stock already available in Inventory
+    public Delivery createDeliveryFromStock(int amount) {
+        Delivery newDelivery = new Delivery(amount, DeliveryState.CREATED,
+                                                    LocalDateTime.now());
+
+        Delivery storedDelivery = deliveryRepository.save(newDelivery);
+
+        if (storedDelivery.getState() == DeliveryState.CREATED) {
+            storedDelivery.setState(DeliveryState.RESERVED);
+            deliveryRepository.save(storedDelivery);
+        }
+        
+        return storedDelivery;
+    }
+    
 
     // Get delivery by ID
     public Delivery getDelivery(Long id) {
@@ -119,6 +135,7 @@ public class DeliveryService {
         return deliveryRepository.findAll();
     }
     
+    // 
     
     /*
     // This method publish start a delivivery

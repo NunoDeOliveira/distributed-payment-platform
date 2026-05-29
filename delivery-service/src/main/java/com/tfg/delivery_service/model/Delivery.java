@@ -32,12 +32,28 @@ public class Delivery {
 
     public Delivery() {
     }
+    
 
     public Delivery(int amount, DeliveryState state, LocalDateTime startTime) {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
-        this.register = "RESERVED " + startTime + " | ";
+        this.register = state.name() + " " + startTime + " | ";
+    }
+    
+    // Switch to CREATED state and record the production start time
+    public void created() {
+        LocalDateTime now = LocalDateTime.now();
+        this.state = DeliveryState.CREATED;
+        this.startTime = LocalDateTime.now();
+        this.register += "CREATED " + now + " | ";
+    }
+    
+    // Switch to RESERVED state and record the production start time
+    public void reserved() {
+        LocalDateTime now = LocalDateTime.now();
+        this.state = DeliveryState.RESERVED;
+        this.register += "RESERVED " + now + " | ";
     }
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test script for Saga pattern evaluation
-BASE_URL="http://13.135.243.150:30000"
+BASE_URL="http://13.134.165.98:30000"
 
 
 echo "============== recived a production with random amount"

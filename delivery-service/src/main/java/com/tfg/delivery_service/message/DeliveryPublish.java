@@ -52,7 +52,7 @@ public class DeliveryPublish {
     // Given an Id and amount of delivery publish a cancelled delivery
     public void publishDeliveryCancelled(Long deliveryId, Long productionId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-        new DeliveryEvent("delivery.cancelled", deliveryId, productionId, amount));
+                  new DeliveryEvent("delivery.cancelled", deliveryId, productionId, amount));
     }
         
     // Given an Id and amount of delivery publish a pending delivery

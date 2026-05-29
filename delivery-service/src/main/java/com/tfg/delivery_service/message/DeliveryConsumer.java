@@ -59,6 +59,9 @@ public class DeliveryConsumer {
             case "stock.available":
                 deliveryService.reserveDelivery(productionId, amount);
                 break;
+            case "create.delivery":
+                deliveryService.createDeliveryFromStock(amount);
+                break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }
