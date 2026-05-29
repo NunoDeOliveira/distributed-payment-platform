@@ -45,7 +45,7 @@ public class ProductionConsumer {
         switch (eventType) {
             case "production.accepted":
                 Production production = productionService.getProduction(productionId);
-                productionService.startProduction(production);
+                productionService.startProduction(productionId);
                 break;
             case "production.rejected":
                 Production productionRejected = productionService.getProduction(productionId);

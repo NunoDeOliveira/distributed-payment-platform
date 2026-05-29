@@ -49,10 +49,11 @@ public class ProductionPublish {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
     }
     
+    /*
     public void publishProductionPending(Long productionId, int amount) {
         ProductionEvent productionEvent = new ProductionEvent(
                                         "production.pending", productionId, amount);
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, productionEvent);
-    }
+    }*/
     
 }

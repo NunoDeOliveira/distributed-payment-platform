@@ -28,7 +28,7 @@ public class DeliveryPublish {
 
     // Define a queue for Production to receive events
     @Bean
-    public Queue productionQueue() {
+    public Queue deliveryQueue() {
         return new Queue(DELIVERY_QUEUE, true);
     }
 

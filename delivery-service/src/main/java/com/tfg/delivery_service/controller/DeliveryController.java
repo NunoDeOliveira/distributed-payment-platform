@@ -16,9 +16,9 @@ public class DeliveryController {
     }
 
     @PostMapping
-    public Delivery createDelivery(@RequestParam Long productionId, 
-                                        @RequestParam int amount) {
-        return deliveryService.createDelivery(productionId, amount);
+    public Delivery reserveDelivery(@RequestParam Long productionId,
+                                    @RequestParam int amount) {
+        return deliveryService.reserveDelivery(productionId, amount);
     }
 
     @GetMapping("/{id}")
@@ -33,8 +33,7 @@ public class DeliveryController {
     
     @DeleteMapping("/{id}")
     public void cancelDelivery(@PathVariable Long id) {
-        Delivery delivery = deliveryService.getDelivery(id);
-        deliveryService.cancelDelivery(delivery);
+        deliveryService.cancelDelivery(id);
     }
    
    

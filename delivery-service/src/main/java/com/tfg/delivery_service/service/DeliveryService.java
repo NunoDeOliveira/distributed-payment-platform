@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 public class DeliveryService {
@@ -18,59 +17,70 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryPublish deliveryPublish;
 
-    public DeliveryService(DeliveryRepository deliveryRepository,
-                           DeliveryPublish deliveryPublish) {
+    public DeliveryService(DeliveryRepository deliveryRepository, 
+                                              DeliveryPublish deliveryPublish) {
         this.deliveryRepository = deliveryRepository;
         this.deliveryPublish = deliveryPublish;
     }
     
     // Given an ID and amount of a Delivery create a delivery
-    public Delivery createDelivery(Long recivedId, int amount) {
-        Delivery newDelivery = new Delivery(amount,
-                               DeliveryState.RESERVED, LocalDateTime.now());
-        newDelivery.setProductionId(recivedId); 
-        Delivery storedDelivery = deliveryRepository.save(newDelivery);
+    public Delivery reserveDelivery(Long productionId, int amount) {
+        Delivery newDelivery = new Delivery(amount, DeliveryState.RESERVED,
+                                                    LocalDateTime.now());
 
-        deliveryPublish.publishDeliveryCreated(
-                        storedDelivery.getId(), storedDelivery.getAmount());
+        newDelivery.setProductionId(productionId);
+        Delivery storedDelivery = deliveryRepository.save(newDelivery);
+        deliveryPublish.publishDeliveryCreated(storedDelivery.getId(), 
+                                                storedDelivery.getAmount());
 
         return storedDelivery;
     }
-
-    // Given an ID of delivery from the RabbitMQ, start a new delivery
+    
     @Async
-    public void startDelivery(Delivery delivery) {
+    // Given an ID of delivery from the RabbitMQ, start a new delivery
+    public void startDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null || delivery.getState() != DeliveryState.RESERVED) {
+            return;
+        }
+        
         delivery.start();
         // Update state in database
         deliveryRepository.save(delivery);
         
         try {
-            // Wait 5 seconds to send delivery completed
-            Thread.sleep(3000); 
+            // Wait 0,001 seconds to send delivery completed
+            Thread.sleep(1); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
         // Apply the logic to finish delivery
-        completeDelivery(delivery);
+        completeDelivery(deliveryId);
     }
     
     @Transactional
     // Method for saving a cancelled delivery in the DB
-    public void cancelDelivery(Delivery delivery) {
-        if (delivery.getState() == DeliveryState.COMPLETED ||
+    public void cancelDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null || delivery.getState() == DeliveryState.COMPLETED ||
             delivery.getState() == DeliveryState.CANCELLED) {
             return;
         }
-    
+        // Save delivery state
         delivery.cancelled();
         deliveryRepository.save(delivery);
-        
-        compensateCancelledDelivery(delivery);
+        // apply compensate transaction
+        compensateCancelledDelivery(deliveryId);
     }
 
     // Saga compensating transaction method.
     // Given a cancelled delivery release delivery reserved
-    public void compensateCancelledDelivery(Delivery delivery) {
+    public void compensateCancelledDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null) {
+            return;
+        }
+        
         deliveryPublish.publishReservationRelease(delivery.getId(), delivery.getAmount());
         deliveryPublish.publishDeliveryCancelled(
                         delivery.getId(), delivery.getProductionId(), delivery.getAmount());
@@ -79,20 +89,19 @@ public class DeliveryService {
     @Transactional
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
-    public void completeDelivery(Delivery delivery) {
-        Delivery deliveryReceived = deliveryRepository.findById(delivery.getId()).orElse(null);
+    public void completeDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
         // Chech if the delivery received is cancelled
         // the delivery cancelled cannot save as completed delivery 
-        if (deliveryReceived == null || 
-            deliveryReceived.getState() == DeliveryState.CANCELLED) {
+        if (delivery == null || delivery.getState() == DeliveryState.CANCELLED ||
+                                delivery.getState() == DeliveryState.COMPLETED) {
             return;
         }
     
         delivery.complete();
         deliveryRepository.save(delivery);
         // Method to send event to RabbitMQ
-        deliveryPublish.publishDeliveryCompleted(
-                        delivery.getId(), delivery.getAmount());
+        deliveryPublish.publishDeliveryCompleted(delivery.getId(), delivery.getAmount());
     }
 
     // Get delivery by ID

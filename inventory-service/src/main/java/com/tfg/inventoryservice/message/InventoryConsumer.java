@@ -41,7 +41,7 @@ public class InventoryConsumer {
                 inventoryService.increaseStock(productionId, amount);
                 break;
             case "delivery.created":
-                inventoryService.validateDelivery(deliveryId, amount);
+                inventoryService.reserveDeliveryStock(deliveryId, amount);
                 break;
             case "delivery.completed":
                 inventoryService.confirmDelivery(deliveryId, amount);

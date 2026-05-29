@@ -1,7 +1,6 @@
 #!/bin/bash
 # Test script for Saga pattern evaluation
 BASE_URL="http://13.135.243.150:30000"
-#RANDOM_AMOUNT="$RANDOM"
 
 
 echo "============== recived a production with random amount"
@@ -10,7 +9,7 @@ echo ""
 sleep 20
 
 echo "Produce and deliver simultaneously"
-for i in $(seq 1 20); do
+for i in $(seq 1 50); do
     echo "Iteration $i"
     curl -s -X POST "$BASE_URL/production/productions?amount=$((5 + RANDOM % 15))" 
     wait

@@ -33,10 +33,13 @@ public class InventoryService {
     // Given an ID and a production quantity, validate it.
     //@Transactional
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void validateProduction(Long id, int amount){
-        System.out.println("MAX_STOCK=" + MAX_STOCK + " currentStock=" + getAvailabilityStock() + " amount=" + amount); ///temporal
+    public synchronized void validateProduction(Long id, int amount){  
+        if (amount <= 0) {
+            return;
+        }
+
         // Calculate the stock that can still be added
-        int currentStock = getAvailabilityStock();
+        int currentStock = getTotalStock();
         int allowedCapacity = MAX_STOCK - currentStock;
 
         // Evaluate whether the amount received is rejected or accepted
@@ -44,7 +47,12 @@ public class InventoryService {
             eventPublish.publishProductionAccepted(id, amount);
             eventPublish.publishStockAvailable(id, amount);
         } else {
-            eventPublish.publishProductionRejected(id, allowedCapacity);
+            int allowedAmount = allowedCapacity;
+            if (allowedAmount < 0) {
+                allowedAmount = 0;
+            }
+            // publish allowed amount if the amount is => than allowed Capacity
+            eventPublish.publishProductionRejected(id, allowedAmount);
         }
     }
     
@@ -53,8 +61,15 @@ public class InventoryService {
     //@Transactional
     //public void validateDelivery(Long id, int amount){
     @Transactional(isolation = Isolation.SERIALIZABLE) 
-    public synchronized void validateDelivery(Long id, int amount){
+    public void reserveDeliveryStock(Long id, int amount){
         if (amount <= 0) {
+            return;
+        }
+        
+        // Check if the reserved already exists
+        StockReservation checkReservation =
+                          reservationRepository.findFirstByReservationId(id);
+        if (checkReservation != null) {
             return;
         }
         
@@ -89,8 +104,8 @@ public class InventoryService {
 
     // Given an id production method to get the stock availability
     public int getAvailabilityStock(){
-        int totalStock = getTotalStock() - getReservedStock();
-        return totalStock;
+        int availableStock = getTotalStock() - getReservedStock();
+        return availableStock;
     }
 
     public int getTotalStock() {
@@ -129,10 +144,13 @@ public class InventoryService {
         if (reservation == null) {
             return;
         }
+        
+        int reservedAmount = reservation.getReservationAmount();
+        
         // Discount delivery from repository
         StockEntry stockEntry = new StockEntry();
         stockEntry.setProductionId(id);
-        stockEntry.setAmount(-reservation.getReservationAmount());
+        stockEntry.setAmount(-reservedAmount);
 
         inventoryRepository.save(stockEntry);
         reservationRepository.delete(reservation);
@@ -155,6 +173,7 @@ public class InventoryService {
     
     //Given an id of delivery and amount, cancell delivery
     public void cancelDelivery(Long deliveryId, Long productionId, int amount) {
+        // Release stock reserved
         releaseReservedStock(deliveryId, amount);
         eventPublish.publishProductionCancelled(productionId, amount);
     }

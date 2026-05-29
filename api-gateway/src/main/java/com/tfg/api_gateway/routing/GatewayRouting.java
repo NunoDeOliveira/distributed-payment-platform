@@ -12,10 +12,8 @@ public class GatewayRouting {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
 
         return builder.routes()
-
                 // Production service
-                .route("production_route", r -> r
-                        .path("/production/**").and()
+                .route("production_route", r -> r.path("/production/**").and()
                         .method(HttpMethod.GET, HttpMethod.POST)
                         .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("productionCircuitBreak");
@@ -27,8 +25,7 @@ public class GatewayRouting {
                 )
 
                 // Delivery service
-                .route("delivery_route", r -> r
-                        .path("/delivery/**").and()
+                .route("delivery_route", r -> r.path("/delivery/**").and()
                         .method(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
                         .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("deliveryCircuitBreak");

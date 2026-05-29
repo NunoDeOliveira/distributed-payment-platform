@@ -91,7 +91,7 @@ public class InventoryPublish {
     // Notify production-service that space has been release
     public void publishCapacityAvailable(int amount) {
         InventoryEvent inventoryEvent = new InventoryEvent(
-                                            "stock.available", null, null, amount);
+                                            "capacity.available", null, null, amount);
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
     }
     

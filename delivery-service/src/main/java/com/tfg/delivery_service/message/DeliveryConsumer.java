@@ -48,8 +48,7 @@ public class DeliveryConsumer {
         switch (eventType) {
             // Case delivery in which can start delivery 
             case "delivery.accepted":
-                Delivery acceptedDelivery = deliveryService.getDelivery(deliveryId);
-                deliveryService.startDelivery(acceptedDelivery);
+                deliveryService.startDelivery(deliveryId);
                 break;
             // Compensating Transaction
             /*case "delivery.rejected":
@@ -58,7 +57,7 @@ public class DeliveryConsumer {
                 break;*/
             // case a new stock available
             case "stock.available":
-                deliveryService.createDelivery(productionId, amount);
+                deliveryService.reserveDelivery(productionId, amount);
                 break;
             default:
                 System.out.println("Event unknown: " + eventType);

@@ -28,37 +28,52 @@ public class ProductionService {
     // Given an ID and amount of Products create a Production
     public Production createProduction(int amount) {
         Production newProduction = new Production(
-                    amount, ProductionState.WAITING, LocalDateTime.now());
+                    amount, ProductionState.CREATED, LocalDateTime.now());
 
         Production storedProduction = productionRepository.save(newProduction);
 
         // Publish on RabbitMQ for consume this event
         productionPublish.publishProductionCreated(
                         storedProduction.getId(), storedProduction.getAmount());
+                        
+        // Change production state to WAITING while waiting
+        waitingResponse(storedProduction.getId());
 
         return storedProduction;
     }
-
-    // Given an ID of production from the RabbitMQ start a new production
+    
+    // Change production state from CREATED to WAITING
+    public void waitingResponse(Long productionId) {
+        Production production = productionRepository.findById(productionId).orElse(null);        
+        if (production == null || production.getState() != ProductionState.CREATED) {
+            return;
+        }
+        
+        production.waiting();
+        productionRepository.save(production);
+    }
+   
     @Async
-    public void startProduction(Production production) {
+    // Given an ID of production from the RabbitMQ start a new production
+    public void startProduction(Long productionId) {
+        Production production = productionRepository.findById(productionId).orElse(null);
+        if (production == null || production.getState() != ProductionState.WAITING) {
+            return;
+        }
+        
         production.start();
         // Update state in database
         productionRepository.save(production);
 
         try{
-            // Simulate the production processing (30 seconds)
-            Thread.sleep(3000);
-            Production produ = productionRepository.findById(production.getId()).orElse(null);
-            if (produ != null && produ.getState() == ProductionState.CANCELLED) {
-                return;
-            }
+            // Simulate the production processing (0,001 seconds)
+            Thread.sleep(1);
         } catch (InterruptedException e){
             Thread.currentThread().interrupt();
-            System.out.println(e);
+            return;
         }
         // Apply the logic for a completed production when de production finish
-        completeProduction(production);
+        completeProduction(productionId);
     }
 
     // Method for saving a rejected production in the DB
@@ -105,20 +120,26 @@ public class ProductionService {
     @Transactional
     // When the production is completed save production in repository
     // and publish an event on RabbitMQ
-    public void completeProduction(Production production) {
-        Production prod = productionRepository.findById(production.getId()).orElse(null);
+    public void completeProduction(Long productionId) {
+        Production production = productionRepository.findById(productionId).orElse(null);
         
-        if (prod == null || prod.getState() == ProductionState.CANCELLED) {
+        if (production == null || production.getState() == ProductionState.CANCELLED) {
             return;
         }
         
         production.complete();
         productionRepository.save(production);
         // Method to send event to RabbitMQ
-        publishProductionCompleted(production);
+        publishProductionCompleted(production.getId(), production.getAmount());
     }
-
-    private void publishProductionCompleted(Production production) {
+    
+    // Given an Id of a production publish that production in the queue
+    private void publishProductionCompleted(Long productionId, int amount) {
+        Production production = productionRepository.findById(productionId).orElse(null);
+        if (production == null) {
+            return;
+        }
+        
         // send event to RabbitMQ
         productionPublish.publishProductionCompleted(
                                     production.getId(), production.getAmount());
