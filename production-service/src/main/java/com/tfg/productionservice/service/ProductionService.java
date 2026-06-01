@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.scheduling.annotation.Scheduled;
+//import org.springframework.scheduling.annotation.Scheduled;
 
 
 @Service
@@ -67,7 +67,7 @@ public class ProductionService {
 
         try{
             // Simulate the production processing (0,001 seconds)
-            Thread.sleep(1000);
+            Thread.sleep(10);
         } catch (InterruptedException e){
             Thread.currentThread().interrupt();
             return;
@@ -86,7 +86,7 @@ public class ProductionService {
             
         // Case needed compensation transaction. Stock is not completed    
         } else if (amountAllowed > 0 && amountAllowed < originalAmount) {
-            productionRejected.cancelled(); 
+            productionRejected.reject(); 
             productionRepository.save(productionRejected);
             compensateRejectedProduction(productionRejected, amountAllowed);
             
@@ -121,8 +121,7 @@ public class ProductionService {
     // When the production is completed save production in repository
     // and publish an event on RabbitMQ
     public void completeProduction(Long productionId) {
-        Production production = productionRepository.findById(productionId).orElse(null);
-        
+        Production production = productionRepository.findById(productionId).orElse(null);    
         if (production == null || production.getState() == ProductionState.CANCELLED) {
             return;
         }
@@ -157,10 +156,12 @@ public class ProductionService {
     // Given an id of production cancell that production
     public void cancelProduction(Long id) {
         Production production = getProduction(id);
-        if (production.getState() == ProductionState.PREPARING) {
-            production.cancelled();
-            productionRepository.save(production);
+        if (production == null || 
+            production.getState() == ProductionState.PREPARING ||
+            production.getState() == ProductionState.CANCELLED) {            
         } 
+        production.cancelled();
+        productionRepository.save(production);
     }
 
     // Get all the production from the repository
@@ -197,14 +198,19 @@ public class ProductionService {
             productionPublish.publishProductionPending(
                               pending.get().getId(), pending.get().getAmount());
         }
-    }
+    }*/
     
-        // If inventory connection fail get timeout state
-    public void getTimeoutState(Production production) {
+    // If inventory connection fail get timeout state
+    public void getTimeoutState(Long productionId) {
+        Production production = productionRepository.findById(productionId).orElse(null);        
+        if (production == null) {
+            return;
+        }
         production.timeout();
         productionRepository.save(production);
     }
     
+    /*
     // When the third retry fails, the state is failed
     public void getFailedSate(Production production) {
         production.fail();

@@ -8,8 +8,8 @@ public enum DeliveryState {
     ON_DELIVERY,
     COMPLETED,
     CANCELLED,
-    REJECTED
+    REJECTED,
     //PENDING,
-    //TIMEOUT,
+    TIMEOUT
     //FAILED
 }

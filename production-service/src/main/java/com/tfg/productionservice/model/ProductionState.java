@@ -6,9 +6,9 @@ public enum ProductionState {
     PREPARING,
     COMPLETED,
     CANCELLED,
-    REJECTED
+    REJECTED,
     //FAILED,
     //PENDING,
-    //TIMEOUT,
+    TIMEOUT
     //FAILED
 }

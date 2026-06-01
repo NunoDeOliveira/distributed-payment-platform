@@ -50,7 +50,7 @@ public class DeliveryService {
         
         try {
             // Wait 0,001 seconds to send delivery completed
-            Thread.sleep(1000); 
+            Thread.sleep(100); 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -93,8 +93,7 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
         // Chech if the delivery received is cancelled
         // the delivery cancelled cannot save as completed delivery 
-        if (delivery == null || delivery.getState() == DeliveryState.CANCELLED ||
-                                delivery.getState() == DeliveryState.COMPLETED) {
+        if (delivery == null || delivery.getState() != DeliveryState.RESERVED) {
             return;
         }
     
@@ -106,16 +105,27 @@ public class DeliveryService {
     
     // Given an amount create a delivery from stock already available in Inventory
     public Delivery createDeliveryFromStock(int amount) {
-        Delivery newDelivery = new Delivery(amount, DeliveryState.CREATED,
-                                                    LocalDateTime.now());
-
+        if (amount <= 0) {
+            return null;
+        }
+    
+        Delivery newDelivery = new Delivery(amount, DeliveryState.CREATED,LocalDateTime.now());
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
-
+        if (storedDelivery == null) {
+            return null;
+        }
+        
+        // Check if the delivery is saved corretly befor to switch to reserved
+        // The create state is only for register
         if (storedDelivery.getState() == DeliveryState.CREATED) {
             storedDelivery.setState(DeliveryState.RESERVED);
             deliveryRepository.save(storedDelivery);
         }
         
+        // if the delivery is cancelled publish
+        deliveryPublish.publishDeliveryCreated(
+                        storedDelivery.getId(), storedDelivery.getAmount());
+
         return storedDelivery;
     }
     
@@ -149,13 +159,18 @@ public class DeliveryService {
         }
     }*/
     
-    /*
+    
     // If inventory connection fail get timeout state
-    public void getTimeoutState(Delivery delivery) {
+    public void getTimeoutState(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null) {
+            return;
+        }
         delivery.timeout();
         deliveryRepository.save(delivery);
     }
 
+    /*
     // When the third retry fails, the state is failed
     public void getFailedSate(Delivery delivery) {
         delivery.fail();

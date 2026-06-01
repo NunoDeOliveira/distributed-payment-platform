@@ -78,7 +78,6 @@ public class Production {
     }
     
     
-    /*
     public void reject() {
         this.state = ProductionState.REJECTED;
         this.endTime = LocalDateTime.now();
@@ -91,7 +90,7 @@ public class Production {
         this.endTime = LocalDateTime.now();
         this.register += "TIMEOUT " + LocalDateTime.now();
     }
-    
+    /*
     // When inventory connection fail 3 times the state will be failed 
     public void fail() {
         this.state = ProductionState.FAILED;

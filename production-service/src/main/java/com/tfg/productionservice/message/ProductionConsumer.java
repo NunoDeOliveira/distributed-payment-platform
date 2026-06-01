@@ -28,14 +28,16 @@ public class ProductionConsumer {
         System.out.println("EventType: " + eventType + "ProductionId: " + productionId);
 
         try {
-            ///// procecess event received
+            // procecess event received
             processEvent(eventType, productionId, amountAllowed);
         } catch (Exception e) {
             ///// Manage timeout or failed
-            /*if (productionId != 0) {
-                Production production = productionService.getProduction(productionId);
-                productionService.getTimeoutState(production);
-            }*/
+            if (productionId != 0) {
+                if (retryCount >= 2) {
+                    // third trying release
+                    productionService.getTimeoutState(productionId); 
+                }
+            }
             throw e;
         }       
     }

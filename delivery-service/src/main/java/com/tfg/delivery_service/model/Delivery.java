@@ -83,7 +83,7 @@ public class Delivery {
     public void reject() {
         this.state = DeliveryState.REJECTED;
         this.endTime = LocalDateTime.now();
-    }
+    }*/
     
     // Switch state to TIMEOUT and record time
     public void timeout() {
@@ -92,13 +92,7 @@ public class Delivery {
         this.register += "TIMEOUT " + LocalDateTime.now();
     }
     
-    // Switch state to FAILED and record time
-    public void cancell() {
-        this.state = DeliveryState.CANCELLED;
-        this.endTime = LocalDateTime.now();
-        this.register += "CANCELLED " + LocalDateTime.now();
-    }
-    
+    /*
     public void pending() {
         this.state = DeliveryState.PENDING;
         this.endTime = null;

@@ -19,4 +19,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     // Sum amount by state for metrics in units
     @Query("SELECT COALESCE(SUM(d.amount), 0) FROM Delivery d WHERE d.state = :state")
     long sumAmountByState(@Param("state") DeliveryState state);
+    // Find by Id to cancell a delivery
+    Optional<Delivery> findByProductionId(Long productionId);
 }

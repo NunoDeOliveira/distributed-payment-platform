@@ -30,15 +30,16 @@ public class DeliveryConsumer {
         System.out.println("Delivery receive: " + eventType + " deliveryId=" + deliveryId);
 
         try {
-            ///// procecess event received
+            // procecess event received
             processEvent(eventType, deliveryId, amount, productionId);
         } catch (Exception e) {
             System.out.println("Error processing event: " + e.getMessage());
-            ///// Manage timeout or failed
-            /*if (deliveryId != 0) {
-                Delivery delivery = deliveryService.getDelivery(deliveryId);
-                deliveryService.getTimeoutState(delivery);
-            }*/
+            ///// Manage timeout 
+            if (deliveryId != 0) {
+                if (retryCount >= 2) {
+                    deliveryService.getTimeoutState(deliveryId);
+                }
+            }
             throw e;
         }
     }

@@ -3,10 +3,10 @@
 BASE_URL="http://localhost:8080"
 
 
+
 echo "============== recived a production with random amount"
-#curl -s -X POST "$BASE_URL/production/productions?amount=30"
 echo ""
-sleep 20
+sleep 30
 
 echo "Produce and deliver simultaneously"
 for i in $(seq 1 50); do
