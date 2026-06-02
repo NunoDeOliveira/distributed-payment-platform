@@ -155,10 +155,11 @@ public class ProductionService {
     
     // Given an id of production cancell that production
     public void cancelProduction(Long id) {
-        Production production = getProduction(id);
+        Production production = productionRepository.findById(id).orElse(null);
         if (production == null || 
             production.getState() == ProductionState.PREPARING ||
-            production.getState() == ProductionState.CANCELLED) {            
+            production.getState() == ProductionState.CANCELLED) {  
+            return;
         } 
         production.cancelled();
         productionRepository.save(production);

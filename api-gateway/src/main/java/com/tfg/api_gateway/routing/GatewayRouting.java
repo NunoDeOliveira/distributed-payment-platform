@@ -14,7 +14,7 @@ public class GatewayRouting {
         return builder.routes()
                 // Production service
                 .route("production_route", r -> r.path("/production/**").and()
-                        .method(HttpMethod.GET, HttpMethod.POST)
+                        .method(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
                         .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
                                     c.setName("productionCircuitBreak");
                                     c.setFallbackUri("forward:/fallback-production");
