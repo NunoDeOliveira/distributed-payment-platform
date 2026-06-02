@@ -76,30 +76,23 @@ public class DeliveryService {
     }
     
     // Given an amount create a delivery from stock already available in Inventory
-    public Delivery createDeliveryFromStock(int amount) {
+    /*public Delivery createDeliveryFromStock(int amount) {
         if (amount <= 0) {
             return null;
         }
     
         Delivery newDelivery = new Delivery(amount, DeliveryState.CREATED,LocalDateTime.now());
         Delivery storedDelivery = deliveryRepository.save(newDelivery);
-        if (storedDelivery == null) {
-            return null;
-        }
         
         // Check if the delivery is saved corretly befor to switch to reserved
         // The create state is only for register
-        if (storedDelivery.getState() == DeliveryState.CREATED) {
-            storedDelivery.setState(DeliveryState.RESERVED);
-            deliveryRepository.save(storedDelivery);
-        }
-        
+        storedDelivery.reserved();
+        deliveryRepository.save(storedDelivery);
         // if the delivery is cancelled publish
-        deliveryPublish.publishDeliveryCreated(
-                        storedDelivery.getId(), storedDelivery.getAmount());
+        deliveryPublish.publishDeliveryCreated(storedDelivery.getId(), storedDelivery.getAmount());
 
         return storedDelivery;
-    }
+    }*/
     
 
     // Get delivery by ID
@@ -131,7 +124,7 @@ public class DeliveryService {
         }
     }*/
     
-    @Transactional
+    @TransactionalCOMPLETED
     // Method for saving a cancelled delivery in the DB
     public void cancelDelivery(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);

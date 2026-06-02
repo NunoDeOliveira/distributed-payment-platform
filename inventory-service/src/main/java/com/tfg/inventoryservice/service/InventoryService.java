@@ -53,11 +53,11 @@ public class InventoryService {
             // publish allowed amount if the amount is => than allowed Capacity
             eventPublish.publishProductionRejected(id, allowedAmount);         
             // Check if there is enough stock already stored
-            int availableStock = getAvailabilityStock();
+            //int availableStock = getAvailabilityStock();
             // If there is enough stock, create a new delivery 
-            if (availableStock >= amount) {
-                eventPublish.publishForCreateDelivery(amount);
-            }    
+            //if (availableStock >= amount) {
+                //eventPublish.publishForCreateDelivery(amount);
+            //}    
         }
     }
        
