@@ -1,32 +1,20 @@
 #!/bin/bash
 BASE_URL="http://localhost:8080"
-# cancelledTest.sh
+BASE_URL_DIRECT="http://localhost:30081"
 
-echo "=== Prodece 5 productions ==="
-for i in $(seq 1 3); do
-    curl -s -X POST "$BASE_URL/production/productions?amount=$((5 + RANDOM % 15))"
-    echo ""
-done
+echo "=== Creando 5 producciones ==="
+curl -s -X POST "$BASE_URL_DIRECT/productions?amount=10" & 
+curl -s -X POST "$BASE_URL_DIRECT/productions?amount=12" &
+curl -s -X POST "$BASE_URL_DIRECT/productions?amount=8" &
+curl -s -X POST "$BASE_URL_DIRECT/productions?amount=15" &
+curl -s -X POST "$BASE_URL_DIRECT/productions?amount=11" &
+wait
 
-
-#sleep 2
-echo "=== Cancel 1 delivery ==="
-sleep 1
-DELIVERY_ID=$(curl -s "$BASE_URL/delivery/deliveries" | grep -o '"id":[0-9]*' | tail -1 | grep -o '[0-9]*')
-curl -s -X DELETE "$BASE_URL/delivery/deliveries/$DELIVERY_ID"
 echo ""
+echo "=== Cancelando produccion 3 ==="
+curl -s -X DELETE "$BASE_URL_DIRECT/productions/3"
 
-
-echo "=== Production 2 more productions ==="
-for i in $(seq 1 2); do
-    curl -s -X POST "$BASE_URL/production/productions?amount=$((5 + RANDOM % 15))"
-    echo ""
-done
-
-sleep 5
-echo "=== Final deliveries ==="
-curl -s "$BASE_URL/delivery/deliveries"
+sleep 2
 echo ""
-echo "=== Final productions ==="
+echo "=== Estado final producciones ==="
 curl -s "$BASE_URL/production/productions"
-echo ""
