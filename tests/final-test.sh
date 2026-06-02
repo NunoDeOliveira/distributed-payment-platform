@@ -3,7 +3,7 @@ BASE_URL="http://localhost:8080"
 BASE_URL_DIRECT="http://localhost:30081"
 
 echo "=== Creando 10 producciones ==="
-for i in $(seq 1 10); do
+for i in $(seq 1 15); do
     curl -s -X POST "$BASE_URL_DIRECT/productions?amount=$((5 + RANDOM % 15))" &
 done
 wait
