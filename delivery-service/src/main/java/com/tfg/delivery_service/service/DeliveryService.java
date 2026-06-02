@@ -65,7 +65,7 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
         // Chech if the delivery received is cancelled
         // the delivery cancelled cannot save as completed delivery 
-        if (delivery == null || delivery.getState() != DeliveryState.RESERVED) {
+        if (delivery == null || delivery.getState() != DeliveryState.ON_DELIVERY) {
             return;
         }
     
