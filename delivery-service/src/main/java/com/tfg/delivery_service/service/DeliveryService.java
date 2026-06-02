@@ -124,7 +124,7 @@ public class DeliveryService {
         }
     }*/
     
-    @TransactionalCOMPLETED
+    @Transactional
     // Method for saving a cancelled delivery in the DB
     public void cancelDelivery(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
