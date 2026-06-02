@@ -169,6 +169,14 @@ public class DeliveryService {
         delivery.timeout();
         deliveryRepository.save(delivery);
     }
+    
+    public void cancelDeliveryByProductionId(Long productionId) {
+        Delivery delivery = deliveryRepository.findByProductionId(productionId).orElse(null);
+        if (delivery == null) {
+            return;
+        }
+        cancelDelivery(delivery.getId());
+    }
 
     /*
     // When the third retry fails, the state is failed

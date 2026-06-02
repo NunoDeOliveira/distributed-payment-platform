@@ -53,6 +53,9 @@ public class InventoryConsumer {
             case "delivery.cancelled":
                 inventoryService.cancelDelivery(deliveryId, productionId, amount); 
                 break;
+            case "production.cancelled":
+                inventoryService.cancelProduction(productionId, amount);
+                break;
             // Compensating Transaction
             case "delivery.reservation.release":
                 inventoryService.releaseReservedStock(deliveryId, amount);

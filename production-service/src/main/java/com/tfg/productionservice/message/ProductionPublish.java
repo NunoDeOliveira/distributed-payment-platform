@@ -49,6 +49,12 @@ public class ProductionPublish {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
     }
     
+    public void publishProductionCancelled(Long productionId, int amount) {
+        ProductionEvent event = new ProductionEvent(
+                            "production.cancelled", productionId, amount);
+        rabbitTemplate.convertAndSend(INVENTORY_QUEUE, event);
+    }
+    
     /*
     public void publishProductionPending(Long productionId, int amount) {
         ProductionEvent productionEvent = new ProductionEvent(

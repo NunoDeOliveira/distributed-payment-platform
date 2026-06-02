@@ -67,7 +67,7 @@ public class ProductionService {
 
         try{
             // Simulate the production processing (0,001 seconds)
-            Thread.sleep(10);
+            Thread.sleep(100);
         } catch (InterruptedException e){
             Thread.currentThread().interrupt();
             return;
@@ -162,6 +162,7 @@ public class ProductionService {
         } 
         production.cancelled();
         productionRepository.save(production);
+        productionPublish.publishProductionCancelled(id, production.getAmount());
     }
 
     // Get all the production from the repository

@@ -57,6 +57,9 @@ public class DeliveryConsumer {
                 deliveryService.rejectDelivery(rejectedDelivery);
                 break;*/
             // case a new stock available
+            case "delivery.cancelled.by.production":
+                deliveryService.cancelDeliveryByProductionId(productionId);
+                break;
             case "stock.available":
                 deliveryService.reserveDelivery(productionId, amount);
                 break;

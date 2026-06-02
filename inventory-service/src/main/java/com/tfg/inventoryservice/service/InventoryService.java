@@ -162,5 +162,10 @@ public class InventoryService {
         eventPublish.publishProductionCancelled(productionId, amount);
     }
     
+    public void cancelProduction(Long productionId, int amount) {
+        releaseReservedStock(productionId, amount);
+        eventPublish.publishDeliveryCancelledByProduction(productionId, amount);
+    }
+    
     
 }

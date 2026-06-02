@@ -30,4 +30,10 @@ public class ProductionController {
     public List<Production> getAllProductions() {
         return productionService.getAllProductions();
     }
+    
+    @DeleteMapping("/{id}")
+    public void cancelProduction(@PathVariable Long id) {
+        productionService.cancelProduction(id);
+    }
+    
 }
