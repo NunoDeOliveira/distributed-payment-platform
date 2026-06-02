@@ -64,7 +64,8 @@ public class InventoryService {
     // Given an ID and a quantity, reserve a stock quantity
     //@Transactional
     //public void validateDelivery(Long id, int amount){
-    @Transactional(isolation = Isolation.SERIALIZABLE) 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    //@Transactional(isolation = Isolation.SERIALIZABLE) 
     public void reserveDeliveryStock(Long id, int amount) {
         if (amount <= 0) {
             return;
