@@ -59,34 +59,6 @@ public class DeliveryService {
     }
     
     @Transactional
-    // Method for saving a cancelled delivery in the DB
-    public void cancelDelivery(Long deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
-        if (delivery == null || delivery.getState() == DeliveryState.COMPLETED ||
-            delivery.getState() == DeliveryState.CANCELLED) {
-            return;
-        }
-        // Save delivery state
-        delivery.cancelled();
-        deliveryRepository.save(delivery);
-        // apply compensate transaction
-        compensateCancelledDelivery(deliveryId);
-    }
-
-    // Saga compensating transaction method.
-    // Given a cancelled delivery release delivery reserved
-    public void compensateCancelledDelivery(Long deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
-        if (delivery == null) {
-            return;
-        }
-        
-        deliveryPublish.publishReservationRelease(delivery.getId(), delivery.getAmount());
-        deliveryPublish.publishDeliveryCancelled(
-                        delivery.getId(), delivery.getProductionId(), delivery.getAmount());
-    }
-    
-    @Transactional
     // When the delivery is completed save delivery in the repository
     // and publish an event on RabbitMQ
     public void completeDelivery(Long deliveryId) {
@@ -159,6 +131,42 @@ public class DeliveryService {
         }
     }*/
     
+    @Transactional
+    // Method for saving a cancelled delivery in the DB
+    public void cancelDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null || delivery.getState() == DeliveryState.COMPLETED ||
+            delivery.getState() == DeliveryState.CANCELLED) {
+            return;
+        }
+        // Save delivery state
+        delivery.cancelled();
+        deliveryRepository.save(delivery);
+        // apply compensate transaction
+        compensateCancelledDelivery(deliveryId);
+    }
+
+    // Saga compensating transaction method.
+    // Given a cancelled delivery release delivery reserved
+    public void compensateCancelledDelivery(Long deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
+        if (delivery == null) {
+            return;
+        }
+        
+        deliveryPublish.publishReservationRelease(delivery.getId(), delivery.getAmount());
+        deliveryPublish.publishDeliveryCancelled(
+                        delivery.getId(), delivery.getProductionId(), delivery.getAmount());
+    }
+    
+    
+    public void cancelDeliveryByProductionId(Long productionId) {
+        Delivery delivery = deliveryRepository.findByProductionId(productionId).orElse(null);
+        if (delivery == null) {
+            return;
+        }
+        cancelDelivery(delivery.getId());
+    }
     
     // If inventory connection fail get timeout state
     public void getTimeoutState(Long deliveryId) {
@@ -170,13 +178,6 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
     
-    public void cancelDeliveryByProductionId(Long productionId) {
-        Delivery delivery = deliveryRepository.findByProductionId(productionId).orElse(null);
-        if (delivery == null) {
-            return;
-        }
-        cancelDelivery(delivery.getId());
-    }
 
     /*
     // When the third retry fails, the state is failed

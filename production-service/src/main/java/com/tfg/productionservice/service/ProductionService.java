@@ -81,7 +81,7 @@ public class ProductionService {
         int originalAmount = productionRejected.getAmount();
         // Case the stock is completed
         if (amountAllowed == 0) {
-            productionRejected.cancelled();
+            productionRejected.reject();
             productionRepository.save(productionRejected);
             
         // Case needed compensation transaction. Stock is not completed    
@@ -122,7 +122,8 @@ public class ProductionService {
     // and publish an event on RabbitMQ
     public void completeProduction(Long productionId) {
         Production production = productionRepository.findById(productionId).orElse(null);    
-        if (production == null || production.getState() == ProductionState.CANCELLED) {
+        if (production == null || production.getState() == ProductionState.CANCELLED ||
+                                  production.getState() == ProductionState.COMPLETED) {
             return;
         }
         
@@ -157,7 +158,19 @@ public class ProductionService {
     public void cancelProduction(Long id) {
         Production production = productionRepository.findById(id).orElse(null);
         if (production == null || 
-            production.getState() == ProductionState.PREPARING ||
+            production.getState() == ProductionState.COMPLETED ||
+            production.getState() == ProductionState.CANCELLED) {  
+            return;
+        } 
+        production.cancelled();
+        productionRepository.save(production);
+    }
+    
+    // Given an id of production cancell that production
+    public void cancelProductionByUser(Long id) {
+        Production production = productionRepository.findById(id).orElse(null);
+        if (production == null || 
+            production.getState() == ProductionState.COMPLETED ||
             production.getState() == ProductionState.CANCELLED) {  
             return;
         } 
@@ -165,6 +178,9 @@ public class ProductionService {
         productionRepository.save(production);
         productionPublish.publishProductionCancelled(id, production.getAmount());
     }
+    
+    
+    
 
     // Get all the production from the repository
     // This query is to return to the user

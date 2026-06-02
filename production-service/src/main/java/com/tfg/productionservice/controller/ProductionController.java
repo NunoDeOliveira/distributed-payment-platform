@@ -32,8 +32,8 @@ public class ProductionController {
     }
     
     @DeleteMapping("/{id}")
-    public void cancelProduction(@PathVariable Long id) {
-        productionService.cancelProduction(id);
+    public void cancelProductionByUser(@PathVariable Long id) {
+        productionService.cancelProductionByUser(id);
     }
     
 }

@@ -51,13 +51,7 @@ public class DeliveryConsumer {
             case "delivery.accepted":
                 deliveryService.startDelivery(deliveryId);
                 break;
-            // Compensating Transaction
-            /*case "delivery.rejected":
-                Delivery rejectedDelivery = deliveryService.getDelivery(deliveryId);
-                deliveryService.rejectDelivery(rejectedDelivery);
-                break;*/
-            // case a new stock available
-            case "delivery.cancelled.by.production":
+            case "delivery.cancel":
                 deliveryService.cancelDeliveryByProductionId(productionId);
                 break;
             case "stock.available":

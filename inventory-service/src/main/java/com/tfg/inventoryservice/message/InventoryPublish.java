@@ -81,9 +81,10 @@ public class InventoryPublish {
         rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, event);
     }
     
+    ///////////////////
     public void publishDeliveryCancelledByProduction(Long productionId, int amount) {
         InventoryEvent event = new InventoryEvent(
-                            "delivery.cancelled.by.production", null, null, amount);
+                                "delivery.cancel", null, null, amount);
         event.setProductionId(productionId);
         rabbitTemplate.convertAndSend(DELIVERY_QUEUE, event);
     }
