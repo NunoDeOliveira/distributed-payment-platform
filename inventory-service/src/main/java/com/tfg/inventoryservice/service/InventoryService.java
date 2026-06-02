@@ -115,7 +115,7 @@ public class InventoryService {
         stockEntry.setAmount(amount);
         // Add new production to entry stock
         inventoryRepository.save(stockEntry);
-        eventPublish.publishStockAvailable(id, amount)
+        eventPublish.publishStockAvailable(id, amount);
         // Publish in queue that there is available stock
         //eventPublish.publishStockAvailable(id, amount);
     }
