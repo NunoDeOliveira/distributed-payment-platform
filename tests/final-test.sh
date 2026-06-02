@@ -12,6 +12,7 @@ for i in $(seq 1 $REQUESTS); do
         curl -s -X POST "$BASE_URL/production/productions?amount=$((5 + RANDOM % 15))" &
     done
 wait
+sleep 1
 done
 
 echo "Ending test ..."
