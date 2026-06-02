@@ -67,7 +67,7 @@ public class ProductionService {
 
         try{
             // Simulate the production processing (0,001 seconds)
-            Thread.sleep(300);
+            Thread.sleep(500);
         } catch (InterruptedException e){
             Thread.currentThread().interrupt();
             return;
