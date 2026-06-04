@@ -66,7 +66,7 @@ public class InventoryService {
     //public void validateDelivery(Long id, int amount){
     @Transactional(isolation = Isolation.SERIALIZABLE) 
     public void reserveDeliveryStock(Long deliveryId, int amount) {
-        if (id == null || amount <= 0) {
+        if (deliveryId == null || amount <= 0) {
             return;
         }
         
