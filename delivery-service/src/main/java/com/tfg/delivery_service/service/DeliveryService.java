@@ -25,6 +25,10 @@ public class DeliveryService {
     
     // Given an ID and amount of a Delivery create a delivery
     public Delivery reserveDelivery(Long productionId, int amount) {
+        if (productionId == null || amount <= 0) {
+            return null;
+        }
+    
         Delivery newDelivery = new Delivery(amount, DeliveryState.RESERVED,
                                                     LocalDateTime.now());
 

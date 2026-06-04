@@ -64,28 +64,27 @@ public class InventoryService {
     // Given an ID and a quantity, reserve a stock quantity
     //@Transactional
     //public void validateDelivery(Long id, int amount){
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    //@Transactional(isolation = Isolation.SERIALIZABLE) 
-    public void reserveDeliveryStock(Long id, int amount) {
-        if (amount <= 0) {
+    @Transactional(isolation = Isolation.SERIALIZABLE) 
+    public void reserveDeliveryStock(Long deliveryId, int amount) {
+        if (id == null || amount <= 0) {
             return;
         }
         
         // Check if the reserved already exists
         StockReservation checkReservation =
-                          reservationRepository.findFirstByReservationId(id);
+                         reservationRepository.findFirstByReservationId(deliveryId);
         if (checkReservation != null) {
             return;
         }
         
         // Create a new reservation for an delivery given
         StockReservation reservation = new StockReservation(); 
-        reservation.setReservationId(id);
+        reservation.setReservationId(deliveryId);
         reservation.setReservationAmount(amount);
         // Save reservation in DB
         reservationRepository.save(reservation);
         // Publish an event accepting the delivery request
-        eventPublish.publishDeliveryAccepted(id, amount);
+        eventPublish.publishDeliveryAccepted(deliveryId, amount);
     }
 
     // Given an id production method to get the stock availability
