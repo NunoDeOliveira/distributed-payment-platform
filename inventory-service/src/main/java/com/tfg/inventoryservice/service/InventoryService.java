@@ -44,7 +44,7 @@ public class InventoryService {
         // Evaluate whether the amount received is rejected or accepted
         if (amount <= allowedCapacity) {
             eventPublish.publishProductionAccepted(id, amount);
-            //eventPublish.publishStockAvailable(id, amount);
+            eventPublish.publishStockAvailable(id, amount);
         } else {            
             int allowedAmount = allowedCapacity;
             if (allowedAmount < 0) {
