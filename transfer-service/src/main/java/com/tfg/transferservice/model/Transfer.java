@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Setter
 @Entity
 @Table(name = "productions")
-public class Production {
+public class Transfer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class Production {
     private int amount;
 
     @Enumerated(EnumType.STRING)
-    private ProductionState state;
+    private TransferState state;
     
     @Column(name = "register", length = 5000)
     private String register = "";
@@ -30,9 +30,9 @@ public class Production {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    public Production() {}
+    public Transfer() {}
 
-    public Production(int amount, ProductionState state, LocalDateTime startTime) {
+    public Transfer(int amount, TransferState state, LocalDateTime startTime) {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
@@ -42,7 +42,7 @@ public class Production {
     // Switch to PREPARING state and record the production start time
     public void created() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = ProductionState.CREATED;
+        this.state = TransferState.CREATED;
         this.startTime = LocalDateTime.now();
         this.register += "CREATED " + now + " | ";
     }
@@ -50,7 +50,7 @@ public class Production {
     // Switch to PREPARING state and record the production start time
     public void waiting() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = ProductionState.WAITING;
+        this.state = TransferState.WAITING;
         this.startTime = LocalDateTime.now();
         this.register += "WAITING " + now + " | ";
     }
@@ -58,48 +58,48 @@ public class Production {
     // Switch to PREPARING state and record the production start time
     public void start() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = ProductionState.PREPARING;
+        this.state = TransferState.PREPARING;
         this.startTime = LocalDateTime.now();
         this.register += "PREPARING " + now + " | ";
     }
 
     // Switch to COMPLETED state and record the production start time
     public void complete() {
-        this.state = ProductionState.COMPLETED;
+        this.state = TransferState.COMPLETED;
         this.endTime = LocalDateTime.now();
         this.register += "COMPLETED " + LocalDateTime.now();
     }
     
     // Switch to CANCELLED state and record the production CANCELLED time
     public void cancelled() {
-        this.state = ProductionState.CANCELLED;
+        this.state = TransferState.CANCELLED;
         this.endTime = LocalDateTime.now();
         this.register += "CANCELLED " + LocalDateTime.now();
     }
     
     
     public void reject() {
-        this.state = ProductionState.REJECTED;
+        this.state = TransferState.REJECTED;
         this.endTime = LocalDateTime.now();
         this.register += "REJECTED " + LocalDateTime.now();
     }
     
     // tIme-out if inventory fail
     public void timeout() {
-        this.state = ProductionState.TIMEOUT;
+        this.state = TransferState.TIMEOUT;
         this.endTime = LocalDateTime.now();
         this.register += "TIMEOUT " + LocalDateTime.now();
     }
     /*
     // When inventory connection fail 3 times the state will be failed 
     public void fail() {
-        this.state = ProductionState.FAILED;
+        this.state = TransferState.FAILED;
         this.endTime = LocalDateTime.now();
         this.register += "FAILED " + LocalDateTime.now();
     }
     
     public void pending() {
-        this.state = ProductionState.PENDING;
+        this.state = TransferState.PENDING;
         this.endTime = null;
         this.register += "PENDING " + LocalDateTime.now() + " | ";
     }

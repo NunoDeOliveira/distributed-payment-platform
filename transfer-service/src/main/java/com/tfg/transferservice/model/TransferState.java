@@ -1,6 +1,6 @@
 package com.tfg.transferservice.model;
 
-public enum ProductionState {
+public enum TransferState {
     CREATED,
     WAITING,
     PREPARING,

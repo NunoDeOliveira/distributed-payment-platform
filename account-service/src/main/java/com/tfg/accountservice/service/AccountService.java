@@ -1,11 +1,11 @@
 package com.tfg.accountservice.service;
 
-import com.tfg.accountservice.message.InventoryPublish;
-import com.tfg.accountservice.model.StockEntry;
-import com.tfg.accountservice.repository.InventoryRepository;
-import com.tfg.accountservice.repository.ReservationRepository;
+import com.tfg.accountservice.message.AccountPublish;
+import com.tfg.accountservice.model.Account;
+import com.tfg.accountservice.repository.AccountRepository;
+import com.tfg.accountservice.repository.BalanceHoldRepository;
 import org.springframework.stereotype.Service;
-import com.tfg.accountservice.model.StockReservation;
+import com.tfg.accountservice.model.BalanceHold;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Optional;
@@ -13,17 +13,17 @@ import org.springframework.transaction.annotation.Isolation;
 
 
 @Service
-public class InventoryService {
-    private final InventoryRepository inventoryRepository;
-    private final InventoryPublish eventPublish;
-    private final ReservationRepository reservationRepository;
+public class AccountService {
+    private final AccountRepository inventoryRepository;
+    private final AccountPublish eventPublish;
+    private final BalanceHoldRepository reservationRepository;
     
     @Value("${inventory.stock.limit:100}")
     private int MAX_STOCK;
 
-    public InventoryService(InventoryRepository inventoryRepository,
-                            InventoryPublish eventPublish,
-                            ReservationRepository reservationRepository) {
+    public AccountService(AccountRepository inventoryRepository,
+                            AccountPublish eventPublish,
+                            BalanceHoldRepository reservationRepository) {
         this.inventoryRepository = inventoryRepository;
         this.eventPublish = eventPublish;
         this.reservationRepository = reservationRepository;
@@ -71,14 +71,14 @@ public class InventoryService {
         }
         
         // Check if the reserved already exists
-        StockReservation checkReservation =
+        BalanceHold checkReservation =
                          reservationRepository.findFirstByReservationId(deliveryId);
         if (checkReservation != null) {
             return;
         }
         
         // Create a new reservation for an delivery given
-        StockReservation reservation = new StockReservation(); 
+        BalanceHold reservation = new BalanceHold(); 
         reservation.setReservationId(deliveryId);
         reservation.setReservationAmount(amount);
         // Save reservation in DB
@@ -110,7 +110,7 @@ public class InventoryService {
             return;
         }
 
-        StockEntry stockEntry = new StockEntry();
+        Account stockEntry = new Account();
         stockEntry.setProductionId(id);
         stockEntry.setAmount(amount);
         // Add new production to entry stock
@@ -125,7 +125,7 @@ public class InventoryService {
     @Transactional
     public void confirmDelivery(Long id, int amount) {
         // Get reservation from repository
-        StockReservation reservation = reservationRepository
+        BalanceHold reservation = reservationRepository
                                         .findFirstByReservationId(id);
         if (reservation == null) {
             return;
@@ -134,7 +134,7 @@ public class InventoryService {
         int reservedAmount = reservation.getReservationAmount();
         
         // Discount delivery from repository
-        StockEntry stockEntry = new StockEntry();
+        Account stockEntry = new Account();
         stockEntry.setProductionId(id);
         stockEntry.setAmount(-reservedAmount);
 
@@ -149,7 +149,7 @@ public class InventoryService {
     public void releaseReservedStock(Long id, int amount) {
         // If the order fails, the reservation is rejected
         // so that the stock becomes available again.
-        StockReservation reservation = reservationRepository
+        BalanceHold reservation = reservationRepository
                                         .findFirstByReservationId(id);
         if (reservation != null) {
             reservationRepository.delete(reservation);

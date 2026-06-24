@@ -1,20 +1,20 @@
 package com.tfg.accountservice.message;
 
-import com.tfg.accountservice.service.InventoryService;
+import com.tfg.accountservice.service.AccountService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
-public class InventoryConsumer {
+public class AccountConsumer {
 
-    private final InventoryService inventoryService;
+    private final AccountService inventoryService;
 
-    public InventoryConsumer(InventoryService inventoryService) {
+    public AccountConsumer(AccountService inventoryService) {
         this.inventoryService = inventoryService;
     }
 
-    @RabbitListener(queues = InventoryPublish.INVENTORY_QUEUE)
+    @RabbitListener(queues = AccountPublish.INVENTORY_QUEUE)
     public void consume(JsonNode event) {
         String eventType = event.path("eventType").asText();
         int amount = event.path("amount").asInt();
@@ -30,7 +30,7 @@ public class InventoryConsumer {
             }
         }
 
-        System.out.println("Inventory receive: " + eventType +
+        System.out.println("Account receive: " + eventType +
                 " productionId=" + productionId + " deliveryId=" + deliveryId);
 
         switch (eventType) {

@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryEvent {
+public class AccountEvent {
     private String eventType;
     private Long productionId;
     private Long deliveryId; // added 17 may

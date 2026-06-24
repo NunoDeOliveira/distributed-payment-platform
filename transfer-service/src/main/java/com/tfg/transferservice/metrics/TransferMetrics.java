@@ -1,18 +1,18 @@
 package com.tfg.transferservice.metrics;
 
-import com.tfg.transferservice.model.ProductionState;
-import com.tfg.transferservice.repository.ProductionRepository;
+import com.tfg.transferservice.model.TransferState;
+import com.tfg.transferservice.repository.TransferRepository;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProductionMetrics {
+public class TransferMetrics {
 
-    public ProductionMetrics(MeterRegistry meterRegistry,
-                             ProductionRepository productionRepository) {
-        for (ProductionState state : ProductionState.values()) {
-            if (state == ProductionState.REJECTED) continue;
+    public TransferMetrics(MeterRegistry meterRegistry,
+                             TransferRepository productionRepository) {
+        for (TransferState state : TransferState.values()) {
+            if (state == TransferState.REJECTED) continue;
             Gauge.builder("production.state.current",
                             productionRepository,
                             repo -> repo.sumAmountByState(state))

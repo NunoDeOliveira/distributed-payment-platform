@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "stock_reservations")
-public class StockReservation {
+public class BalanceHold {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

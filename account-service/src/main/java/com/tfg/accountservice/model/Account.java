@@ -12,7 +12,7 @@ import lombok.Getter;
 @Setter
 @Entity
 @Table(name = "stockEntries")
-public class StockEntry {
+public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

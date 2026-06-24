@@ -2,7 +2,7 @@ package com.tfg.ledgerservice.model;
 
 import jakarta.persistence.Enumerated;
 
-public enum DeliveryState {
+public enum LedgerMovementState {
     CREATED,
     RESERVED,
     ON_DELIVERY,

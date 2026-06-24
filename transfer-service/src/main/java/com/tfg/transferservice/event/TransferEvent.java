@@ -1,15 +1,15 @@
 package com.tfg.transferservice.event;
 
-public class ProductionEvent {
+public class TransferEvent {
 
     private String eventType;
     private Long productionId;
     private Integer amount;
 
-    public ProductionEvent() {
+    public TransferEvent() {
     }
 
-    public ProductionEvent(String event, Long productionId, Integer amount) {
+    public TransferEvent(String event, Long productionId, Integer amount) {
         this.eventType = event;
         this.productionId = productionId;
         this.amount = amount;
@@ -19,7 +19,7 @@ public class ProductionEvent {
         return eventType;
     }
 
-    public Long getProductionId() {
+    public Long getTransferId() {
         return productionId;
     }
 

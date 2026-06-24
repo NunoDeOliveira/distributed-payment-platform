@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Setter
 @Entity
 @Table(name = "deliveries")
-public class Delivery {
+public class LedgerMovement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class Delivery {
     private int retryCount = 0;
 
     @Enumerated(EnumType.STRING)
-    private DeliveryState state;
+    private LedgerMovementState state;
     
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -30,11 +30,11 @@ public class Delivery {
     @Column(name = "register", length = 5000)
     private String register = "";
 
-    public Delivery() {
+    public LedgerMovement() {
     }
     
 
-    public Delivery(int amount, DeliveryState state, LocalDateTime startTime) {
+    public LedgerMovement(int amount, LedgerMovementState state, LocalDateTime startTime) {
         this.amount = amount;
         this.state = state;
         this.startTime = startTime;
@@ -44,7 +44,7 @@ public class Delivery {
     // Switch to CREATED state and record the production start time
     public void created() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = DeliveryState.CREATED;
+        this.state = LedgerMovementState.CREATED;
         this.startTime = LocalDateTime.now();
         this.register += "CREATED " + now + " | ";
     }
@@ -52,27 +52,27 @@ public class Delivery {
     // Switch to RESERVED state and record the production start time
     public void reserved() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = DeliveryState.RESERVED;
+        this.state = LedgerMovementState.RESERVED;
         this.register += "RESERVED " + now + " | ";
     }
 
     // Switch state READY_FOR_DELIVERY state and record the delivery start time
     public void start() {
-        this.state = DeliveryState.ON_DELIVERY;
+        this.state = LedgerMovementState.ON_DELIVERY;
         this.startTime = LocalDateTime.now();
         this.register += "ON_DELIVERY " + LocalDateTime.now() + " | ";
     }
 
     // Switch state COMPLETED state and record the delivery start time
     public void complete() {
-        this.state = DeliveryState.COMPLETED;
+        this.state = LedgerMovementState.COMPLETED;
         this.endTime = LocalDateTime.now();
         this.register += "COMPLETED " + LocalDateTime.now();
     }
     
     // Switch state CANCELLED state and record the delivery cancelled time
     public void cancelled() {
-        this.state = DeliveryState.CANCELLED;
+        this.state = LedgerMovementState.CANCELLED;
         this.endTime = LocalDateTime.now();
         this.register += "CANCELLED " + LocalDateTime.now();
     }
@@ -81,27 +81,27 @@ public class Delivery {
     /*
     // Switch state to REJECTED and record time
     public void reject() {
-        this.state = DeliveryState.REJECTED;
+        this.state = LedgerMovementState.REJECTED;
         this.endTime = LocalDateTime.now();
     }*/
     
     // Switch state to TIMEOUT and record time
     public void timeout() {
-        this.state = DeliveryState.TIMEOUT;
+        this.state = LedgerMovementState.TIMEOUT;
         this.endTime = LocalDateTime.now();
         this.register += "TIMEOUT " + LocalDateTime.now();
     }
     
     /*
     public void pending() {
-        this.state = DeliveryState.PENDING;
+        this.state = LedgerMovementState.PENDING;
         this.endTime = null;
         this.register += "PENDING " + LocalDateTime.now() + " | ";
     }
     
     // Switch  to reserving state and record time
     public void reserving() {
-        this.state = DeliveryState.RESERVED;
+        this.state = LedgerMovementState.RESERVED;
         this.endTime = LocalDateTime.now();
         this.register += "RESERVED " + LocalDateTime.now() + " | ";
     }

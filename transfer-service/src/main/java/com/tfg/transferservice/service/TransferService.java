@@ -1,9 +1,9 @@
 package com.tfg.transferservice.service;
 
-import com.tfg.transferservice.message.ProductionPublish;
-import com.tfg.transferservice.model.Production;
-import com.tfg.transferservice.model.ProductionState;
-import com.tfg.transferservice.repository.ProductionRepository;
+import com.tfg.transferservice.message.TransferPublish;
+import com.tfg.transferservice.model.Transfer;
+import com.tfg.transferservice.model.TransferState;
+import com.tfg.transferservice.repository.TransferRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,38 +14,38 @@ import java.util.Optional;
 
 
 @Service
-public class ProductionService {
+public class TransferService {
 
-    private final ProductionRepository productionRepository;
-    private final ProductionPublish productionPublish;
+    private final TransferRepository productionRepository;
+    private final TransferPublish productionPublish;
 
-    public ProductionService(ProductionRepository productionRepository,
-                             ProductionPublish productionPublish) {
+    public TransferService(TransferRepository productionRepository,
+                             TransferPublish productionPublish) {
         this.productionRepository = productionRepository;
         this.productionPublish = productionPublish;
     }
 
-    // Given an ID and amount of Products create a Production
-    public Production createProduction(int amount) {
-        Production newProduction = new Production(
-                    amount, ProductionState.CREATED, LocalDateTime.now());
+    // Given an ID and amount of Products create a Transfer
+    public Transfer createTransfer(int amount) {
+        Transfer newTransfer = new Transfer(
+                    amount, TransferState.CREATED, LocalDateTime.now());
 
-        Production storedProduction = productionRepository.save(newProduction);
+        Transfer storedTransfer = productionRepository.save(newTransfer);
 
         // Publish on RabbitMQ for consume this event
-        productionPublish.publishProductionCreated(
-                        storedProduction.getId(), storedProduction.getAmount());
+        productionPublish.publishTransferCreated(
+                        storedTransfer.getId(), storedTransfer.getAmount());
                         
         // Change production state to WAITING while waiting
-        waitingResponse(storedProduction.getId());
+        waitingResponse(storedTransfer.getId());
 
-        return storedProduction;
+        return storedTransfer;
     }
     
     // Change production state from CREATED to WAITING
     public void waitingResponse(Long productionId) {
-        Production production = productionRepository.findById(productionId).orElse(null);        
-        if (production == null || production.getState() != ProductionState.CREATED) {
+        Transfer production = productionRepository.findById(productionId).orElse(null);        
+        if (production == null || production.getState() != TransferState.CREATED) {
             return;
         }
         
@@ -55,9 +55,9 @@ public class ProductionService {
    
     @Async
     // Given an ID of production from the RabbitMQ start a new production
-    public void startProduction(Long productionId) {
-        Production production = productionRepository.findById(productionId).orElse(null);
-        if (production == null || production.getState() != ProductionState.WAITING) {
+    public void startTransfer(Long productionId) {
+        Transfer production = productionRepository.findById(productionId).orElse(null);
+        if (production == null || production.getState() != TransferState.WAITING) {
             return;
         }
         
@@ -73,11 +73,11 @@ public class ProductionService {
             return;
         }
         // Apply the logic for a completed production when de production finish
-        completeProduction(productionId);
+        completeTransfer(productionId);
     }
 
     // Method for saving a rejected production in the DB
-    public void rejectProduction(Production productionRejected, int amountAllowed) {   
+    public void rejectTransfer(Transfer productionRejected, int amountAllowed) {   
         int originalAmount = productionRejected.getAmount();
         // Case the stock is completed
         if (amountAllowed == 0) {
@@ -88,7 +88,7 @@ public class ProductionService {
         } else if (amountAllowed > 0 && amountAllowed < originalAmount) {
             productionRejected.reject(); 
             productionRepository.save(productionRejected);
-            compensateRejectedProduction(productionRejected, amountAllowed);
+            compensateRejectedTransfer(productionRejected, amountAllowed);
             
          // This case should not happen   
         } else {
@@ -99,20 +99,20 @@ public class ProductionService {
     
     // Saga compensating transaction method.
     // Given a rejected production and the maximum amount allowed for that production
-    public void compensateRejectedProduction(Production productionRejected, 
+    public void compensateRejectedTransfer(Transfer productionRejected, 
                                                     int maxAllowedAmount) {
         int originalAmount = productionRejected.getAmount();
         int pendingAmount = originalAmount - maxAllowedAmount;
       
         // Create new protuction with allowd amount
-        createProduction(maxAllowedAmount);
+        createTransfer(maxAllowedAmount);
         
         System.out.println("Partial compensation: created new production with amount=" 
                             + maxAllowedAmount);
         // Save the rest of the production rejected as PENDING
         /*if (pendingAmount > 0) {
-            Production newPending = new Production(
-                        pendingAmount, ProductionState.PENDING, LocalDateTime.now());
+            Transfer newPending = new Transfer(
+                        pendingAmount, TransferState.PENDING, LocalDateTime.now());
             productionRepository.save(newPending);
         }*/
     }
@@ -120,46 +120,46 @@ public class ProductionService {
     @Transactional
     // When the production is completed save production in repository
     // and publish an event on RabbitMQ
-    public void completeProduction(Long productionId) {
-        Production production = productionRepository.findById(productionId).orElse(null);    
-        if (production == null || production.getState() == ProductionState.CANCELLED ||
-                                  production.getState() == ProductionState.COMPLETED) {
+    public void completeTransfer(Long productionId) {
+        Transfer production = productionRepository.findById(productionId).orElse(null);    
+        if (production == null || production.getState() == TransferState.CANCELLED ||
+                                  production.getState() == TransferState.COMPLETED) {
             return;
         }
         
         production.complete();
         productionRepository.save(production);
         // Method to send event to RabbitMQ
-        publishProductionCompleted(production.getId(), production.getAmount());
+        publishTransferCompleted(production.getId(), production.getAmount());
     }
     
     // Given an Id of a production publish that production in the queue
-    private void publishProductionCompleted(Long productionId, int amount) {
-        Production production = productionRepository.findById(productionId).orElse(null);
+    private void publishTransferCompleted(Long productionId, int amount) {
+        Transfer production = productionRepository.findById(productionId).orElse(null);
         if (production == null) {
             return;
         }
         
         // send event to RabbitMQ
-        productionPublish.publishProductionCompleted(
+        productionPublish.publishTransferCompleted(
                                     production.getId(), production.getAmount());
     }
     
     // Get production by ID
-    public Production getProduction(Long id) {
-        Optional<Production> production = productionRepository.findById(id);
-        Production productionToReturn = production.orElseThrow(()
-                    -> new RuntimeException("Production " + id + "not found"));
+    public Transfer getTransfer(Long id) {
+        Optional<Transfer> production = productionRepository.findById(id);
+        Transfer productionToReturn = production.orElseThrow(()
+                    -> new RuntimeException("Transfer " + id + "not found"));
 
         return productionToReturn;
     }
     
     // Given an id of production cancell that production
-    public void cancelProduction(Long id) {
-        Production production = productionRepository.findById(id).orElse(null);
+    public void cancelTransfer(Long id) {
+        Transfer production = productionRepository.findById(id).orElse(null);
         if (production == null || 
-            production.getState() == ProductionState.COMPLETED ||
-            production.getState() == ProductionState.CANCELLED) {  
+            production.getState() == TransferState.COMPLETED ||
+            production.getState() == TransferState.CANCELLED) {  
             return;
         } 
         production.cancelled();
@@ -167,16 +167,16 @@ public class ProductionService {
     }
     
     // Given an id of production cancell that production
-    public void cancelProductionByUser(Long id) {
-        Production production = productionRepository.findById(id).orElse(null);
+    public void cancelTransferByUser(Long id) {
+        Transfer production = productionRepository.findById(id).orElse(null);
         if (production == null || 
-            production.getState() == ProductionState.COMPLETED ||
-            production.getState() == ProductionState.CANCELLED) {  
+            production.getState() == TransferState.COMPLETED ||
+            production.getState() == TransferState.CANCELLED) {  
             return;
         } 
         production.cancelled();
         productionRepository.save(production);
-        productionPublish.publishProductionCancelled(id, production.getAmount());
+        productionPublish.publishTransferCancelled(id, production.getAmount());
     }
     
     
@@ -184,13 +184,13 @@ public class ProductionService {
 
     // Get all the production from the repository
     // This query is to return to the user
-    public List<Production> getAllProductions() {
+    public List<Transfer> getAllTransfers() {
         return productionRepository.findAll();
     }
     
         /*
     // Given an rejeted production manage timeout and fail 
-    private void handleRetry(Production productionRejected) {
+    private void handleRetry(Transfer productionRejected) {
         productionRejected.incrementRetry();
         
         // Case faill 3 times the state will be failed
@@ -209,18 +209,18 @@ public class ProductionService {
     // When a production is rejected because it excceds the stock 
     // and is assigned as PENDING, this method start this a pending production
     //@Scheduled(fixedDelay = 10000)
-    public void processPendingProductions() {
-        Optional<Production> pending = productionRepository
-                  .findFirstByStateOrderByStartTimeAsc(ProductionState.PENDING);
+    public void processPendingTransfers() {
+        Optional<Transfer> pending = productionRepository
+                  .findFirstByStateOrderByStartTimeAsc(TransferState.PENDING);
         if (pending.isPresent()) {
-            productionPublish.publishProductionPending(
+            productionPublish.publishTransferPending(
                               pending.get().getId(), pending.get().getAmount());
         }
     }*/
     
     // If inventory connection fail get timeout state
     public void getTimeoutState(Long productionId) {
-        Production production = productionRepository.findById(productionId).orElse(null);        
+        Transfer production = productionRepository.findById(productionId).orElse(null);        
         if (production == null) {
             return;
         }
@@ -230,7 +230,7 @@ public class ProductionService {
     
     /*
     // When the third retry fails, the state is failed
-    public void getFailedSate(Production production) {
+    public void getFailedSate(Transfer production) {
         production.fail();
         productionRepository.save(production);
     }*/

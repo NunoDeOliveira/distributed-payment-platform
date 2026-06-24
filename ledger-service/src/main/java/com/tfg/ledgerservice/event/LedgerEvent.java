@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveryEvent {
+public class LedgerEvent {
     private String eventType;
     private Long deliveryId;
     private Long productionId;

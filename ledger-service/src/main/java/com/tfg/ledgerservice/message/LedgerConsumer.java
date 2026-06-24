@@ -1,23 +1,23 @@
 package com.tfg.ledgerservice.message;
 
 import org.springframework.stereotype.Component;
-import com.tfg.ledgerservice.service.DeliveryService;
-import com.tfg.ledgerservice.model.Delivery;
+import com.tfg.ledgerservice.service.LedgerService;
+import com.tfg.ledgerservice.model.LedgerMovement;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Header;
 import com.fasterxml.jackson.databind.JsonNode;
 
 
 @Component
-public class DeliveryConsumer {
+public class LedgerConsumer {
 
-    private final DeliveryService deliveryService;
+    private final LedgerService deliveryService;
 
-    public DeliveryConsumer(DeliveryService deliveryService) {
+    public LedgerConsumer(LedgerService deliveryService) {
         this.deliveryService = deliveryService;
     }
 
-    @RabbitListener(queues = DeliveryPublish.DELIVERY_QUEUE)
+    @RabbitListener(queues = LedgerPublish.DELIVERY_QUEUE)
     public void consume(JsonNode event,
         @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
 
@@ -27,7 +27,7 @@ public class DeliveryConsumer {
         Long productionId = event.path("productionId").asLong();
         System.out.println("Event JSON: " + event.toString()); // temporal
         int amount = event.path("amount").asInt();
-        System.out.println("Delivery receive: " + eventType + " deliveryId=" + deliveryId);
+        System.out.println("LedgerMovement receive: " + eventType + " deliveryId=" + deliveryId);
 
         try {
             // procecess event received
@@ -49,16 +49,16 @@ public class DeliveryConsumer {
         switch (eventType) {
             // Case delivery in which can start delivery 
             case "delivery.accepted":
-                deliveryService.startDelivery(deliveryId);
+                deliveryService.startLedgerMovement(deliveryId);
                 break;
             case "delivery.cancel":
-                deliveryService.cancelDeliveryByProductionId(productionId);
+                deliveryService.cancelLedgerMovementByProductionId(productionId);
                 break;
             case "stock.available":
-                deliveryService.reserveDelivery(productionId, amount);
+                deliveryService.reserveLedgerMovement(productionId, amount);
                 break;
             //case "create.delivery":
-                //deliveryService.createDeliveryFromStock(amount);
+                //deliveryService.createLedgerMovementFromStock(amount);
                 //break;
             default:
                 System.out.println("Event unknown: " + eventType);

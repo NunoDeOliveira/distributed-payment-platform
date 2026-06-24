@@ -1,13 +1,13 @@
 package com.tfg.ledgerservice.message;
 
-import com.tfg.ledgerservice.event.DeliveryEvent;
+import com.tfg.ledgerservice.event.LedgerEvent;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeliveryPublish {
+public class LedgerPublish {
 
     // Define queue for sending Inventory messages
     public static final String INVENTORY_QUEUE = "inventory.queue";
@@ -16,7 +16,7 @@ public class DeliveryPublish {
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
 
-    public DeliveryPublish(RabbitTemplate rabbitTemplate) {
+    public LedgerPublish(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
@@ -32,32 +32,32 @@ public class DeliveryPublish {
         return new Queue(DELIVERY_QUEUE, true);
     }
 
-    public void publishDeliveryCreated(Long deliveryId, int amount) {
+    public void publishLedgerMovementCreated(Long deliveryId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                       new DeliveryEvent("delivery.created", deliveryId, null, amount));
+                       new LedgerEvent("delivery.created", deliveryId, null, amount));
     }
 
-    public void publishDeliveryCompleted(Long deliveryId, int amount) {
+    public void publishLedgerMovementCompleted(Long deliveryId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                       new DeliveryEvent("delivery.completed", deliveryId, null, amount));
+                       new LedgerEvent("delivery.completed", deliveryId, null, amount));
     }
     
     // Given an ID of delivery and the amount of delivery 
     // publishes an event to Inventory to release the stock reservation
     public void publishReservationRelease(Long deliveryId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                new DeliveryEvent("delivery.reservation.release", deliveryId, null, amount));
+                new LedgerEvent("delivery.reservation.release", deliveryId, null, amount));
     }
     
     // Given an Id and amount of delivery publish a cancelled delivery
-    public void publishDeliveryCancelled(Long deliveryId, Long productionId, int amount) {
+    public void publishLedgerMovementCancelled(Long deliveryId, Long productionId, int amount) {
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE,
-                  new DeliveryEvent("delivery.cancelled", deliveryId, productionId, amount));
+                  new LedgerEvent("delivery.cancelled", deliveryId, productionId, amount));
     }
         
     // Given an Id and amount of delivery publish a pending delivery
-    public void publishDeliveryPending(Long deliveryId, int amount) {
-        DeliveryEvent deliveryEvent = new DeliveryEvent(
+    public void publishLedgerMovementPending(Long deliveryId, int amount) {
+        LedgerEvent deliveryEvent = new LedgerEvent(
                                       "delivery.pending", deliveryId, null, amount);
         rabbitTemplate.convertAndSend(INVENTORY_QUEUE, deliveryEvent);
     }

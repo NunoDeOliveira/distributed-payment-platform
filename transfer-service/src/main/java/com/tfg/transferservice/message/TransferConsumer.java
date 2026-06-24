@@ -1,22 +1,22 @@
 package com.tfg.transferservice.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.tfg.transferservice.service.ProductionService;
+import com.tfg.transferservice.service.TransferService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Header;
-import com.tfg.transferservice.model.Production;
+import com.tfg.transferservice.model.Transfer;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProductionConsumer {
+public class TransferConsumer {
 
-    private final ProductionService productionService;
+    private final TransferService productionService;
 
-    public ProductionConsumer(ProductionService productionService) {
+    public TransferConsumer(TransferService productionService) {
         this.productionService = productionService;
     }
     
-    @RabbitListener(queues = ProductionPublish.PRODUCTION_QUEUE)
+    @RabbitListener(queues = TransferPublish.PRODUCTION_QUEUE)
     public void consume(JsonNode event, 
         @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
         //System.out.println("Message received: " + event.toString());
@@ -25,7 +25,7 @@ public class ProductionConsumer {
         String eventType = event.path("eventType").asText();
         Long productionId = event.path("productionId").asLong();
         int amountAllowed = event.path("amount").asInt();   // this is the amount allowed
-        System.out.println("EventType: " + eventType + "ProductionId: " + productionId);
+        System.out.println("EventType: " + eventType + "TransferId: " + productionId);
 
         try {
             // procecess event received
@@ -46,18 +46,18 @@ public class ProductionConsumer {
     private void processEvent(String eventType, Long productionId, int amountAllowed) {
         switch (eventType) {
             case "production.accepted":
-                Production production = productionService.getProduction(productionId);
-                productionService.startProduction(productionId);
+                Transfer production = productionService.getTransfer(productionId);
+                productionService.startTransfer(productionId);
                 break;
             case "production.rejected":
-                Production productionRejected = productionService.getProduction(productionId);
-                productionService.rejectProduction(productionRejected, amountAllowed);
+                Transfer productionRejected = productionService.getTransfer(productionId);
+                productionService.rejectTransfer(productionRejected, amountAllowed);
                 break;
             case "production.cancelled":
-                productionService.cancelProduction(productionId);
+                productionService.cancelTransfer(productionId);
                 break;
             //case "stock.available":
-                //productionService.processPendingProductions();
+                //productionService.processPendingTransfers();
                 //break;
             default:
                 System.out.println("Event unknown: " + eventType);
