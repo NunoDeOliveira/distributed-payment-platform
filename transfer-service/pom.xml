@@ -8,8 +8,8 @@
 		<version>4.0.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.tfg.productionService</groupId>
-	<artifactId>production-service</artifactId>
+	<groupId>com.tfg</groupId>
+	<artifactId>transfer-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
