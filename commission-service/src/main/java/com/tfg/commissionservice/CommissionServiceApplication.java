@@ -1,13 +1,13 @@
-package com.tfg.authorizationservice;
+package com.tfg.commissionservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AuthorizationServiceApplication {
+public class CommissionServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AuthorizationServiceApplication.class, args);
+		SpringApplication.run(CommissionServiceApplication.class, args);
 	}
 
 }
