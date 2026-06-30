@@ -26,3 +26,20 @@ Thumbs.db
 
 # Spring Initializr generated help files
 HELP.md
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+# Private keys
+*.pem
+*.key
+
+# Kubernetes credentials
+kubeconfig
+kubeconfig-*
