@@ -69,14 +69,14 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # Generate image metadata
-    - name: Extract metadata for production-service
+    - name: Extract metadata for payment-service
       id: meta
       uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
       with:
         images: nunohenriquedeoliveira/inventory-service
 
     # Building and publishing the Docker image
-    - name: Build and push production-service
+    - name: Build and push payment-service
       uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
       with:
         context: ./inventory-service

@@ -22,7 +22,7 @@ public class GatewayRouting {
                                     c.setFallbackUri("forward:/fallback-production");
                                 }).addResponseHeader("Gateway-Service", "Production-Service")
                         )
-                        .uri("http://production-service:8081")
+                        .uri("http://payment-service:8081")
                         //.uri("http://localhost:8081")
                 )
 

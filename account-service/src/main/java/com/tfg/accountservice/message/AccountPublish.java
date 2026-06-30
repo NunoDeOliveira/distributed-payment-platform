@@ -96,7 +96,7 @@ public class AccountPublish {
         rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
     }
     
-    // Notify production-service that space has been release
+    // Notify payment-service that space has been release
     public void publishCapacityAvailable(int amount) {
         AccountEvent inventoryEvent = new AccountEvent(
                                             "capacity.available", null, null, amount);
