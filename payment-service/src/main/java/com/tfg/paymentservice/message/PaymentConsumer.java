@@ -1,6 +1,7 @@
 package com.tfg.paymentservice.message;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tfg.paymentservice.event.PaymentEvent;
 import com.tfg.paymentservice.service.PaymentService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Header;
@@ -12,53 +13,34 @@ public class PaymentConsumer {
 
     private final PaymentService paymentService;
 
+
     public PaymentConsumer(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
-    
-    @RabbitListener(queues = PaymentPublish.PRODUCTION_QUEUE)
-    public void consume(JsonNode event, 
-        @Header(value = "x-delivery-count", defaultValue = "0") int retryCount) {
-        //System.out.println("Message received: " + event.toString());
-        
-        // Extract data
-        String eventType = event.path("eventType").asText();
-        Long paymentId = event.path("paymentId").asLong();
-        int amountAllowed = event.path("amount").asInt();   // this is the amount allowed
-        System.out.println("EventType: " + eventType + "PaymentId: " + paymentId);
 
-        try {
-            // procecess event received
-            processEvent(eventType, paymentId, amountAllowed);
-        } catch (Exception e) {
-            ///// Manage timeout or failed
-            if (paymentId != 0) {
-                if (retryCount >= 2) {
-                    // third trying release
-                    paymentService.getTimeoutState(paymentId); 
-                }
-            }
-            throw e;
-        }       
-    }
-    
-    // Process the event given. Case aproved or case rejected
-    private void processEvent(String eventType, Long paymentId, int amountAllowed) {
+    // Listens on payment.queue for events published by other services
+    @RabbitListener(queues = PaymentPublish.PAYMENT_QUEUE)
+    private void processEvent(PaymentEvent event) {
+        if (event == null) {
+            System.out.println("Received null or invalid event");
+            return;
+        }
+
+        // Manage all the possible states
+        String eventType = event.getEventType();
         switch (eventType) {
-            case "payment.accepted":
-                Payment payment = paymentService.getPayment(paymentId);
-                paymentService.startPayment(paymentId);
+            // Case in which payment is finished successful
+            case "movement.recorded":
+                paymentService.completedPayment(event.getPaymentId(), event.getCorrelationId());
                 break;
+            // Case in which payment is canceled by a user
+            /*case "payment.cancelled":
+                paymentService.cancelPayment(event.getPaymentId(), event.getCorrelationId());
+                break;*/
+            // Case in which a payment is rejected due to insufficient balance
             case "payment.rejected":
-                Payment paymentRejected = paymentService.getPayment(paymentId);
-                paymentService.rejectPayment(paymentRejected, amountAllowed);
+                paymentService.rejectPayment(event.getPaymentId(), event.getCorrelationId());
                 break;
-            case "payment.cancelled":
-                paymentService.cancelPayment(paymentId);
-                break;
-            //case "stock.available":
-                //paymentService.processPendingPayments();
-                //break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

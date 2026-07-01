@@ -3,8 +3,9 @@ package com.tfg.paymentservice.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 @Getter
@@ -17,95 +18,81 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int amount;
+    @Column(nullable = false, unique = true)
+    private String correlationId;
+
+    @Column(nullable = false)
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod method;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentState state;
-    
-    @Column(name = "register", length = 5000)
-    private String register = "";
-    private int retryCount = 0;
-    
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
 
-    public Payment() {}
+    @Column(length = 1000)
+    private String register;
 
-    public Payment(int amount, PaymentState state, LocalDateTime startTime) {
+
+    protected Payment() {}
+
+    public Payment(String correlationId, BigDecimal amount, PaymentMethod method, PaymentState state, LocalDateTime startAt) {
+        this.correlationId = correlationId;
         this.amount = amount;
+        this.method = method;
         this.state = state;
-        this.startTime = startTime;
-        this.register += state.name() + " " + startTime + " | ";
+        this.startAt = startAt;
+        this.endAt = null;
+        this.register = state.name() + " " + startAt + " | ";
     }
     
     // Switch to PREPARING state and record the payment start time
     public void created() {
         LocalDateTime now = LocalDateTime.now();
         this.state = PaymentState.CREATED;
-        this.startTime = LocalDateTime.now();
+        this.startAt = LocalDateTime.now();
         this.register += "CREATED " + now + " | ";
-    }
-    
-    // Switch to PREPARING state and record the payment start time
-    public void waiting() {
-        LocalDateTime now = LocalDateTime.now();
-        this.state = PaymentState.WAITING;
-        this.startTime = LocalDateTime.now();
-        this.register += "WAITING " + now + " | ";
-    }
-
-    // Switch to PREPARING state and record the payment start time
-    public void start() {
-        LocalDateTime now = LocalDateTime.now();
-        this.state = PaymentState.PREPARING;
-        this.startTime = LocalDateTime.now();
-        this.register += "PREPARING " + now + " | ";
     }
 
     // Switch to COMPLETED state and record the payment start time
     public void complete() {
         this.state = PaymentState.COMPLETED;
-        this.endTime = LocalDateTime.now();
+        this.endAt = LocalDateTime.now();
         this.register += "COMPLETED " + LocalDateTime.now();
     }
     
     // Switch to CANCELLED state and record the payment CANCELLED time
     public void cancelled() {
         this.state = PaymentState.CANCELLED;
-        this.endTime = LocalDateTime.now();
+        this.endAt = LocalDateTime.now();
         this.register += "CANCELLED " + LocalDateTime.now();
     }
     
     
     public void reject() {
         this.state = PaymentState.REJECTED;
-        this.endTime = LocalDateTime.now();
+        this.endAt = LocalDateTime.now();
         this.register += "REJECTED " + LocalDateTime.now();
     }
     
     // tIme-out if inventory fail
     public void timeout() {
-        this.state = PaymentState.TIMEOUT;
-        this.endTime = LocalDateTime.now();
-        this.register += "TIMEOUT " + LocalDateTime.now();
-    }
-    /*
-    // When inventory connection fail 3 times the state will be failed 
-    public void fail() {
         this.state = PaymentState.FAILED;
-        this.endTime = LocalDateTime.now();
+        this.endAt = LocalDateTime.now();
         this.register += "FAILED " + LocalDateTime.now();
     }
-    
-    public void pending() {
-        this.state = PaymentState.PENDING;
-        this.endTime = null;
-        this.register += "PENDING " + LocalDateTime.now() + " | ";
-    }
-    
-    public void incrementRetry() {
-        this.retryCount++;
+
+    /*private void addRegister(String state, LocalDateTime time) {
+        if (this.register == null) {
+            this.register = "";
+        }
+
+        this.register += state + " " + time + " | ";
     }*/
     
 }

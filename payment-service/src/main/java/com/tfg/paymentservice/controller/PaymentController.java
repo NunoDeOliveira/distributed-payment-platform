@@ -1,10 +1,12 @@
 package com.tfg.paymentservice.controller;
 
 import com.tfg.paymentservice.model.Payment;
+import com.tfg.paymentservice.model.PaymentMethod;
 import com.tfg.paymentservice.service.PaymentService;
 import org.springframework.web.bind.annotation.*;
-
+import java.math.BigDecimal;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/payments")
@@ -16,9 +18,11 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+    public record CreatePaymentRequest(BigDecimal amount, PaymentMethod method) {}
+
     @PostMapping
-    public Payment createPayment(@RequestParam int amount) {
-        return paymentService.createPayment(amount);
+    public Payment createPayment(@RequestBody CreatePaymentRequest request) {
+        return paymentService.createPayment(request.amount(), request.method());
     }
 
     @GetMapping("/{id}")
@@ -33,7 +37,7 @@ public class PaymentController {
     
     @DeleteMapping("/{id}")
     public void cancelPaymentByUser(@PathVariable Long id) {
-        paymentService.cancelPaymentByUser(id);
+        paymentService.cancelPayment(id);
     }
     
 }

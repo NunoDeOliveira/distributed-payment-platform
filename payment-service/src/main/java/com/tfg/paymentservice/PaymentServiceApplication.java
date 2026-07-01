@@ -9,8 +9,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableAsync
-@EnableScheduling
 public class PaymentServiceApplication {
 
     public static void main(String[] args) {
@@ -19,8 +17,6 @@ public class PaymentServiceApplication {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
-        converter.setAlwaysConvertToInferredType(true);
-        return converter;
+        return new Jackson2JsonMessageConverter();
     }
 }

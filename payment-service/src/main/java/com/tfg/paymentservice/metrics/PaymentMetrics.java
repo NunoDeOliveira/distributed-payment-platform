@@ -9,15 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaymentMetrics {
 
-    public PaymentMetrics(MeterRegistry meterRegistry,
-                             PaymentRepository paymentRepository) {
+    public PaymentMetrics(MeterRegistry meterRegistry, PaymentRepository paymentRepository) {
         for (PaymentState state : PaymentState.values()) {
             if (state == PaymentState.REJECTED) continue;
             Gauge.builder("payment.state.current",
-                            paymentRepository,
-                            repo -> repo.sumAmountByState(state))
-                            .tag("state", state.name())
-                            .register(meterRegistry);
+                                        paymentRepository,
+                                        repo -> repo.sumAmountByState(state))
+                                        .tag("state", state.name())
+                                        .register(meterRegistry);
         }
     }
 
