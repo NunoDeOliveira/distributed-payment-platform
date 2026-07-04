@@ -20,8 +20,7 @@ public class CommissionService {
     private final CommissionPublish commissionPublish;
 
     // Constructor
-    public CommissionService(CommissionRepository commissionRepository,
-                                                CommissionPublish commissionPublish) {
+    public CommissionService(CommissionRepository commissionRepository, CommissionPublish commissionPublish) {
         this.commissionRepository = commissionRepository;
         this.commissionPublish = commissionPublish;
     }
@@ -54,7 +53,8 @@ public class CommissionService {
     @Transactional
     public void commissionRelease(Long paymentId, String correId) {
         // Get commission from repository
-        Commission commission = commissionRepository.findOperationByIdAndCorrelationId(paymentId, correId).orElse(null);
+        Commission commission = commissionRepository.
+                                findOperationByIdAndCorrelationId(paymentId, correId).orElse(null);
         if (commission == null) {
             return;
         }
