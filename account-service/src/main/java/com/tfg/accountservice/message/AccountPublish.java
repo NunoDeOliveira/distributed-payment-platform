@@ -9,107 +9,84 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 
+import java.math.BigDecimal;
+
 @Component
 public class AccountPublish {
-    // Define queue where the Production send messages
-    public static final String INVENTORY_QUEUE = "inventory.queue";
-    // Define queue where the Production receive messages
-    public static final String PRODUCTION_QUEUE = "production.queue";
-    // Define queue where the Delivery send messages
-    public static final String DELIVERY_QUEUE = "delivery.queue";
-
+    // Define queue where the account send messages
+    public static final String ACCOUNT_QUEUE = "account.queue";
+    // Define queue where the commission receive messages
+    public static final String COMMISSION_QUEUE = "commission.queue";
+    // Define queue where the ledge send messages
+    public static final String LEDGER_QUEUE = "ledger.queue";
+    // Define queue where the ledge send messages
+    public static final String PAYMENT_QUEUE = "payment.queue";
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
 
+    // Constructor
     public AccountPublish(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    // Define a queue for Account to receive events
     @Bean
-    public Queue inventoryQueue() {
-        return new Queue(INVENTORY_QUEUE, true);
-    }
-
-    // Define a queue for Production to receive events
-    @Bean
-    public Queue productionQueue() {
-        return new Queue(PRODUCTION_QUEUE, true);
+    public Queue accountQueue() {
+        return new Queue(ACCOUNT_QUEUE, true);
     }
 
     @Bean
-    public Queue deliveryQueue() {
-        return new Queue(DELIVERY_QUEUE, true);
+    public Queue commissionQueue() {
+        return new Queue(COMMISSION_QUEUE, true);
     }
 
-    // Publish an event accepting production in the Production queue
-    public void publishProductionAccepted(Long productionId, int amount) {
-        AccountEvent inventoryEvent = new AccountEvent(
-                                            "production.accepted", productionId, null,amount);
-        // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
+    @Bean
+    public Queue ledgeQueue() {
+        return new Queue(LEDGER_QUEUE, true);
     }
 
-    // Publish an event rejecting production in the Production queue
-    public void publishProductionRejected(Long productionId, int amount) {
-        AccountEvent inventoryEvent = new AccountEvent(
-                                            "production.rejected", productionId, null, amount);
-        // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
+    @Bean
+    public Queue paymentQueue() {
+        return new Queue(PAYMENT_QUEUE, true);
     }
+
 
     // Publish an event accepting delivery in the delivery queue
-    public void publishDeliveryAccepted(Long deliveryId, int amount) {
-        AccountEvent inventoryEvent = new AccountEvent(
-                                            "delivery.accepted", null, deliveryId, amount);
+    public void publishOperationRejected(Long accountId, String correlationId) {
+        // Create an object account event to publish in commission queue
+        AccountEvent event;
+        event = new AccountEvent("operation.rejected", accountId, correlationId, null, null);
+
         // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
+        rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
 
-    // Publish an event rejecting production in the Production queue
-    public void publishDeliveryRejected(Long deliveryId, int amount) {
-        AccountEvent inventoryEvent = new AccountEvent(
-                                            "delivery.rejected", null, deliveryId, amount);
+    // Publish an event in Ledge queue
+    public void publishHoldFunds(Long accountId, String correlationId, BigDecimal totalAmount) {
+        // Create an object account event to publish in the ledge queue
+        AccountEvent event;
+        event = new AccountEvent("held.funds", accountId, correlationId, totalAmount, accountId);
+
         // Convert to JSON format and send
-        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
-    }
-    
-    // Notify production cancellation 
-    public void publishProductionCancelled(Long productionId, int amount) {
-        AccountEvent event = new AccountEvent(
-                                    "production.cancelled", productionId, null, amount);
-        rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, event);
-    }
-    
-    ///////////////////
-    public void publishDeliveryCancelledByProduction(Long productionId, int amount) {
-        AccountEvent event = new AccountEvent(
-                                "delivery.cancel", null, null, amount);
-        event.setProductionId(productionId);
-        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, event);
+        rabbitTemplate.convertAndSend(LEDGER_QUEUE, event);
     }
 
-    // Notify delivery service that stock is available
-    public void publishStockAvailable(Long productionId, int amount) {
-        AccountEvent inventoryEvent = new AccountEvent( 
-                                      "stock.available", productionId, null, amount);
-        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
-    }
-    
-    // Notify payment-service that space has been release
-    public void publishCapacityAvailable(int amount) {
-        AccountEvent inventoryEvent = new AccountEvent(
-                                            "capacity.available", null, null, amount);
-        rabbitTemplate.convertAndSend(PRODUCTION_QUEUE, inventoryEvent);
-    }
-    
-    // Given an amount publish 
-    public void publishForCreateDelivery(int amount) {
-        AccountEvent inventoryEvent = new AccountEvent("create.delivery",
-                                                            null, null, amount);
+    //
+    public void publishAccountDeducted(Long accountId, String correlationId, BigDecimal totalAmount) {
+        // Create an object account event to publish in commission queue
+        AccountEvent event;
+        event = new AccountEvent("account.deducted", accountId, correlationId, totalAmount, accountId);
 
-        rabbitTemplate.convertAndSend(DELIVERY_QUEUE, inventoryEvent);
+        // Convert to JSON format and send
+        rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }
-    
+
+    public void publishOperationReleased(Long accountId, String correlationId) {
+        // Create an object account event to publish in commission queue
+        AccountEvent event;
+        event = new AccountEvent("operation.release", accountId, correlationId, null, null);
+
+        // Convert to JSON format and send
+        rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.tfg.accountservice.message;
 
+import com.tfg.accountservice.event.AccountEvent;
 import com.tfg.accountservice.service.AccountService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -7,62 +8,34 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 public class AccountConsumer {
+    // Attributes
+    private final AccountService accountService;
 
-    private final AccountService inventoryService;
-
-    public AccountConsumer(AccountService inventoryService) {
-        this.inventoryService = inventoryService;
+    // Constructor
+    public AccountConsumer(AccountService accountService) {
+        this.accountService = accountService;
     }
 
-    @RabbitListener(queues = AccountPublish.INVENTORY_QUEUE)
-    public void consume(JsonNode event) {
-        String eventType = event.path("eventType").asText();
-        int amount = event.path("amount").asInt();
-        
-        Long productionId = null;
-        Long deliveryId = null;
-        if (eventType.startsWith("production")) {
-            productionId = event.path("productionId").asLong();
-        } else {
-            deliveryId = event.path("deliveryId").asLong();
-            if (eventType.equals("delivery.cancelled")) {
-                productionId = event.path("productionId").asLong();
-            }
+
+    @RabbitListener(queues = AccountPublish.ACCOUNT_QUEUE)
+    public void processEvent(AccountEvent event) {
+        if (event == null) {
+            return;
         }
 
-        System.out.println("Account receive: " + eventType +
-                " productionId=" + productionId + " deliveryId=" + deliveryId);
-
+        // Manage all the possible states
+        String eventType = event.getEventType();
         switch (eventType) {
-            case "production.created":
-                inventoryService.validateProduction(productionId, amount);
+            case "commission.calculated":
+                accountService.holdFunds(event.getAccountId(), event.getCorrelationId(), event.getAmount());
                 break;
-            case "production.completed":
-                inventoryService.increaseStock(productionId, amount);
+            case "movement.recorded":
+                accountService.deductAccount(event.getAccountId(), event.getCorrelationId());
                 break;
-            case "delivery.created":
-                inventoryService.reserveDeliveryStock(deliveryId, amount);
+            case "payment.cancelled":
+                accountService.cancelOperation(event.getAccountId(), event.getCorrelationId());
                 break;
-            case "delivery.completed":
-                inventoryService.confirmDelivery(deliveryId, amount);
-                break;
-            // Case for productions pendings
-            //case "production.pending":
-                //inventoryService.validateProduction(productionId, amount);
-                //break;
-            case "delivery.cancelled":
-                inventoryService.cancelDelivery(deliveryId, productionId, amount); 
-                break;
-            case "production.cancelled":
-                inventoryService.cancelProduction(productionId, amount);
-                break;
-            // Compensating Transaction
-            case "delivery.reservation.release":
-                inventoryService.releaseReservedStock(deliveryId, amount);
-                break;
-            //case "delivery.pending":
-                //inventoryService.validateDelivery(deliveryId, amount);
-                //break;
+
             default:
                 System.out.println("Event unknown: " + eventType);
         }

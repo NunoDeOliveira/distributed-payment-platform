@@ -4,6 +4,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 
 @Setter
 @Getter
@@ -11,9 +13,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AccountEvent {
     private String eventType;
-    private Long productionId;
-    private Long deliveryId; // added 17 may
-    private Integer amount;
+    private Long paymentId;
+    private String correlationId;
+    private BigDecimal amount;
+    private Long accountId;
 
 
 }

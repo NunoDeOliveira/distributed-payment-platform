@@ -1,6 +1,5 @@
 package com.tfg.accountservice;
 
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,8 +14,8 @@ public class AccountServiceApplication {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
-        converter.setAlwaysConvertToInferredType(true);
-        return converter;
+        return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter(
+                new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()
+        );
     }
 }

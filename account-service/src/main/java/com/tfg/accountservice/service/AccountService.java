@@ -2,170 +2,175 @@ package com.tfg.accountservice.service;
 
 import com.tfg.accountservice.message.AccountPublish;
 import com.tfg.accountservice.model.Account;
+import com.tfg.accountservice.model.AccountState;
 import com.tfg.accountservice.repository.AccountRepository;
-import com.tfg.accountservice.repository.BalanceHoldRepository;
+import com.tfg.accountservice.repository.OperationRepository;
 import org.springframework.stereotype.Service;
-import com.tfg.accountservice.model.BalanceHold;
+import com.tfg.accountservice.model.Operation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Isolation;
 
 
 @Service
 public class AccountService {
-    private final AccountRepository inventoryRepository;
-    private final AccountPublish eventPublish;
-    private final BalanceHoldRepository reservationRepository;
-    
-    @Value("${inventory.stock.limit:100}")
-    private int MAX_STOCK;
+    private final AccountRepository accountRepo;
+    private final AccountPublish accountPublish;
+    private final OperationRepository operationRepo;
 
-    public AccountService(AccountRepository inventoryRepository,
-                            AccountPublish eventPublish,
-                            BalanceHoldRepository reservationRepository) {
-        this.inventoryRepository = inventoryRepository;
-        this.eventPublish = eventPublish;
-        this.reservationRepository = reservationRepository;
+    // Constructor
+    public AccountService(AccountRepository accountRepo,
+                          AccountPublish accountPublish,
+                          OperationRepository operationRepo) {
+        this.accountRepo = accountRepo;
+        this.accountPublish = accountPublish;
+        this.operationRepo = operationRepo;
     }
     
-    // Given an ID and a production quantity, validate it.
+
     //@Transactional
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public synchronized void validateProduction(Long id, int amount) {  
-        if (amount <= 0) {
+    public void holdFunds(Long accountId, String correlationId, BigDecimal amountToDeducted) {
+        // Idempotency. Check if the operation already exists
+        if (operationRepo.findByCorrelationId(correlationId).isPresent()) {
             return;
         }
 
-        // Calculate the stock that can still be added
-        int currentStock = getTotalStock();
-        int allowedCapacity = MAX_STOCK - currentStock;
-
-        // Evaluate whether the amount received is rejected or accepted
-        if (amount <= allowedCapacity) {
-            eventPublish.publishProductionAccepted(id, amount);
-            eventPublish.publishStockAvailable(id, amount);
-        } else {            
-            int allowedAmount = allowedCapacity;
-            if (allowedAmount < 0) {
-                allowedAmount = 0;
-            }
-            // publish allowed amount if the amount is => than allowed Capacity
-            eventPublish.publishProductionRejected(id, allowedAmount);         
-            // Check if there is enough stock already stored
-            //int availableStock = getAvailabilityStock();
-            // If there is enough stock, create a new delivery 
-            //if (availableStock >= amount) {
-                //eventPublish.publishForCreateDelivery(amount);
-            //}    
+        // Search account by accountId
+        Account account = accountRepo.findById(accountId).orElse(null);
+        if (account == null) {
+            // Case account does not exist
+            accountPublish.publishOperationRejected(accountId, correlationId);
+            return;
         }
+
+        // create operation record
+        Operation operation = new Operation(accountId, correlationId, amountToDeducted,
+                                            AccountState.HELD, LocalDateTime.now(), LocalDateTime.now());
+
+        // Check if the balance is enough
+        AccountState result = checkBalance(account, amountToDeducted, operation);
+        if (result == AccountState.REJECTED) {
+            accountPublish.publishOperationRejected(accountId, correlationId);
+            return;
+        }
+
+        // Publish event
+        accountPublish.publishHoldFunds(accountId, correlationId, amountToDeducted);
     }
-       
-    // Given an ID and a quantity, reserve a stock quantity
+
     //@Transactional
     //public void validateDelivery(Long id, int amount){
-    @Transactional(isolation = Isolation.SERIALIZABLE) 
-    public void reserveDeliveryStock(Long deliveryId, int amount) {
-        if (deliveryId == null || amount <= 0) {
+    @Transactional
+    public void deductAccount(Long accountId, String correlationId) {
+        if (correlationId == null || accountId == null) {
             return;
         }
-        
-        // Check if the reserved already exists
-        BalanceHold checkReservation =
-                         reservationRepository.findFirstByReservationId(deliveryId);
-        if (checkReservation != null) {
+
+        // Recover the existing operation
+        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
+        if (operation == null) {
             return;
         }
-        
-        // Create a new reservation for an delivery given
-        BalanceHold reservation = new BalanceHold(); 
-        reservation.setReservationId(deliveryId);
-        reservation.setReservationAmount(amount);
-        // Save reservation in DB
-        reservationRepository.save(reservation);
-        // Publish an event accepting the delivery request
-        eventPublish.publishDeliveryAccepted(deliveryId, amount);
-    }
 
-    // Given an id production method to get the stock availability
-    public int getAvailabilityStock() {
-        int availableStock = getTotalStock() - getReservedStock();
-        return availableStock;
-    }
+        // Extract amount from the operation — not a parameter here
+        BigDecimal amountToDeducted = operation.getAmount();
 
-    public int getTotalStock() {
-        return Optional.ofNullable(inventoryRepository.
-                        getTotalStock()).orElse(0);
-    }
+        // Confirm the hold is now a permanent debit
+        operation.deducted();
+        operationRepo.save(operation);
 
-    public int getReservedStock() {
-        return Optional.ofNullable(reservationRepository.
-                getTotalReservedStock()).orElse(0);
+        // Notify in queue that the full chain succeeded
+        accountPublish.publishAccountDeducted(accountId, correlationId, amountToDeducted);
     }
 
     @Transactional
     // Given an id and amount of a Production increase the stock of DB
-    public void increaseStock(Long id, int amount) {
-        if (amount <= 0) {
+    public void releaseOperation(Long paymentId, String correlationId, Long accountId) {
+        if (paymentId == null || correlationId == null || accountId == null) {
             return;
         }
 
-        Account stockEntry = new Account();
-        stockEntry.setProductionId(id);
-        stockEntry.setAmount(amount);
-        // Add new production to entry stock
-        inventoryRepository.save(stockEntry);
-        eventPublish.publishStockAvailable(id, amount);
-        // Publish in queue that there is available stock
-        //eventPublish.publishStockAvailable(id, amount);
+        // Recover the existing hold — if not found, nothing to release
+        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
+        if (operation == null) {
+            return;
+        }
+
+        // Only release if the operation is still held
+        if (operation.getState() != AccountState.HELD) {
+            return; // idempotency guard — already released or deducted
+        }
+
+        // Restore the balance in the account
+        Account account = accountRepo.findById(accountId).orElse(null);
+        if (account == null) {
+            return;
+        }
+        account.release(operation.getAmount());
+        accountRepo.save(account);
+
+        // Mark the operation as released
+        operation.released();
+        operationRepo.save(operation);
+
+        // Notify Commission Service so it can cancel the commission
+        accountPublish.publishOperationReleased(paymentId, correlationId);
     }
-    
 
     // Given and id of product and amount release a reservation
     @Transactional
-    public void confirmDelivery(Long id, int amount) {
-        // Get reservation from repository
-        BalanceHold reservation = reservationRepository
-                                        .findFirstByReservationId(id);
-        if (reservation == null) {
+    public void cancelOperation(Long accountId, String CorrelationId) {
+        // Check input data
+        if (accountId == null || CorrelationId == null) {
             return;
         }
-        
-        int reservedAmount = reservation.getReservationAmount();
-        
-        // Discount delivery from repository
-        Account stockEntry = new Account();
-        stockEntry.setProductionId(id);
-        stockEntry.setAmount(-reservedAmount);
-
-        inventoryRepository.save(stockEntry);
-        reservationRepository.delete(reservation);
-        
-        // Notify to production sevice when a delivery is completed
-        eventPublish.publishCapacityAvailable(MAX_STOCK - getAvailabilityStock());
     }
 
-    @Transactional
-    public void releaseReservedStock(Long id, int amount) {
-        // If the order fails, the reservation is rejected
-        // so that the stock becomes available again.
-        BalanceHold reservation = reservationRepository
-                                        .findFirstByReservationId(id);
-        if (reservation != null) {
-            reservationRepository.delete(reservation);
+    // Given an id and amount check the balance
+    public AccountState checkBalance(Account account, BigDecimal amountToDeducted, Operation operation) {
+        if (account == null || amountToDeducted == null) {
+            return AccountState.FAILED;
         }
+
+        // Compare the balance with amount to deducted (amountToDeducted)
+        boolean enoughBalance = account.getBalance().compareTo(amountToDeducted) >= 0;
+
+        // Check if the balance is enough
+        if (!enoughBalance) {
+            // Case there are not enough balance
+            operation.rejected();
+            operationRepo.save(operation);
+            return AccountState.REJECTED;
+        }
+
+        // Case there are enough balance
+        account.held(amountToDeducted);
+        accountRepo.save(account);
+        operation.held();
+        operationRepo.save(operation);
+        return AccountState.HELD;
     }
-    
-    //Given an id of delivery and amount, cancell delivery
-    public void cancelDelivery(Long deliveryId, Long productionId, int amount) {
-        // Release stock reserved
-        releaseReservedStock(deliveryId, amount);
-        eventPublish.publishProductionCancelled(productionId, amount);
+
+    // Given an id of get acount
+    public Account getAccount(Long accountId) {
+        // Check input data
+        if (accountId == null) {
+            System.out.println("Incorrect input data");
+            return null;
+        }
+
+        return accountRepo.findById(accountId).orElse(null);
     }
-    
-    public void cancelProduction(Long productionId, int amount) {
-        eventPublish.publishDeliveryCancelledByProduction(productionId, amount);
+
+    // Get all the operations
+    public List<Account> getAllAccounts() {
+        return accountRepo.findAll();
     }
-    
-    
+
+
 }
