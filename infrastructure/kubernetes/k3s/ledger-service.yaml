@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delivery-service
+  name: movement-service
   labels:
-    app: delivery-service
+    app: movement-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: delivery-service
+      app: movement-service
   template:
     metadata:
       labels:
-        app: delivery-service
+        app: movement-service
     spec:
       containers:
-      - name: delivery-service
+      - name: movement-service
         image: nunohenriquedeoliveira/delivery-service:main
         imagePullPolicy: Always
         ports:
-        - containerPort: 8082
+        - containerPort: 8084
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres-delivery:5432/deliverydb"
+          value: "jdbc:postgresql://postgres-movement:5432/movementdb"
         - name: SPRING_DATASOURCE_USERNAME
           value: "postgres"
         - name: SPRING_DATASOURCE_PASSWORD
@@ -48,12 +48,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: delivery-service
+  name: movement-service
 spec:
   type: NodePort
   selector:
-    app: delivery-service
+    app: movement-service
   ports:
-    - port: 8082
-      targetPort: 8082
-      nodePort: 30082
+    - port: 8084
+      targetPort: 8084
+      nodePort: 30084

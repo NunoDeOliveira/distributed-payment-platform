@@ -9,14 +9,18 @@ scrape_configs:
     static_configs:
       - targets: ["host.docker.internal:8081"]
 
-  - job_name: 'delivery-service'
+  - job_name: 'commission-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ["host.docker.internal:8082"]
 
-  - job_name: 'inventory-service'
+  - job_name: 'account-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ["host.docker.internal:8083"]
 
+  - job_name: 'movement-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ["host.docker.internal:8083"]
 

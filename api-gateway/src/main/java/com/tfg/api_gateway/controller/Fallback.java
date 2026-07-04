@@ -9,19 +9,23 @@ import reactor.core.publisher.Mono;
 @RestController
 public class Fallback {
 
-    @GetMapping("/fallback-production")
-    public Mono<ResponseEntity<String>> fallbackProduction() {
-        return Mono.just(ResponseEntity
-                        .status(HttpStatus.SERVICE_UNAVAILABLE)
-                        .body("Production Service unavailable")
-        );
+    @GetMapping("/fallback-payment")
+    public Mono<ResponseEntity<String>> fallbackPayment() {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Payment Service unavailable"));
     }
 
-    @GetMapping("/fallback-delivery")
-    public Mono<ResponseEntity<String>> fallbackDelivery() {
-        return Mono.just(ResponseEntity
-                        .status(HttpStatus.SERVICE_UNAVAILABLE)
-                        .body("Delivery Service unavailable")
-        );
+    @GetMapping("/fallback-commission")
+    public Mono<ResponseEntity<String>> fallbackCommission() {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Commission Service unavailable"));
+    }
+
+    @GetMapping("/fallback-account")
+    public Mono<ResponseEntity<String>> fallbackAccount() {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Account Service unavailable"));
+    }
+
+    @GetMapping("/fallback-ledger")
+    public Mono<ResponseEntity<String>> fallbackLedger() {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Ledger Service unavailable"));
     }
 }

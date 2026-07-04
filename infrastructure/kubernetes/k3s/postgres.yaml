@@ -1,28 +1,28 @@
-# PostgreSQL for Production Service
+# PostgreSQL for Payment Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-production
+  name: postgres-payment
   labels:
-    app: postgres-production
+    app: postgres-payment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-production
+      app: postgres-payment
   template:
     metadata:
       labels:
-        app: postgres-production
+        app: postgres-payment
     spec:
       containers:
-      - name: postgres-production
+      - name: postgres-payment
         image: postgres:15
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: "productiondb"
+          value: "paymentdb"
         - name: POSTGRES_USER
           value: "postgres"
         - name: POSTGRES_PASSWORD
@@ -36,41 +36,41 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-production
+  name: postgres-payment
 spec:
   type: NodePort
   selector:
-    app: postgres-production
+    app: postgres-payment
   ports:
     - port: 5432
       targetPort: 5432
       nodePort: 30432
 ---
-# PostgreSQL for Delivery Service
+# PostgreSQL for Commission Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-delivery
+  name: postgres-commission
   labels:
-    app: postgres-delivery
+    app: postgres-commission
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-delivery
+      app: postgres-commission
   template:
     metadata:
       labels:
-        app: postgres-delivery
+        app: postgres-commission
     spec:
       containers:
-      - name: postgres-delivery
+      - name: postgres-commission
         image: postgres:15
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: "deliverydb"
+          value: "commissiondb"
         - name: POSTGRES_USER
           value: "postgres"
         - name: POSTGRES_PASSWORD
@@ -84,41 +84,90 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-delivery
+  name: postgres-commission
 spec:
   type: NodePort
   selector:
-    app: postgres-delivery
+    app: postgres-commission
   ports:
     - port: 5432
       targetPort: 5432
       nodePort: 30433
+
+---
+# PostgreSQL for Delivery Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-movement
+  labels:
+    app: postgres-movement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-movement
+  template:
+    metadata:
+      labels:
+        app: postgres-movement
+    spec:
+      containers:
+      - name: postgres-movement
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "movementdb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-movement
+spec:
+  type: NodePort
+  selector:
+    app: postgres-movement
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30434
 ---
 # PostgreSQL for Inventory Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-inventory
+  name: postgres-account
   labels:
-    app: postgres-inventory
+    app: postgres-account
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-inventory
+      app: postgres-account
   template:
     metadata:
       labels:
-        app: postgres-inventory
+        app: postgres-account
     spec:
       containers:
-      - name: postgres-inventory
+      - name: postgres-account
         image: postgres:15
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: "inventorydb"
+          value: "accountdb"
         - name: POSTGRES_USER
           value: "postgres"
         - name: POSTGRES_PASSWORD
@@ -132,12 +181,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-inventory
+  name: postgres-account
 spec:
   type: NodePort
   selector:
-    app: postgres-inventory
+    app: postgres-account
   ports:
     - port: 5432
       targetPort: 5432
-      nodePort: 30434
+      nodePort: 30435

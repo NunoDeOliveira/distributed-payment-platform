@@ -1,24 +1,28 @@
 package com.tfg.ledgerservice.repository;
 
-import com.tfg.ledgerservice.model.LedgerMovement;
+import com.tfg.ledgerservice.model.Movement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.tfg.ledgerservice.model.LedgerMovementState;
+import com.tfg.ledgerservice.model.MovementState;
 import java.util.Optional;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface LedgerMovementRepository extends JpaRepository<LedgerMovement, Long> {
-    Optional<LedgerMovement> findFirstByStateOrderByStartTimeAsc(LedgerMovementState state);
+public interface LedgerMovementRepository extends JpaRepository<Movement, Long> {
+    Optional<Movement> findFirstByStateOrderByStartTimeAsc(MovementState state);
     // Method of consulting for count state
-    long countByState(LedgerMovementState state);
+    long countByState(MovementState state);
     // Added to get all the pendings
-    List<LedgerMovement> findByStateOrderByStartTimeAsc(LedgerMovementState state);
+    List<Movement> findByStateOrderByStartTimeAsc(MovementState state);
     // Sum amount by state for metrics in units
     @Query("SELECT COALESCE(SUM(d.amount), 0) FROM LedgerMovement d WHERE d.state = :state")
-    long sumAmountByState(@Param("state") LedgerMovementState state);
+    long sumAmountByState(@Param("state") MovementState state);
     // Find by Id to cancell a delivery
-    Optional<LedgerMovement> findByProductionId(Long productionId);
+    Optional<Movement> findByProductionId(Long productionId);
+
+
+
+    Optional<Object> findByCorrelationId(String correlationId);
 }

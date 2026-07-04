@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LedgerEvent {
     private String eventType;
-    private Long deliveryId;
-    private Long productionId;
-    private Integer amount;
+    private Long LedgerId;
+    private String correlationId;
+    private BigDecimal amount;
 }
