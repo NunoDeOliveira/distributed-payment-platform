@@ -1,6 +1,5 @@
 package com.tfg.commissionservice;
 
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +14,7 @@ public class CommissionServiceApplication {
 
 	@Bean
 	public MessageConverter jsonMessageConverter() {
-		return new Jackson2JsonMessageConverter();
+		return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter();
 	}
 }
 
