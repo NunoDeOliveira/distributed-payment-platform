@@ -2,7 +2,7 @@ package com.tfg.accountservice.service;
 
 import com.tfg.accountservice.message.AccountPublish;
 import com.tfg.accountservice.model.Account;
-import com.tfg.accountservice.model.AccountState;
+import com.tfg.accountservice.model.OperationState;
 import com.tfg.accountservice.repository.AccountRepository;
 import com.tfg.accountservice.repository.OperationRepository;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 import org.springframework.transaction.annotation.Isolation;
 
 
@@ -23,9 +23,7 @@ public class AccountService {
     private final OperationRepository operationRepo;
 
     // Constructor
-    public AccountService(AccountRepository accountRepo,
-                          AccountPublish accountPublish,
-                          OperationRepository operationRepo) {
+    public AccountService(AccountRepository accountRepo, AccountPublish accountPublish, OperationRepository operationRepo) {
         this.accountRepo = accountRepo;
         this.accountPublish = accountPublish;
         this.operationRepo = operationRepo;
@@ -50,11 +48,11 @@ public class AccountService {
 
         // create operation record
         Operation operation = new Operation(accountId, correlationId, amountToDeducted,
-                                            AccountState.HELD, LocalDateTime.now(), LocalDateTime.now());
+                                            OperationState.HELD, LocalDateTime.now(), LocalDateTime.now());
 
         // Check if the balance is enough
-        AccountState result = checkBalance(account, amountToDeducted, operation);
-        if (result == AccountState.REJECTED) {
+        OperationState result = checkBalance(account, amountToDeducted, operation);
+        if (result == OperationState.REJECTED) {
             accountPublish.publishOperationRejected(accountId, correlationId);
             return;
         }
@@ -102,7 +100,7 @@ public class AccountService {
         }
 
         // Only release if the operation is still held
-        if (operation.getState() != AccountState.HELD) {
+        if (operation.getState() != OperationState.HELD) {
             return; // idempotency guard — already released or deducted
         }
 
@@ -124,17 +122,17 @@ public class AccountService {
 
     // Given and id of product and amount release a reservation
     @Transactional
-    public void cancelOperation(Long accountId, String CorrelationId) {
+    public void cancelOperation(Long accountId, String correlationId) {
         // Check input data
-        if (accountId == null || CorrelationId == null) {
+        if (accountId == null || correlationId == null) {
             return;
         }
     }
 
     // Given an id and amount check the balance
-    public AccountState checkBalance(Account account, BigDecimal amountToDeducted, Operation operation) {
+    public OperationState checkBalance(Account account, BigDecimal amountToDeducted, Operation operation) {
         if (account == null || amountToDeducted == null) {
-            return AccountState.FAILED;
+            return OperationState.FAILED;
         }
 
         // Compare the balance with amount to deducted (amountToDeducted)
@@ -145,7 +143,7 @@ public class AccountService {
             // Case there are not enough balance
             operation.rejected();
             operationRepo.save(operation);
-            return AccountState.REJECTED;
+            return OperationState.REJECTED;
         }
 
         // Case there are enough balance
@@ -153,7 +151,7 @@ public class AccountService {
         accountRepo.save(account);
         operation.held();
         operationRepo.save(operation);
-        return AccountState.HELD;
+        return OperationState.HELD;
     }
 
     // Given an id of get acount

@@ -41,30 +41,28 @@ public class CommissionPublish {
 
 
     // Given a commission publish commission calculated
-    public void publishCommissionCalculated(Long Id, String CorrelationId, BigDecimal totalAmount, String method) {
-        CommissionEvent event = new CommissionEvent(
-                                        "commission.calculated", Id, CorrelationId, totalAmount, method);
+    public void publishCommissionCalculated(String CorrelationId, BigDecimal amount,
+                                            BigDecimal totalAmount, String method) {
 
+        CommissionEvent event = new CommissionEvent("commission.calculated",
+                                                    CorrelationId, amount, totalAmount, method);
         // Send to rabbit account queue
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
 
-    public void publishCommissionReleased(Commission commission) {
+    // Given a commission publish commission released
+    public void publishCommissionReleased(String correlationId) {
         CommissionEvent event;
-        event = new CommissionEvent("commission.released",
-                                                commission.getOperationId(),
-                                                commission.getCorrelationId(),
-                                                null, null);
+        event = new CommissionEvent("commission.released", correlationId, null, null, null);
 
         // Send to rabbit payment queue
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }
 
+    // Given a commission publish commission rejected
     /*public void publishCommissionRejected(Commission commission) {
-        CommissionEvent event = new CommissionEvent("commission.rejected",
-                                                    commission.getId(),
-                                                    commission.getCorrelationId(),
-                                                    commission.getAmount(),
+        CommissionEvent event = new CommissionEvent("commission.rejected", commission.getId(),
+                                                    commission.getCorrelationId(), commission.getAmount(),
                                                     commission.getCommissionAmount(),
                                                     commission.getTotalAmount(),
                                                     commission.getMethod(), LocalDateTime.now());

@@ -21,8 +21,8 @@ public class GatewayRouting {
                                     c.setFallbackUri("forward:/fallback-payment");
                                 }).addResponseHeader("Gateway-Service", "Payment-Service")
                         )
-                        .uri("http://payment-service:8081")
-                        //.uri("http://localhost:8081")
+                        //.uri("http://payment-service:8081")
+                        .uri("http://localhost:8081")
                 )
 
                 .route("commission_route", r -> r.path("/commissions/**").and()

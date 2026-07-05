@@ -6,18 +6,15 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class LedgerMetrics {
 
-    public LedgerMetrics(MeterRegistry meterRegistry,
-                           LedgerMovementRepository deliveryRepository) {
+    public LedgerMetrics(MeterRegistry meterRegistry, LedgerMovementRepository movementRepository) {
         for (MovementState state : MovementState.values()) {
             if (state == MovementState.REJECTED) continue;
-            Gauge.builder("delivery.state.current",
-                            deliveryRepository,
-                            repo -> repo.sumAmountByState(state))
-                            .tag("state", state.name())
-                            .register(meterRegistry);
+            Gauge.builder("ledger.state.current", movementRepository, repo ->
+                            repo.sumAmountByState(state)).tag("state", state.name()).register(meterRegistry);
         }
     }
 

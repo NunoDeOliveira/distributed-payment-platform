@@ -30,17 +30,14 @@ public class PaymentConsumer {
         String eventType = event.getEventType();
         switch (eventType) {
             // Case in which payment is finished successful
-            case "movement.recorded":
-                paymentService.completedPayment(event.getPaymentId(), event.getCorrelationId());
+            case "account.deducted":
+                paymentService.completePayment(event.getCorrelationId());
                 break;
-            // Case in which payment is canceled by a user
-            /*case "payment.cancelled":
-                paymentService.cancelPayment(event.getPaymentId(), event.getCorrelationId());
-                break;*/
-            // Case in which a payment is rejected due to insufficient balance
-            case "payment.rejected":
-                paymentService.rejectPayment(event.getPaymentId(), event.getCorrelationId());
+
+            case "commission.released":
+                paymentService.releasePayment(event.getCorrelationId());
                 break;
+
             default:
                 System.out.println("Event unknown: " + eventType);
         }

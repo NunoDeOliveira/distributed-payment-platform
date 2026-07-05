@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Component
 public class PaymentPublish {
     // Define queue where the Payment send messages
-    public static final String COMMISSION_QUEUE = "inventory.queue";
+    public static final String COMMISSION_QUEUE = "commission.queue";
     // Define queue where the Payment receive messages
     public static final String PAYMENT_QUEUE = "payment.queue";
     // The variable to use the RabbitTemplate class
@@ -43,13 +43,13 @@ public class PaymentPublish {
     // Payment publish payment created
     public void publishPaymentCreated(Long paymentId, String CorrelationId, BigDecimal amount, PaymentMethod method) {
         PaymentEvent event = new PaymentEvent(
-                "payment.created", paymentId, CorrelationId, amount, method, LocalDateTime.now());
+                "payment.created", CorrelationId, amount, method);
         // publish payment created                       
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
     
     public void publishPaymentCancelled(Long paymentId, String correlationId) {
-        PaymentEvent event = new PaymentEvent("payment.cancelled", paymentId, correlationId,null, null, LocalDateTime.now());
+        PaymentEvent event = new PaymentEvent("payment.canceled", correlationId,null, null);
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
 

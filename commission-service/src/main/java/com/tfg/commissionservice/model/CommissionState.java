@@ -4,5 +4,5 @@ public enum CommissionState {
     CALCULATED,
     RELEASED,
     REJECTED,
-    FAILED
+    CANCELED
 }

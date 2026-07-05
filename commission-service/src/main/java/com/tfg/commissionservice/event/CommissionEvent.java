@@ -12,19 +12,20 @@ import java.math.BigDecimal;
 public class CommissionEvent {
 
     private String eventType;
-    private Long paymentId;
     private String correlationId;
+    private BigDecimal amount;
     private BigDecimal totalAmount;
     private String method;
 
     public CommissionEvent() {
     }
 
-    public CommissionEvent(String eventType, Long paymentId,String correlationId, BigDecimal totalAmount, String method) {
+    public CommissionEvent(String eventType, String correlationId,
+                           BigDecimal amount, BigDecimal totalAmount, String method) {
 
         this.eventType = eventType;
-        this.paymentId = paymentId;
         this.correlationId = correlationId;
+        this.amount = amount;
         this.totalAmount = totalAmount;
         this.method = null;
     }

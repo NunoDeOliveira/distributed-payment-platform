@@ -1,6 +1,6 @@
 package com.tfg.accountservice.model;
 
-public enum AccountState {
+public enum OperationState {
     HELD,
     DEBITED,
     REJECTED,

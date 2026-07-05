@@ -20,26 +20,23 @@ public class CommissionConsumer {
     }
 
     @RabbitListener(queues = CommissionPublish.COMMISSION_QUEUE)
-    private void processEvent(CommissionEvent event) {
+    public void processEvent(CommissionEvent event) {
         if (event == null) {
             return;
         }
 
-        // Get parameters to use in switch cases
-        Long idReceived = event.getPaymentId();
-        String correlationId = event.getCorrelationId();
-        BigDecimal amount = event.getTotalAmount();
-        String method = event.getMethod();
         String eventType = event.getEventType();
-
         switch (eventType) {
             case "payment.created":
-                commissionService.calculateCommission(idReceived, correlationId, amount, method);
+                commissionService.calculateCommission(event.getCorrelationId(),
+                                                    event.getAmount(), event.getMethod());
                 break;
-            case "balance.rejected":
-                commissionService.commissionRelease(idReceived, correlationId);
+            case "operation.rejected":
+                commissionService.releaseCommission(event.getCorrelationId());
                 break;
-
+            case "payment.canceled":
+                commissionService.cancelCommission(event.getCorrelationId());
+                break;
             default:
                 System.out.println("Event unknown: " + eventType);
         }

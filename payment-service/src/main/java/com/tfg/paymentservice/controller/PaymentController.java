@@ -14,15 +14,22 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    public record CreatePaymentRequest(BigDecimal amount, PaymentMethod method) {}
+
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 
-    public record CreatePaymentRequest(BigDecimal amount, PaymentMethod method) {}
 
+    // This method receive JSON and convert the JSON en CreatePaymentRequest
     @PostMapping
     public Payment createPayment(@RequestBody CreatePaymentRequest request) {
         return paymentService.createPayment(request.amount(), request.method());
+    }
+
+    @DeleteMapping("/{id}")
+    public void cancelPaymentByUser(@PathVariable Long id) {
+        paymentService.cancelPayment(id);
     }
 
     @GetMapping("/{id}")
@@ -34,10 +41,5 @@ public class PaymentController {
     public List<Payment> getAllPayments() {
         return paymentService.getAllPayments();
     }
-    
-    @DeleteMapping("/{id}")
-    public void cancelPaymentByUser(@PathVariable Long id) {
-        paymentService.cancelPayment(id);
-    }
-    
+
 }

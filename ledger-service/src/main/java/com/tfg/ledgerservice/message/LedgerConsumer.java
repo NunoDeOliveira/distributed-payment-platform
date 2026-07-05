@@ -23,7 +23,7 @@ public class LedgerConsumer {
             case "hold.funds":
                 ledgerService.recordMovement(event.getLedgerId(), event.getCorrelationId(), event.getAmount());
                 break;
-            case "payment.canceled":
+            case "hold.founds.canceled":
                 ledgerService.cancelMovement(event.getLedgerId(),event.getCorrelationId());
                 break;
 

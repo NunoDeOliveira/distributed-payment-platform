@@ -17,9 +17,6 @@ public class Commission {
     private Long id;
 
     @Column(nullable = false)
-    private Long operationId;
-
-    @Column(nullable = false)
     private String correlationId;
 
     @Column(nullable = false)
@@ -46,10 +43,9 @@ public class Commission {
 
     protected Commission() {}
 
-    public Commission(Long operationId, String correlationId, BigDecimal amount, BigDecimal commissionAmount,
+    public Commission(String correlationId, BigDecimal amount, BigDecimal commissionAmount,
                       BigDecimal totalAmount, CommissionMethod method, CommissionState state, LocalDateTime time) {
 
-        this.operationId = operationId;
         this.correlationId = correlationId;
         this.amount = amount;
         this.commissionAmount = commissionAmount;
@@ -81,10 +77,10 @@ public class Commission {
         this.register += "REJECTED " + now + " | ";
     }
 
-    public void failed() {
+    public void cancel() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = CommissionState.FAILED;
+        this.state = CommissionState.CANCELED;
         this.time = now;
-        this.register += "FAILED " + now + " | ";
+        this.register += "CANCELED " + now + " | ";
     }
 }

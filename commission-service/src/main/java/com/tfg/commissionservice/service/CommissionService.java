@@ -27,7 +27,12 @@ public class CommissionService {
 
     // Given
     @Transactional
-    public void calculateCommission(Long Id, String correlationId, BigDecimal amount, String paymentMethod) {
+    public void calculateCommission(String correlationId, BigDecimal amount, String paymentMethod) {
+        // Check input data
+        if (correlationId == null || correlationId.isEmpty() ||
+                amount == null || paymentMethod == null) {
+            return;
+        }
 
         // Convert paymentMethod received into CommissionMethod class
         CommissionMethod commissionMethod = CommissionMethod.valueOf(paymentMethod);
@@ -39,27 +44,33 @@ public class CommissionService {
         BigDecimal totalAmount = amount.add(commissionAmount);
 
         // Create object commission to save in database
-        Commission commission = new Commission(Id, correlationId, amount, commissionAmount, totalAmount,
-                                                commissionMethod, CommissionState.CALCULATED, LocalDateTime.now());
+        Commission commission = new Commission(correlationId, amount, commissionAmount, totalAmount,
+                                    commissionMethod, CommissionState.CALCULATED, LocalDateTime.now());
 
         // Save commission apply into database
-        Commission storedCommission = commissionRepository.save(commission);
+        commission.calculated();
+        commissionRepository.save(commission);
 
         // Publish event in rabbit Account queue
-        commissionPublish.publishCommissionCalculated(storedCommission.getId(),commission.getCorrelationId(),
-                                                            commission.getTotalAmount(), paymentMethod);
+        commissionPublish.publishCommissionCalculated(commission.getCorrelationId(), amount,
+                                                        commission.getTotalAmount(), paymentMethod);
     }
 
     @Transactional
-    public void commissionRelease(Long paymentId, String correId) {
+    public void releaseCommission(String correlationId) {
+        // Check input data
+        if (correlationId == null) {
+            return;
+        }
+
         // Get commission from repository
-        Commission commission = commissionRepository.
-                                findOperationByIdAndCorrelationId(paymentId, correId).orElse(null);
+        Commission commission = commissionRepository.findByCorrelationId(correlationId).orElse(null);
         if (commission == null) {
             return;
         }
 
-        if (!commission.getCorrelationId().equals(correId) && commission.getState() != CommissionState.CALCULATED) {
+        if (!commission.getCorrelationId().equals(correlationId) &&
+                commission.getState() != CommissionState.CALCULATED) {
             return;
         }
 
@@ -68,9 +79,39 @@ public class CommissionService {
         commissionRepository.save(commission);
 
         // Publish in rabbit Payment queue
-        commissionPublish.publishCommissionReleased(commission);
+        commissionPublish.publishCommissionReleased(commission.getCorrelationId());
     }
 
+    // If the payment/operation is canceled,
+    @Transactional
+    public void cancelCommission(String correlationId) {
+        // Check input data
+        if (correlationId == null) {
+            return;
+        }
+
+        // Get commission from repository
+        Commission commission = commissionRepository.findByCorrelationId(correlationId).orElse(null);
+        if (commission == null) {
+            return;
+        }
+
+        // Check current state
+        if (commission.getState() != CommissionState.CALCULATED) {
+            return;
+        }
+
+        // Local cancellation
+        commission.cancel();
+        commissionRepository.save(commission);
+
+        // Local compensation
+        commission.released();
+        commissionRepository.save(commission);
+
+        // Publish compensation event
+        commissionPublish.publishCommissionReleased(commission.getCorrelationId());
+    }
 
     // Given an Id of commission get operation of commission
     public Commission getCommission(Long id) {

@@ -1,4 +1,4 @@
-# Dockerfile for ledger-service
+# Dockerfile for commission-service
 
 FROM eclipse-temurin:17-jre-alpine
 ARG JAR_FILE=target/*.jar

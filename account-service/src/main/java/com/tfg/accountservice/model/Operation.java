@@ -27,7 +27,7 @@ public class Operation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AccountState state;
+    private OperationState state;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -39,7 +39,7 @@ public class Operation {
     public Operation() {}
 
     public Operation(Long accountId, String correlationId, BigDecimal amount,
-                     AccountState state, LocalDateTime startTime, LocalDateTime endTime) {
+                     OperationState state, LocalDateTime startTime, LocalDateTime endTime) {
         this.accountId = accountId;
         this.correlationId = correlationId;
         this.amount = amount;
@@ -52,7 +52,7 @@ public class Operation {
     // Switch to DEBITED state and record the payment start time
     public void held() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = AccountState.HELD;
+        this.state = OperationState.HELD;
         this.startTime = LocalDateTime.now();
         this.register += "HELD " + now + " | ";
     }
@@ -60,28 +60,28 @@ public class Operation {
     // Switch to DEBITED state and record the payment start time
     public void deducted() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = AccountState.DEBITED;
+        this.state = OperationState.DEBITED;
         this.startTime = LocalDateTime.now();
         this.register += "DEBITED " + LocalDateTime.now();
     }
 
     // Switch to REJECTED state and record the payment start time
     public void rejected() {
-        this.state = AccountState.REJECTED;
+        this.state = OperationState.REJECTED;
         this.endTime = LocalDateTime.now();
         this.register += "REJECTED " + LocalDateTime.now();
     }
 
     // Switch to RELEASED state and record the payment RELEASED time
     public void released() {
-        this.state = AccountState.RELEASED;
+        this.state = OperationState.RELEASED;
         this.endTime = LocalDateTime.now();
         this.register += "RELEASED " + LocalDateTime.now();
     }
 
 
     public void failed() {
-        this.state = AccountState.FAILED;
+        this.state = OperationState.FAILED;
         this.endTime = LocalDateTime.now();
         this.register += "FAILED " + LocalDateTime.now();
     }

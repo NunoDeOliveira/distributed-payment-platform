@@ -14,4 +14,6 @@ import org.springframework.data.repository.query.Param;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.state = :state")
     Integer sumAmountByState(@Param("state") PaymentState state);
+
+    Optional<Payment> findByCorrelationId(String correlationId);
 }

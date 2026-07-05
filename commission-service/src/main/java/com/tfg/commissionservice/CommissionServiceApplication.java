@@ -1,7 +1,10 @@
 package com.tfg.commissionservice;
 
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class CommissionServiceApplication {
@@ -10,4 +13,9 @@ public class CommissionServiceApplication {
 		SpringApplication.run(CommissionServiceApplication.class, args);
 	}
 
+	@Bean
+	public MessageConverter jsonMessageConverter() {
+		return new Jackson2JsonMessageConverter();
+	}
 }
+

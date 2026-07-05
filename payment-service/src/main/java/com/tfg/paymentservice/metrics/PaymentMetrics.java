@@ -12,11 +12,8 @@ public class PaymentMetrics {
     public PaymentMetrics(MeterRegistry meterRegistry, PaymentRepository paymentRepository) {
         for (PaymentState state : PaymentState.values()) {
             if (state == PaymentState.REJECTED) continue;
-            Gauge.builder("payment.state.current",
-                                        paymentRepository,
-                                        repo -> repo.sumAmountByState(state))
-                                        .tag("state", state.name())
-                                        .register(meterRegistry);
+            Gauge.builder("payment.state.current", paymentRepository, repo ->
+                            repo.sumAmountByState(state)).tag("state", state.name()).register(meterRegistry);
         }
     }
 
