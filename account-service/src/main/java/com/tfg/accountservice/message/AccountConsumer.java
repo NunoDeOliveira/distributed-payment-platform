@@ -26,13 +26,13 @@ public class AccountConsumer {
         String eventType = event.getEventType();
         switch (eventType) {
             case "commission.calculated":
-                accountService.holdFunds(event.getCorrelationId(), event.getTotalAmount());
+                accountService.reserveAmount(event.getCorrelationId(), event.getTotalAmount());
                 break;
             case "movement.recorded":
-                accountService.deductAccount(event.getCorrelationId());
+                accountService.deductAmount(event.getCorrelationId());
                 break;
             case "payment.canceled":
-                accountService.cancelOperation(event.getCorrelationId());
+                accountService.cancelReserveAmount(event.getCorrelationId());
                 break;
 
             default:

@@ -1,9 +1,9 @@
 package com.tfg.accountservice.model;
 
 public enum BalanceState {
-    HELD,
-    DEBITED,
+    RESERVED,
+    CONFIRMED,
     REJECTED,
     RELEASED,
-    FAILED
+    CANCELED
 }

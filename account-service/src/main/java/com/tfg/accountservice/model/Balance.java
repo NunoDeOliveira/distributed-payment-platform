@@ -24,11 +24,7 @@ public class Balance {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(nullable = false)
-    private BigDecimal availableBalance;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private BalanceState state;
 
     private LocalDateTime time;
@@ -40,10 +36,10 @@ public class Balance {
     public Balance() {
     }
 
-    public Balance(String correlationId, BigDecimal amount, BigDecimal availableBalance, BalanceState state) {
+    public Balance(String correlationId, BigDecimal amount, BalanceState state) {
         this.correlationId = correlationId;
         this.amount = amount;
-        this.availableBalance = availableBalance;
+        //this.availableBalance = availableBalance;
         this.state = state;
         this.time = null;
         this.register = register;
@@ -51,19 +47,19 @@ public class Balance {
 
 
     // Switch to DEBITED state and record the payment start time
-    public void held() {
+    public void reserved() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = BalanceState.HELD;
+        this.state = BalanceState.RESERVED;
         this.time = LocalDateTime.now();
-        this.register += "HELD " + now + " | ";
+        this.register += "RESERVED " + now + " | ";
     }
 
     // Switch to DEBITED state and record the payment start time
-    public void deducted() {
+    public void debited() {
         LocalDateTime now = LocalDateTime.now();
-        this.state = BalanceState.DEBITED;
+        this.state = BalanceState.CONFIRMED;
         this.time = LocalDateTime.now();
-        this.register += "DEBITED " + LocalDateTime.now();
+        this.register += "CONFIRMED " + LocalDateTime.now();
     }
 
     // Switch to REJECTED state and record the payment start time
@@ -81,9 +77,9 @@ public class Balance {
     }
 
 
-    /*public void canceled() {
+    public void canceled() {
         this.state = BalanceState.CANCELED;
         this.time = LocalDateTime.now();
         this.register += "CANCELED " + LocalDateTime.now();
-    }*/
+    }
 }

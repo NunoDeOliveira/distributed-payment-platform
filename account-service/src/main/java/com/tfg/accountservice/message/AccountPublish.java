@@ -51,7 +51,7 @@ public class AccountPublish {
 
 
     // Publish an event accepting delivery in the delivery queue
-    public void publishOperationRejected(String correlationId) {
+    public void publishAmountRejected(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
         event = new AccountEvent("operation.rejected", correlationId, null, null);
@@ -61,7 +61,7 @@ public class AccountPublish {
     }
 
     // Publish an event in Ledge queue
-    public void publishHoldFunds(String correlationId, BigDecimal totalAmount) {
+    public void publishAmountReserved(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in the ledge queue
         AccountEvent event;
         event = new AccountEvent("held.funds", correlationId, totalAmount, null);
@@ -71,7 +71,7 @@ public class AccountPublish {
     }
 
     //
-    public void publishAccountDeducted(String correlationId, BigDecimal totalAmount) {
+    public void publishAmountDeducted(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
         event = new AccountEvent("account.deducted", correlationId, totalAmount,null);
@@ -80,7 +80,7 @@ public class AccountPublish {
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }
 
-    public void publishOperationReleased(String correlationId) {
+    public void publishAmountReleased(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
         event = new AccountEvent("operation.release", correlationId, null, null);

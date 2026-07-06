@@ -1,221 +1,163 @@
 package com.tfg.accountservice.service;
 
 import com.tfg.accountservice.message.AccountPublish;
-import com.tfg.accountservice.model.Account;
-import com.tfg.accountservice.model.Operation;
-import com.tfg.accountservice.model.OperationState;
-import com.tfg.accountservice.repository.AccountRepository;
-import com.tfg.accountservice.repository.OperationRepository;
+import com.tfg.accountservice.model.*;
+import com.tfg.accountservice.repository.BalanceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.List;
-
-import org.springframework.transaction.annotation.Isolation;
 
 
 @Service
 public class AccountService {
-    private final AccountRepository accountRepo;
     private final AccountPublish accountPublish;
-    private final OperationRepository operationRepo;
+    private final BalanceRepository balanceRepo;
 
     // Constructor
-    public AccountService(AccountRepository accountRepo, AccountPublish accountPublish,
-                          OperationRepository operationRepo) {
-        this.accountRepo = accountRepo;
+    public AccountService(AccountPublish accountPublish, BalanceRepository balanceRepo) {
         this.accountPublish = accountPublish;
-        this.operationRepo = operationRepo;
+        this.balanceRepo = balanceRepo;
     }
     
 
     //@Transactional
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void reserveAmount(String correlationId, BigDecimal amountToDeducted) {
+    public void reserveAmount(String correlationId, BigDecimal amount) {
         // Check input data
-        if (correlationId == null || amountToDeducted == null) {
+        if (correlationId == null || amount == null) {
             return;
         }
 
-        // Idempotency. Check if the operation already exists
-        if (operationRepo.findByCorrelationId(correlationId).isPresent()) {
+        // Check if there are Balance records with the given ID
+        Optional<Balance> amountToReserve = balanceRepo.findByCorrelationId(correlationId);
+        if (amountToReserve.isPresent()) {
             return;
         }
 
-        // Search operation by accountId
-        Account account = accountRepo.findByCorrelationId(correlationId).orElse(null);
-        if (account == null) {
-            // Case operation does not exist
-            accountPublish.publishOperationRejected(correlationId);
+        // Calculate  available balance from repository
+        BigDecimal available = balanceRepo.calculateAvailableBalance(
+                List.of(BalanceState.RESERVED, BalanceState.CONFIRMED));
+
+        // Check if there are enough funds
+        if (available.compareTo(amount) < 0) {
+            accountPublish.publishAmountRejected(correlationId);
             return;
         }
 
-        // create operation record
-        Operation operation = new Operation(correlationId, amountToDeducted, OperationState.HELD,
-                                                                    null, null);
+        // Save the state of amount reserved. -->String correlationId, BigDecimal amount, BalanceState state
+        Balance amountReserved = new Balance(correlationId,amount, BalanceState.RESERVED);
+        balanceRepo.save(amountReserved);
 
-        // Check if the balance is enough
-        OperationState result = checkBalance(operation, amountToDeducted, operation);
-        if (result == OperationState.REJECTED) {
-            accountPublish.publishOperationRejected(correlationId);
-            return;
-        }
-
-        // Publish event
-        accountPublish.publishHoldFunds(correlationId, amountToDeducted);
+        // Publish into Ledger queue
+        accountPublish.publishAmountReserved(correlationId, amount);
     }
 
     //@Transactional
     //public void validateDelivery(Long id, int amount){
     @Transactional
-    public void deductAccount(String correlationId) {
+    public void deductAmount(String correlationId) {
         if (correlationId == null) {
             return;
         }
 
-        // Recover the existing operation
-        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
-        if (operation == null) {
+        Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
+
+        if (balance == null) {
             return;
         }
 
-        // Extract amount from the operation — not a parameter here
-        BigDecimal amountToDeducted = operation.getAmount();
+        if (balance.getState() == BalanceState.CONFIRMED) {
+            return;
+        }
 
-        // Confirm the hold is now a permanent debit
-        operation.deducted();
-        operationRepo.save(operation);
+        if (balance.getState() != BalanceState.RESERVED) {
+            return;
+        }
 
-        // Notify in queue that the full chain succeeded
-        accountPublish.publishAccountDeducted(correlationId, amountToDeducted);
+        // // Save the state of balance as debited
+        balance.debited();
+        balanceRepo.save(balance);
+
+        // Release the amount reserved
+        Balance balanceSaved = balanceRepo.findByCorrelationId(correlationId).orElse(null);
+        releaseAmount(correlationId);
     }
 
     @Transactional
     // Given an id and amount of a Production increase the stock of DB
-    public void releaseOperation(String correlationId) {
+    public void releaseAmount(String correlationId) {
         if (correlationId == null) {
             return;
         }
 
+        // Idempotency: if it was already released, do not release it again
+        Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
+        if (balance.getState() == BalanceState.RELEASED) {
+            return;
+        }
 
-        /* ******************* NEW CODE ******************* */
-        BigDecimal newAvailableBalance =
-                balance.getAvailableBalance().add(balance.getAmount());
+        // Only reserved amounts can be released
+        if (balance.getState() != BalanceState.RESERVED) {
+            return;
+        }
 
-        balance.setAvailableBalance(newAvailableBalance);
+        // Change local state to RELEASED
         balance.released();
+        balanceRepo.save(balance);
 
-        balanceRepository.save(balance);
+        // Publish compensation event
         accountPublish.publishAmountReleased(correlationId);
-
-
-        /* ******************* ENd ******************* */
-
-
-
-
-
-        // Recover the existing hold — if not found, nothing to release
-        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
-        if (operation == null) {
-            return;
-        }
-
-        // Only release if the operation is still held
-        if (operation.getState() != OperationState.HELD) {
-            return; // idempotency guard — already released or deducted
-        }
-
-        // Restore the balance in the account
-        Operation account = accountRepo.findByCorrelationId(correlationId).orElse(null);
-        if (account == null) {
-            return;
-        }
-        account.release(operation.getAmount());
-        accountRepo.save(account);
-
-        // Mark the operation as released
-        operation.released();
-        operationRepo.save(operation);
-
-        // Notify Commission Service so it can cancel the commission
-        accountPublish.publishOperationReleased(correlationId);
     }
 
     // Given and id of product and amount release a reservation
     @Transactional
-    public void cancelOperation(String correlationId) {
+    public void cancelReserveAmount(String correlationId) {
         // Check input data
         if (correlationId == null) {
             return;
         }
 
-        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
-        if (operation == null) return;
-
-        if (operation.getState() != OperationState.HELD) return;
-
-        operation.canceled();
-        operationRepo.save(operation);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    // Given an id and amount check the balance
-    public OperationState checkBalance(Operation account, BigDecimal amountToDeducted,
-                                       Operation operation) {
-        if (operation == null || amountToDeducted == null) {
-            return OperationState.FAILED;
-        }
-
-
-        /* ******************* NEW CODE ******************* */
-        if (balance.getAvailableBalance().compareTo(balance.getAmount()) < 0) {
-            balance.rejected();
-            balanceRepository.save(balance);
-            accountPublish.publishAmountRejected(correlationId);
+        // Idempotency: if it is already released, do not release it again
+        Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
+        if (balance.getState() == BalanceState.RELEASED) {
             return;
         }
 
-        balance.reserved();
-        balanceRepository.save(balance);
-        accountPublish.publishAmountReserved(correlationId, amount);
-
-        /* ******************* END NEW CODE ******************* */
-
-
-        boolean enoughBalance = operation.getBalance().compareTo(amountToDeducted) >= 0;
-        if (!enoughBalance) {
-            operation.rejected();
-            operationRepo.save(operation);
-            return OperationState.REJECTED;
+        // Only a reserved amount can be cancelled and released
+        if (balance.getState() != BalanceState.RESERVED) {
+            return;
         }
 
-        // Case there are enough balance
-        operation.held();
-        operationRepo.save(operation);
-        return OperationState.HELD;
+        // Local trace: cancelled is not published as a Saga event
+        balance.canceled();
+        balanceRepo.save(balance);
+        // Final state for the Saga compensation
+        balance.released();
+        balanceRepo.save(balance);
+
+        accountPublish.publishAmountReleased(correlationId);
     }
 
-    // Given an id of get account
-    public Operation getAccount(Long id) {
-        if (id == null) return null;
-        return operationRepo.findById(id).orElse(null);
-    }
 
-    // Get all the operations
-    public List<Operation> getAllAccounts() {
-        return operationRepo.findAll();
+
+    // Get available balance to
+
+    // Given an amount deposit that amount into the account
+    @Transactional
+    public void addBalance(BigDecimal amount) {
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        Balance balance = new Balance();
+        balance.setAmount(amount);
+
+        balanceRepo.save(balance);
     }
 
 

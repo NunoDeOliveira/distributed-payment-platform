@@ -1,8 +1,7 @@
 package com.tfg.accountservice.metrics;
 
-import com.tfg.accountservice.model.OperationState;
-import com.tfg.accountservice.repository.AccountRepository;
-import com.tfg.accountservice.repository.OperationRepository;
+import com.tfg.accountservice.model.BalanceState;
+import com.tfg.accountservice.repository.BalanceRepository;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
@@ -10,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountMetrics {
 
-    public AccountMetrics(MeterRegistry meterRegistry, OperationRepository operationRepository) {
-        for (OperationState state : OperationState.values()) {
-            if (state == OperationState.REJECTED) continue;
+    public AccountMetrics(MeterRegistry meterRegistry, BalanceRepository balanceRepository) {
+        for (BalanceState state : BalanceState.values()) {
+            if (state == BalanceState.REJECTED) continue;
 
-            Gauge.builder("account.state.current", operationRepository,
+            Gauge.builder("account.state.current", balanceRepository,
                     repo -> repo.sumAmountByState(state)).tag("state", state.name()).register(meterRegistry);
         }
     }
