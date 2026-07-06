@@ -1,6 +1,7 @@
 package com.tfg.accountservice.controller;
 
 import com.tfg.accountservice.model.Account;
+import com.tfg.accountservice.model.Operation;
 import com.tfg.accountservice.service.AccountService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +19,14 @@ public class AccountController {
 
 
     @GetMapping("/{id}")
-    public Account getPayment(@PathVariable Long id) {
+    public Operation getPayment(@PathVariable Long id) {
+
         return accountService.getAccount(id);
     }
 
     @GetMapping
     public List<Account> getAllPayments() {
+
         return accountService.getAllAccounts();
     }
 

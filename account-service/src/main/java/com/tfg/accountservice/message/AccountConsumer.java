@@ -4,7 +4,6 @@ import com.tfg.accountservice.event.AccountEvent;
 import com.tfg.accountservice.service.AccountService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 public class AccountConsumer {
@@ -27,13 +26,13 @@ public class AccountConsumer {
         String eventType = event.getEventType();
         switch (eventType) {
             case "commission.calculated":
-                accountService.holdFunds(event.getAccountId(), event.getCorrelationId(), event.getAmount());
+                accountService.holdFunds(event.getCorrelationId(), event.getTotalAmount());
                 break;
             case "movement.recorded":
-                accountService.deductAccount(event.getAccountId(), event.getCorrelationId());
+                accountService.deductAccount(event.getCorrelationId());
                 break;
-            case "payment.cancelled":
-                accountService.cancelOperation(event.getAccountId(), event.getCorrelationId());
+            case "payment.canceled":
+                accountService.cancelOperation(event.getCorrelationId());
                 break;
 
             default:

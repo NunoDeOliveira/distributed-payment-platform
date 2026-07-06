@@ -2,15 +2,14 @@ package com.tfg.accountservice.service;
 
 import com.tfg.accountservice.message.AccountPublish;
 import com.tfg.accountservice.model.Account;
+import com.tfg.accountservice.model.Operation;
 import com.tfg.accountservice.model.OperationState;
 import com.tfg.accountservice.repository.AccountRepository;
 import com.tfg.accountservice.repository.OperationRepository;
 import org.springframework.stereotype.Service;
-import com.tfg.accountservice.model.Operation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Isolation;
@@ -23,7 +22,8 @@ public class AccountService {
     private final OperationRepository operationRepo;
 
     // Constructor
-    public AccountService(AccountRepository accountRepo, AccountPublish accountPublish, OperationRepository operationRepo) {
+    public AccountService(AccountRepository accountRepo, AccountPublish accountPublish,
+                          OperationRepository operationRepo) {
         this.accountRepo = accountRepo;
         this.accountPublish = accountPublish;
         this.operationRepo = operationRepo;
@@ -32,40 +32,45 @@ public class AccountService {
 
     //@Transactional
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void holdFunds(Long accountId, String correlationId, BigDecimal amountToDeducted) {
+    public void reserveAmount(String correlationId, BigDecimal amountToDeducted) {
+        // Check input data
+        if (correlationId == null || amountToDeducted == null) {
+            return;
+        }
+
         // Idempotency. Check if the operation already exists
         if (operationRepo.findByCorrelationId(correlationId).isPresent()) {
             return;
         }
 
-        // Search account by accountId
-        Account account = accountRepo.findById(accountId).orElse(null);
+        // Search operation by accountId
+        Account account = accountRepo.findByCorrelationId(correlationId).orElse(null);
         if (account == null) {
-            // Case account does not exist
-            accountPublish.publishOperationRejected(accountId, correlationId);
+            // Case operation does not exist
+            accountPublish.publishOperationRejected(correlationId);
             return;
         }
 
         // create operation record
-        Operation operation = new Operation(accountId, correlationId, amountToDeducted,
-                                            OperationState.HELD, LocalDateTime.now(), LocalDateTime.now());
+        Operation operation = new Operation(correlationId, amountToDeducted, OperationState.HELD,
+                                                                    null, null);
 
         // Check if the balance is enough
-        OperationState result = checkBalance(account, amountToDeducted, operation);
+        OperationState result = checkBalance(operation, amountToDeducted, operation);
         if (result == OperationState.REJECTED) {
-            accountPublish.publishOperationRejected(accountId, correlationId);
+            accountPublish.publishOperationRejected(correlationId);
             return;
         }
 
         // Publish event
-        accountPublish.publishHoldFunds(accountId, correlationId, amountToDeducted);
+        accountPublish.publishHoldFunds(correlationId, amountToDeducted);
     }
 
     //@Transactional
     //public void validateDelivery(Long id, int amount){
     @Transactional
-    public void deductAccount(Long accountId, String correlationId) {
-        if (correlationId == null || accountId == null) {
+    public void deductAccount(String correlationId) {
+        if (correlationId == null) {
             return;
         }
 
@@ -83,15 +88,33 @@ public class AccountService {
         operationRepo.save(operation);
 
         // Notify in queue that the full chain succeeded
-        accountPublish.publishAccountDeducted(accountId, correlationId, amountToDeducted);
+        accountPublish.publishAccountDeducted(correlationId, amountToDeducted);
     }
 
     @Transactional
     // Given an id and amount of a Production increase the stock of DB
-    public void releaseOperation(Long paymentId, String correlationId, Long accountId) {
-        if (paymentId == null || correlationId == null || accountId == null) {
+    public void releaseOperation(String correlationId) {
+        if (correlationId == null) {
             return;
         }
+
+
+        /* ******************* NEW CODE ******************* */
+        BigDecimal newAvailableBalance =
+                balance.getAvailableBalance().add(balance.getAmount());
+
+        balance.setAvailableBalance(newAvailableBalance);
+        balance.released();
+
+        balanceRepository.save(balance);
+        accountPublish.publishAmountReleased(correlationId);
+
+
+        /* ******************* ENd ******************* */
+
+
+
+
 
         // Recover the existing hold — if not found, nothing to release
         Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
@@ -105,7 +128,7 @@ public class AccountService {
         }
 
         // Restore the balance in the account
-        Account account = accountRepo.findById(accountId).orElse(null);
+        Operation account = accountRepo.findByCorrelationId(correlationId).orElse(null);
         if (account == null) {
             return;
         }
@@ -117,57 +140,82 @@ public class AccountService {
         operationRepo.save(operation);
 
         // Notify Commission Service so it can cancel the commission
-        accountPublish.publishOperationReleased(paymentId, correlationId);
+        accountPublish.publishOperationReleased(correlationId);
     }
 
     // Given and id of product and amount release a reservation
     @Transactional
-    public void cancelOperation(Long accountId, String correlationId) {
+    public void cancelOperation(String correlationId) {
         // Check input data
-        if (accountId == null || correlationId == null) {
+        if (correlationId == null) {
             return;
         }
+
+        Operation operation = operationRepo.findByCorrelationId(correlationId).orElse(null);
+        if (operation == null) return;
+
+        if (operation.getState() != OperationState.HELD) return;
+
+        operation.canceled();
+        operationRepo.save(operation);
     }
 
+
+
+
+
+
+
+
+
+
+
+
     // Given an id and amount check the balance
-    public OperationState checkBalance(Account account, BigDecimal amountToDeducted, Operation operation) {
-        if (account == null || amountToDeducted == null) {
+    public OperationState checkBalance(Operation account, BigDecimal amountToDeducted,
+                                       Operation operation) {
+        if (operation == null || amountToDeducted == null) {
             return OperationState.FAILED;
         }
 
-        // Compare the balance with amount to deducted (amountToDeducted)
-        boolean enoughBalance = account.getBalance().compareTo(amountToDeducted) >= 0;
 
-        // Check if the balance is enough
+        /* ******************* NEW CODE ******************* */
+        if (balance.getAvailableBalance().compareTo(balance.getAmount()) < 0) {
+            balance.rejected();
+            balanceRepository.save(balance);
+            accountPublish.publishAmountRejected(correlationId);
+            return;
+        }
+
+        balance.reserved();
+        balanceRepository.save(balance);
+        accountPublish.publishAmountReserved(correlationId, amount);
+
+        /* ******************* END NEW CODE ******************* */
+
+
+        boolean enoughBalance = operation.getBalance().compareTo(amountToDeducted) >= 0;
         if (!enoughBalance) {
-            // Case there are not enough balance
             operation.rejected();
             operationRepo.save(operation);
             return OperationState.REJECTED;
         }
 
         // Case there are enough balance
-        account.held(amountToDeducted);
-        accountRepo.save(account);
         operation.held();
         operationRepo.save(operation);
         return OperationState.HELD;
     }
 
-    // Given an id of get acount
-    public Account getAccount(Long accountId) {
-        // Check input data
-        if (accountId == null) {
-            System.out.println("Incorrect input data");
-            return null;
-        }
-
-        return accountRepo.findById(accountId).orElse(null);
+    // Given an id of get account
+    public Operation getAccount(Long id) {
+        if (id == null) return null;
+        return operationRepo.findById(id).orElse(null);
     }
 
     // Get all the operations
-    public List<Account> getAllAccounts() {
-        return accountRepo.findAll();
+    public List<Operation> getAllAccounts() {
+        return operationRepo.findAll();
     }
 
 

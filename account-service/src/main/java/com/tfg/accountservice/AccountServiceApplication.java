@@ -14,8 +14,6 @@ public class AccountServiceApplication {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter(
-                new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()
-        );
+        return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter();
     }
 }

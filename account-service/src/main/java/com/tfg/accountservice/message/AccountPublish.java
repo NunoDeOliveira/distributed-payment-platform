@@ -51,39 +51,39 @@ public class AccountPublish {
 
 
     // Publish an event accepting delivery in the delivery queue
-    public void publishOperationRejected(Long accountId, String correlationId) {
+    public void publishOperationRejected(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("operation.rejected", accountId, correlationId, null, null);
+        event = new AccountEvent("operation.rejected", correlationId, null, null);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
 
     // Publish an event in Ledge queue
-    public void publishHoldFunds(Long accountId, String correlationId, BigDecimal totalAmount) {
+    public void publishHoldFunds(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in the ledge queue
         AccountEvent event;
-        event = new AccountEvent("held.funds", accountId, correlationId, totalAmount, accountId);
+        event = new AccountEvent("held.funds", correlationId, totalAmount, null);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(LEDGER_QUEUE, event);
     }
 
     //
-    public void publishAccountDeducted(Long accountId, String correlationId, BigDecimal totalAmount) {
+    public void publishAccountDeducted(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("account.deducted", accountId, correlationId, totalAmount, accountId);
+        event = new AccountEvent("account.deducted", correlationId, totalAmount,null);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }
 
-    public void publishOperationReleased(Long accountId, String correlationId) {
+    public void publishOperationReleased(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("operation.release", accountId, correlationId, null, null);
+        event = new AccountEvent("operation.release", correlationId, null, null);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
