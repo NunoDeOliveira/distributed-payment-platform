@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
 
@@ -144,7 +145,28 @@ public class AccountService {
 
 
 
-    // Get available balance to
+    // Get available balance
+    public BigDecimal getAvailableBalance() {
+
+        BigDecimal availableBalance = BigDecimal.ZERO;
+
+        List<Balance> balances = balanceRepo.findAll();
+
+        for (Balance balance : balances) {
+
+            BalanceState state = balance.getState();
+            BigDecimal amount = balance.getAmount();
+            if (amount == null) {
+                continue;
+            }
+
+            if (state == null || state == BalanceState.RESERVED || state == BalanceState.CONFIRMED) {
+                availableBalance = availableBalance.add(amount);
+            }
+        }
+
+        return availableBalance;
+    }
 
     // Given an amount deposit that amount into the account
     @Transactional
@@ -156,6 +178,7 @@ public class AccountService {
 
         Balance balance = new Balance();
         balance.setAmount(amount);
+        balance.setTime(LocalDateTime.now());
 
         balanceRepo.save(balance);
     }

@@ -11,10 +11,13 @@ public class AccountMetrics {
 
     public AccountMetrics(MeterRegistry meterRegistry, BalanceRepository balanceRepository) {
         for (BalanceState state : BalanceState.values()) {
-            if (state == BalanceState.REJECTED) continue;
+            if (state == BalanceState.REJECTED) {
+                continue;
+            }
 
-            Gauge.builder("account.state.current", balanceRepository,
-                    repo -> repo.sumAmountByState(state)).tag("state", state.name()).register(meterRegistry);
+            Gauge.builder("account.state.current", balanceRepository, repo ->
+                                    repo.sumAmountByState(state).doubleValue()).tag("state", state.name())
+                                    .register(meterRegistry);
         }
     }
 
