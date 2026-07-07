@@ -5,9 +5,8 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 
@@ -23,6 +22,8 @@ public class AccountPublish {
     public static final String PAYMENT_QUEUE = "payment.queue";
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
+
+    private static final Logger log = LoggerFactory.getLogger(AccountPublish.class);
 
     // Constructor
     public AccountPublish(RabbitTemplate rabbitTemplate) {
@@ -54,7 +55,7 @@ public class AccountPublish {
     public void publishAmountRejected(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("operation.rejected", correlationId, null, null);
+        event = new AccountEvent("amount.rejected", correlationId, null, null);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
@@ -64,7 +65,10 @@ public class AccountPublish {
     public void publishAmountReserved(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in the ledge queue
         AccountEvent event;
-        event = new AccountEvent("held.funds", correlationId, totalAmount, null);
+        event = new AccountEvent("amount.reserved", correlationId, totalAmount, null);
+
+        log.info("PUBLISH | amount.reserved | correlationId={} | amount={}",
+                correlationId, totalAmount);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(LEDGER_QUEUE, event);
@@ -74,7 +78,10 @@ public class AccountPublish {
     public void publishAmountDeducted(String correlationId, BigDecimal totalAmount) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("account.deducted", correlationId, totalAmount,null);
+        event = new AccountEvent("amount.deducted", correlationId, totalAmount,null);
+
+        log.info("PUBLISH | amount.debited | correlationId={} | amount={}",
+                correlationId, totalAmount);
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
@@ -83,10 +90,14 @@ public class AccountPublish {
     public void publishAmountReleased(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;
-        event = new AccountEvent("operation.release", correlationId, null, null);
+        event = new AccountEvent("amount.released", correlationId, null, null);
+
+        log.info("PUBLISH | amount.released | correlationId={} | amount={}",
+                correlationId, event.getAmount());
 
         // Convert to JSON format and send
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
+
 
 }

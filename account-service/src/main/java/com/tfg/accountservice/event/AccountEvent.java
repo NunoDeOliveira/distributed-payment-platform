@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class AccountEvent {
     private String eventType;
     private String correlationId;
-    private BigDecimal totalAmount;
+    private BigDecimal amount;
     private BalanceState state;
 
 

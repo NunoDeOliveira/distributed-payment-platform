@@ -19,9 +19,6 @@ public class Movement {
     private Long id;
 
     @Column(nullable = false)
-    private Long ledgerId;
-
-    @Column(nullable = false)
     private String correlationId;
 
     @Column(nullable = false)
@@ -41,9 +38,8 @@ public class Movement {
     }
     
 
-    public Movement(Long ledgerId, String correlationId, BigDecimal amount,
+    public Movement(String correlationId, BigDecimal amount,
                     MovementState state, LocalDateTime startTime) {
-        this.ledgerId = ledgerId;
         this.correlationId = correlationId;
         this.amount = amount;
         this.state = state;

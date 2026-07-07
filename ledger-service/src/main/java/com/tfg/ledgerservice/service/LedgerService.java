@@ -28,7 +28,7 @@ public class LedgerService {
 
     // Given an ID and amount of a LedgerMovement recorded a movement
     @Transactional
-    public void recordMovement(Long ledgerId, String correlationId, BigDecimal amount) {
+    public void recordMovement(String correlationId, BigDecimal amount) {
         if (correlationId == null || amount == null) {
             return;
         }
@@ -39,25 +39,25 @@ public class LedgerService {
         }
 
         // Create the ledger entry
-        Movement movement = new Movement(ledgerId, correlationId, amount, MovementState.RECORDED, LocalDateTime.now());
+        Movement movement = new Movement(correlationId, amount, MovementState.RECORDED, LocalDateTime.now());
 
         try {
             movement.recorded();
             movementRepo.save(movement);
             // Publish  recorded event
-            ledgerPublish.publishLedgerMovementRecorded(ledgerId, correlationId, amount);
+            ledgerPublish.publishLedgerMovementRecorded(correlationId, amount);
 
         } catch (Exception e) {
             movement.failed();
             movementRepo.save(movement);
             // Publish failed event
-            ledgerPublish.publishLedgerMovementFailed(ledgerId, correlationId, amount);
+            ledgerPublish.publishLedgerMovementFailed(correlationId, amount);
         }
 
     }
 
     @Transactional
-    public void cancelMovement(Long ledgerId, String correlationId) {
+    public void cancelMovement(String correlationId) {
         // Check input data
         if (correlationId == null) {
             return;
@@ -81,7 +81,7 @@ public class LedgerService {
     }
 
     // Given an
-    /*@Transactional
+    @Transactional
     public void rejectMovement(Long ledgerId, String correlationId) {
         // Check input data
         if (correlationId == null) {
@@ -104,7 +104,7 @@ public class LedgerService {
         movement.reject();
         movementRepo.save(movement);
         ledgerPublish.publishLedgerMovementRejected(ledgerId, correlationId, movement.getAmount());
-    }*/
+    }
 
     // Get delivery by ID
     public Movement getLedgerMovement(Long id) {

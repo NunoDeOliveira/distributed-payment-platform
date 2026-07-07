@@ -5,6 +5,9 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.math.BigDecimal;
 
@@ -17,6 +20,8 @@ public class LedgerPublish {
     public static final String LEDGER_QUEUE = "ledger.queue";
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
+    private static final Logger log = LoggerFactory.getLogger(LedgerPublish.class);
+
 
     public LedgerPublish(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
@@ -34,9 +39,12 @@ public class LedgerPublish {
 
 
     // Methods
-    public void publishLedgerMovementRecorded(Long ledgerId, String correlationId, BigDecimal amount) {
+    public void publishLedgerMovementRecorded(String correlationId, BigDecimal amount) {
         // Create an event to publish in the queue
-        LedgerEvent event =  new LedgerEvent("movement.recorded",  ledgerId, correlationId, amount);
+        LedgerEvent event =  new LedgerEvent("movement.recorded", correlationId, amount,null);
+
+        log.info("PUBLISH | movement.recorded | correlationId={} | totalAmount={}",
+                correlationId, event.getAmount());
 
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
@@ -44,7 +52,10 @@ public class LedgerPublish {
     // Given an Id and amount of movement publish movement rejected
     public void publishLedgerMovementRejected(Long ledgerId, String correlationId, BigDecimal amount) {
         // Create an event to publish in the queue
-        LedgerEvent event =  new LedgerEvent("movement.rejected",  ledgerId, correlationId, amount);
+        LedgerEvent event =  new LedgerEvent("movement.rejected", correlationId, amount, null);
+
+        log.info("PUBLISH | movement.rejecteded | correlationId={} | totalAmount={}",
+                correlationId, event.getAmount());
 
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
@@ -52,9 +63,12 @@ public class LedgerPublish {
 
 
     // Given an Id and amount of delivery publish a pending delivery
-    public void publishLedgerMovementFailed(Long ledgerId, String correlationId, BigDecimal amount) {
+    public void publishLedgerMovementFailed(String correlationId, BigDecimal amount) {
         // Create an event to publish in the queue
-        LedgerEvent event =  new LedgerEvent("movement.failed",  ledgerId, correlationId, amount);
+        LedgerEvent event =  new LedgerEvent("movement.failed",  correlationId, amount, null);
+
+        log.info("PUBLISH | movement.failed | correlationId={} | totalAmount={}",
+                correlationId, event.getAmount());
 
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }

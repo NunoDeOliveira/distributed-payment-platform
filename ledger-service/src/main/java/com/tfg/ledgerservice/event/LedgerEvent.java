@@ -1,5 +1,7 @@
 package com.tfg.ledgerservice.event;
 
+import com.tfg.ledgerservice.model.MovementState;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +14,10 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LedgerEvent {
     private String eventType;
-    private Long LedgerId;
     private String correlationId;
     private BigDecimal amount;
+    private Long ledgerId;
 }

@@ -49,7 +49,7 @@ public class AccountService {
             return;
         }
 
-        // Save the state of amount reserved. -->String correlationId, BigDecimal amount, BalanceState state
+        // Save the state of amount reserved.->String correlationId, BigDecimal amount, BalanceState state
         Balance amountReserved = new Balance(correlationId,amount, BalanceState.RESERVED);
         balanceRepo.save(amountReserved);
 
@@ -65,17 +65,13 @@ public class AccountService {
             return;
         }
 
+        // if it was already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-
         if (balance == null) {
             return;
         }
 
-        if (balance.getState() == BalanceState.CONFIRMED) {
-            return;
-        }
-
-        if (balance.getState() != BalanceState.RESERVED) {
+        if (balance.getState() == BalanceState.CONFIRMED || balance.getState() != BalanceState.RESERVED) {
             return;
         }
 
@@ -86,6 +82,10 @@ public class AccountService {
         // Release the amount reserved
         Balance balanceSaved = balanceRepo.findByCorrelationId(correlationId).orElse(null);
         releaseAmount(correlationId);
+
+        // publish the event into queue
+        accountPublish.publishAmountDeducted(correlationId, balanceSaved.getAmount());
+
     }
 
     @Transactional
@@ -95,14 +95,13 @@ public class AccountService {
             return;
         }
 
-        // Idempotency: if it was already released, do not release it again
+        // If it was already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance.getState() == BalanceState.RELEASED) {
+        if (balance == null) {
             return;
         }
 
-        // Only reserved amounts can be released
-        if (balance.getState() != BalanceState.RESERVED) {
+        if (balance.getState() == BalanceState.RELEASED || balance.getState() != BalanceState.RESERVED) {
             return;
         }
 
@@ -124,12 +123,11 @@ public class AccountService {
 
         // Idempotency: if it is already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance.getState() == BalanceState.RELEASED) {
+        if (balance == null) {
             return;
         }
 
-        // Only a reserved amount can be cancelled and released
-        if (balance.getState() != BalanceState.RESERVED) {
+        if (balance.getState() == BalanceState.RELEASED || balance.getState() != BalanceState.RESERVED) {
             return;
         }
 
@@ -147,7 +145,6 @@ public class AccountService {
 
     // Get available balance
     public BigDecimal getAvailableBalance() {
-
         BigDecimal availableBalance = BigDecimal.ZERO;
 
         List<Balance> balances = balanceRepo.findAll();
@@ -171,7 +168,7 @@ public class AccountService {
     // Given an amount deposit that amount into the account
     @Transactional
     public void addBalance(BigDecimal amount) {
-
+        // Check the input data
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             return;
         }

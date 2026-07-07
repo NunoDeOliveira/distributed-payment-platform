@@ -30,7 +30,7 @@ public class PaymentConsumer {
         String eventType = event.getEventType();
         switch (eventType) {
             // Case in which payment is finished successful
-            case "account.deducted":
+            case "amount.deducted":
                 paymentService.completePayment(event.getCorrelationId());
                 break;
 
