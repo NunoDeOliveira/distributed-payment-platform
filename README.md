@@ -43,40 +43,94 @@ Cada paso pertenece a un microservicio distinto. La consistencia global no se ob
 
 ---
 
-## Application Design
+## System Architecture: Application and Infrastructure
+
+## System Architecture: Application and Infrastructure
+
+The platform is designed as a distributed system composed of independent Spring Boot microservices. Each service owns its local data model and communicates with the rest of the system through asynchronous events published in RabbitMQ.
+
+The local version runs with Docker containers for RabbitMQ and PostgreSQL. The target deployment architecture is prepared for **AWS EC2 instances running a K3s cluster**, where each microservice can be deployed as a Kubernetes workload.
+
+---
+
+## System Components
+
+| Layer | Component | Technology | Role |
+|---|---|---|---|
+| Cloud Infrastructure | AWS EC2 | Virtual machines | Hosts the K3s cluster nodes |
+| Container Orchestration | K3s | Lightweight Kubernetes | Runs and manages the microservice workloads |
+| Entry Point | API Gateway | Spring Cloud Gateway | Routes external HTTP requests to internal services |
+| Business Service | Payment Service | Spring Boot | Creates and completes payments |
+| Business Service | Commission Service | Spring Boot | Calculates and compensates commissions |
+| Business Service | Account Service | Spring Boot | Reserves, confirms and releases account balance |
+| Business Service | Ledger Service | Spring Boot | Records ledger movements |
+| Messaging | RabbitMQ | Message broker | Enables asynchronous event-driven communication |
+| Persistence | PostgreSQL | Relational database | Stores the local state of each service |
+| Observability | Prometheus / Grafana | Monitoring stack | Collects and visualizes metrics |
+
+---
+
+## Global Architecture
 
 ```mermaid
-flowchart LR
-    User[User] --> Gateway[API Gateway]
-    Gateway --> Payment[Payment Service]
+flowchart TB
 
-    Payment -->|payment.created| RabbitMQ[(RabbitMQ)]
-    RabbitMQ -->|payment.created| Commission[Commission Service]
+    subgraph AWS["AWS Cloud"]
+        subgraph EC2["EC2 Instances"]
+            subgraph K3S["K3s Cluster"]
 
-    Commission -->|commission.calculated| RabbitMQ
-    RabbitMQ -->|commission.calculated| Account[Account Service]
+                User[User] --> Gateway[API Gateway]
 
-    Account -->|amount.reserved| RabbitMQ
-    RabbitMQ -->|amount.reserved| Ledger[Ledger Service]
+                Gateway --> Payment[Payment Service]
+                Gateway --> AccountAPI[Account Service API]
 
-    Ledger -->|movement.recorded| RabbitMQ
-    RabbitMQ -->|movement.recorded| Account
+                Payment -->|payment.created| RabbitMQ[(RabbitMQ)]
+                RabbitMQ -->|payment.created| Commission[Commission Service]
 
-    Account -->|amount.debited| RabbitMQ
-    RabbitMQ -->|amount.debited| Payment
+                Commission -->|commission.calculated| RabbitMQ
+                RabbitMQ -->|commission.calculated| Account[Account Service]
 
-    Payment -->|COMPLETED| Completed[Payment Completed]
+                Account -->|amount.reserved| RabbitMQ
+                RabbitMQ -->|amount.reserved| Ledger[Ledger Service]
 
-    PaymentDB[(paymentdb)]
-    CommissionDB[(commissiondb)]
-    AccountDB[(accountdb)]
-    LedgerDB[(movementdb)]
+                Ledger -->|movement.recorded| RabbitMQ
+                RabbitMQ -->|movement.recorded| Account
 
-    Payment --> PaymentDB
-    Commission --> CommissionDB
-    Account --> AccountDB
-    Ledger --> LedgerDB
+                Account -->|amount.debited| RabbitMQ
+                RabbitMQ -->|amount.debited| Payment
+
+                PaymentDB[(paymentdb)]
+                CommissionDB[(commissiondb)]
+                AccountDB[(accountdb)]
+                LedgerDB[(movementdb)]
+
+                Payment --> PaymentDB
+                Commission --> CommissionDB
+                Account --> AccountDB
+                Ledger --> LedgerDB
+
+                Prometheus[Prometheus] --> Grafana[Grafana]
+                Prometheus --> Payment
+                Prometheus --> Commission
+                Prometheus --> Account
+                Prometheus --> Ledger
+            end
+        end
+    end
 ```
+
+---
+
+## Deployment Model
+
+The application can be executed in two environments:
+
+| Environment | Description |
+|---|---|
+| Local environment | Microservices run locally, while RabbitMQ and PostgreSQL run in Docker containers. |
+| AWS/K3s environment | Microservices are deployed as Kubernetes workloads inside a K3s cluster running on AWS EC2 instances. |
+
+The current local environment is used to validate the Saga flow, database state transitions and asynchronous event communication. The AWS/K3s environment is the target infrastructure for demonstrating deployment in a cloud-based distributed environment.
 
 ---
 
@@ -178,16 +232,3 @@ The execution can be verified through service logs, RabbitMQ queues and PostgreS
 - Integrate Prometheus and Grafana for monitoring.
 - Prepare deployment in AWS.
 
-
-## Technologies
-
-- **Spring Boot**: Microservice development framework
-- **Spring Cloud Gateway**: API Gateway and request routing
-- **Spring Web (REST)**: HTTP communication between APIs and microservices
-- **Spring Data JPA**: Data persistence layer
-- **RabbitMQ**: For asynchronous event-driven communication
-- **PostgreSQL**: Relational database
-- **Maven**: Build and dependency management
-- **Java**: Programming language
-
-#
