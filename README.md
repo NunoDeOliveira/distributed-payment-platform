@@ -72,51 +72,61 @@ The local version runs with Docker containers for RabbitMQ and PostgreSQL. The t
 
 ## Global Architecture
 
+## Global Architecture
+
 ```mermaid
 flowchart TB
+
+    User[User / Client]
 
     subgraph AWS["AWS Cloud"]
         subgraph EC2["EC2 Instances"]
             subgraph K3S["K3s Cluster"]
 
-                User[User] --> Gateway[API Gateway]
+                Gateway[API Gateway]
 
-                Gateway --> Payment[Payment Service]
-                Gateway --> AccountAPI[Account Service API]
+                subgraph Services["Application Services"]
+                    Payment[Payment Service]
+                    Commission[Commission Service]
+                    Account[Account Service]
+                    Ledger[Ledger Service]
+                end
 
-                Payment -->|payment.created| RabbitMQ[(RabbitMQ)]
-                RabbitMQ -->|payment.created| Commission[Commission Service]
+                RabbitMQ[(RabbitMQ)]
 
-                Commission -->|commission.calculated| RabbitMQ
-                RabbitMQ -->|commission.calculated| Account[Account Service]
+                subgraph Databases["PostgreSQL Databases"]
+                    PaymentDB[(paymentdb)]
+                    CommissionDB[(commissiondb)]
+                    AccountDB[(accountdb)]
+                    LedgerDB[(movementdb)]
+                end
 
-                Account -->|amount.reserved| RabbitMQ
-                RabbitMQ -->|amount.reserved| Ledger[Ledger Service]
+                subgraph Observability["Observability"]
+                    Prometheus[Prometheus]
+                    Grafana[Grafana]
+                end
 
-                Ledger -->|movement.recorded| RabbitMQ
-                RabbitMQ -->|movement.recorded| Account
-
-                Account -->|amount.debited| RabbitMQ
-                RabbitMQ -->|amount.debited| Payment
-
-                PaymentDB[(paymentdb)]
-                CommissionDB[(commissiondb)]
-                AccountDB[(accountdb)]
-                LedgerDB[(movementdb)]
-
-                Payment --> PaymentDB
-                Commission --> CommissionDB
-                Account --> AccountDB
-                Ledger --> LedgerDB
-
-                Prometheus[Prometheus] --> Grafana[Grafana]
-                Prometheus --> Payment
-                Prometheus --> Commission
-                Prometheus --> Account
-                Prometheus --> Ledger
             end
         end
     end
+
+    User --> Gateway
+
+    Gateway --> Payment
+    Gateway --> Account
+
+    Services --> RabbitMQ
+    RabbitMQ --> Services
+
+    Payment --> PaymentDB
+    Commission --> CommissionDB
+    Account --> AccountDB
+    Ledger --> LedgerDB
+
+    Prometheus --> Services
+    Prometheus --> RabbitMQ
+    Prometheus --> Databases
+    Grafana --> Prometheus
 ```
 
 ---
