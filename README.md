@@ -45,7 +45,6 @@ Cada paso pertenece a un microservicio distinto. La consistencia global no se ob
 
 ## System Architecture: Application and Infrastructure
 
-## System Architecture: Application and Infrastructure
 
 The platform is designed as a distributed system composed of independent Spring Boot microservices. Each service owns its local data model and communicates with the rest of the system through asynchronous events published in RabbitMQ.
 
@@ -70,7 +69,6 @@ The local version runs with Docker containers for RabbitMQ and PostgreSQL. The t
 
 ---
 
-## Global Architecture
 
 ## Global Architecture
 
