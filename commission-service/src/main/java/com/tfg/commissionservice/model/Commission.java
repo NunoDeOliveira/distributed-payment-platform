@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 @Setter
@@ -41,11 +42,11 @@ public class Commission {
     @Column(length = 1000)
     private String register;
 
-    protected Commission() {}
+    protected Commission() {
+    }
 
     public Commission(String correlationId, BigDecimal amount, BigDecimal commissionAmount,
                       BigDecimal totalAmount, CommissionMethod method, CommissionState state, LocalDateTime time) {
-
         this.correlationId = correlationId;
         this.amount = amount;
         this.commissionAmount = commissionAmount;
@@ -53,34 +54,35 @@ public class Commission {
         this.method = method;
         this.state = state;
         this.time = time;
-        this.register = state.name() + " " + time + " | ";
+        this.register = state.name() + " " + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toLocalTime() + " | ";
     }
 
+    // Methods
     public void calculated() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = CommissionState.CALCULATED;
         this.time = now;
-        this.register += "CALCULATED " + now + " | ";
+        this.register += "CALCULATED " + now.toLocalTime() + " | ";
     }
 
     public void released() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = CommissionState.RELEASED;
         this.time = now;
-        this.register += "RELEASED " + now + " | ";
+        this.register += "RELEASED " + now.toLocalTime() + " | ";
     }
 
     public void rejected() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = CommissionState.REJECTED;
         this.time = now;
-        this.register += "REJECTED " + now + " | ";
+        this.register += "REJECTED " + now.toLocalTime() + " | ";
     }
 
     public void cancel() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = CommissionState.CANCELED;
         this.time = now;
-        this.register += "CANCELED " + now + " | ";
+        this.register += "CANCELED " + now.toLocalTime() + " | ";
     }
 }

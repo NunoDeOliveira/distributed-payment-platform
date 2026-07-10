@@ -18,6 +18,8 @@ public class LedgerPublish {
     public static final String ACCOUNT_QUEUE = "account.queue";
     // Define queue for receiving account messages
     public static final String LEDGER_QUEUE = "ledger.queue";
+    // Define queue for receiving account messages
+    public static final String LEDGER_CANCEL_QUEUE = "ledger.cancel.queue";
     // The variable to use the RabbitTemplate class
     private final RabbitTemplate rabbitTemplate;
     private static final Logger log = LoggerFactory.getLogger(LedgerPublish.class);
@@ -35,6 +37,11 @@ public class LedgerPublish {
     @Bean
     public Queue ledgerQueue() {
         return new Queue(LEDGER_QUEUE, true);
+    }
+
+    @Bean
+    public Queue ledgerCancelQueue() {
+        return new Queue(LEDGER_CANCEL_QUEUE, true);
     }
 
 
@@ -60,6 +67,16 @@ public class LedgerPublish {
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
 
+    // Given an Id and amount of delivery publish a pending delivery
+    public void publishLedgerMovementCanceled(String correlationId, BigDecimal amount) {
+        // Create an event to publish in the queue
+        LedgerEvent event =  new LedgerEvent("operation.canceled",  correlationId, amount, null);
+
+        log.info("PUBLISH | operation.canceled | correlationId={} | totalAmount={}",
+                correlationId, event.getAmount());
+
+        rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
+    }
 
 
     // Given an Id and amount of delivery publish a pending delivery

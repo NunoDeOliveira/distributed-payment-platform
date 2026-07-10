@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 
 @Getter
@@ -31,12 +32,17 @@ public class Movement {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     
-    @Column(name = "register", length = 5000)
+    @Column(name = "register", length = 1000)
     private String register = "";
 
     public Movement() {
     }
-    
+
+    public Movement(String correlationId, BigDecimal amount) {
+        this.correlationId = correlationId;
+        this.amount = amount;
+        this.register = "";
+    }
 
     public Movement(String correlationId, BigDecimal amount,
                     MovementState state, LocalDateTime startTime) {
@@ -46,33 +52,44 @@ public class Movement {
         this.startTime = startTime;
         this.register = state.name() + " " + startTime + " | ";
     }
-    
+
     // Switch to RECORDED state and record the production start time
     public void recorded() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.RECORDED;
-        this.startTime = LocalDateTime.now();
-        this.register += "RECORDED " + now + " | ";
+        this.startTime = now;
+        this.register += "RECORDED " + now.toLocalTime() + " | ";
     }
 
-    // Switch state canceled state and record the delivery start time
+    // Switch state to CANCELED and record the delivery start time
     public void cancelled() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.CANCELED;
-        this.startTime = LocalDateTime.now();
-        this.register += "CANCELED " + LocalDateTime.now() + " | ";
+        this.startTime = now;
+        this.register += "CANCELED " + now.toLocalTime() + " | ";
     }
 
     // Switch state to REJECTED and record time
     public void reject() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.REJECTED;
-        this.endTime = LocalDateTime.now();
-        this.register += "REJECTED " + LocalDateTime.now();
+        this.endTime = now;
+        this.register += "REJECTED " + now.toLocalTime() + " | ";
     }
 
-    // Switch state to REJECTED and record time
-    public void failed() {
-        this.state = MovementState.FAILED;
-        this.endTime = LocalDateTime.now();
-        this.register += "FAILED " + LocalDateTime.now();
+    // Switch state to WAITING and record time
+    public void waiting() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        this.state = MovementState.WAITING;
+        this.startTime = now;
+        this.register += "WAITING " + now.toLocalTime() + " | ";
+    }
+
+    // Switch state to RELEASED and record time
+    public void released() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        this.state = MovementState.RELEASED;
+        this.endTime = now;
+        this.register += "RELEASED " + now.toLocalTime() + " | ";
     }
 }

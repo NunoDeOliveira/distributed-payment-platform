@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 
 @Getter
@@ -41,58 +42,53 @@ public class Payment {
 
     protected Payment() {}
 
-    public Payment(String correlationId, BigDecimal amount, PaymentMethod method, PaymentState state, LocalDateTime startAt) {
+    public Payment(String correlationId, BigDecimal amount, PaymentMethod method,
+                   PaymentState state, LocalDateTime startAt) {
         this.correlationId = correlationId;
         this.amount = amount;
         this.method = method;
         this.state = state;
-        this.startAt = startAt;
+        this.startAt = startAt.truncatedTo(ChronoUnit.SECONDS);
         this.endAt = null;
-        this.register = state.name() + " " + startAt + " | ";
+        this.register = state.name() + " " + startAt.toLocalTime().truncatedTo(ChronoUnit.SECONDS) + " | ";
     }
-    
-    // Switch to PREPARING state and record the payment start time
+
+    // Switch to CREATED state and record the payment start time
     public void created() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = PaymentState.CREATED;
-        this.startAt = LocalDateTime.now();
-        this.register += "CREATED " + now + " | ";
+        this.startAt = now;
+        this.register += "CREATED " + now.toLocalTime() + " | ";
     }
 
-    // Switch to COMPLETED state and record the payment start time
+    // Switch to COMPLETED state and record the payment end time
     public void complete() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = PaymentState.COMPLETED;
-        this.endAt = LocalDateTime.now();
-        this.register += "COMPLETED " + LocalDateTime.now();
+        this.endAt = now;
+        this.register += "COMPLETED " + now.toLocalTime() + " | ";
     }
-    
-    // Switch to CANCELLED state and record the payment CANCELLED time
-    public void cancelled() {
+
+    // Switch to CANCELLED state and record the payment end time
+    public void canceled() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = PaymentState.CANCELLED;
-        this.endAt = LocalDateTime.now();
-        this.register += "CANCELLED " + LocalDateTime.now();
+        this.endAt = now;
+        this.register += "CANCELLED " + now.toLocalTime() + " | ";
     }
-    
-    
+
     public void reject() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = PaymentState.REJECTED;
-        this.endAt = LocalDateTime.now();
-        this.register += "REJECTED " + LocalDateTime.now();
+        this.endAt = now;
+        this.register += "REJECTED " + now.toLocalTime() + " | ";
     }
-    
-    // tIme-out if inventory fail
+
+    // Timeout if payment fails
     public void timeout() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = PaymentState.FAILED;
-        this.endAt = LocalDateTime.now();
-        this.register += "FAILED " + LocalDateTime.now();
+        this.endAt = now;
+        this.register += "FAILED " + now.toLocalTime() + " | ";
     }
-
-    /*private void addRegister(String state, LocalDateTime time) {
-        if (this.register == null) {
-            this.register = "";
-        }
-
-        this.register += state + " " + time + " | ";
-    }*/
-    
 }

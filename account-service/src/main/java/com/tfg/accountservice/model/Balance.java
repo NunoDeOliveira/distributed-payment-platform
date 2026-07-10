@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 @Setter
@@ -21,8 +23,13 @@ public class Balance {
     @Column(unique = true)
     private String correlationId;
 
+    // Amount of operation
+    //@Column(nullable = false)
+    //private BigDecimal amount;
+
+    // balance of account
     @Column(nullable = false)
-    private BigDecimal amount;
+    private BigDecimal balanceAccount;
 
     @Enumerated(EnumType.STRING)
     private BalanceState state;
@@ -34,52 +41,49 @@ public class Balance {
 
 
     public Balance() {
+        this.register = "";
     }
 
-    public Balance(String correlationId, BigDecimal amount, BalanceState state) {
+    public Balance(String correlationId, BigDecimal balanceAccount, BalanceState state) {
         this.correlationId = correlationId;
-        this.amount = amount;
-        //this.availableBalance = availableBalance;
+        this.balanceAccount = balanceAccount;
         this.state = state;
         this.time = null;
-        this.register = register;
+        this.register = "";
     }
 
-
-    // Switch to DEBITED state and record the payment start time
     public void reserved() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = BalanceState.RESERVED;
-        this.time = LocalDateTime.now();
-        this.register += "RESERVED " + now + " | ";
+        this.time = now;
+        this.register += "RESERVED " + now.toLocalTime() + " | ";
     }
 
-    // Switch to DEBITED state and record the payment start time
-    public void debited() {
-        LocalDateTime now = LocalDateTime.now();
+    public void confirm() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = BalanceState.CONFIRMED;
-        this.time = LocalDateTime.now();
-        this.register += "CONFIRMED " + LocalDateTime.now();
+        this.time = now;
+        this.register += "CONFIRMED " + now.toLocalTime() + " | ";
     }
 
-    // Switch to REJECTED state and record the payment start time
     public void rejected() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = BalanceState.REJECTED;
-        this.time = LocalDateTime.now();
-        this.register += "REJECTED " + LocalDateTime.now();
+        this.time = now;
+        this.register += "REJECTED " + now.toLocalTime() + " | ";
     }
 
-    // Switch to RELEASED state and record the payment RELEASED time
     public void released() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = BalanceState.RELEASED;
-        this.time = LocalDateTime.now();
-        this.register += "RELEASED " + LocalDateTime.now();
+        this.time = now;
+        this.register += "RELEASED " + now.toLocalTime() + " | ";
     }
-
 
     public void canceled() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = BalanceState.CANCELED;
-        this.time = LocalDateTime.now();
-        this.register += "CANCELED " + LocalDateTime.now();
+        this.time = now;
+        this.register += "CANCELED " + now.toLocalTime() + " | ";
     }
 }

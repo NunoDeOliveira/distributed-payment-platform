@@ -28,32 +28,25 @@ public class CommissionService {
     // Given
     @Transactional
     public void calculateCommission(String correlationId, BigDecimal amount, String paymentMethod) {
-        // Check input data
-        if (correlationId == null || correlationId.isEmpty() ||
-                amount == null || paymentMethod == null) {
+        if (correlationId == null || correlationId.isEmpty()
+                || amount == null || paymentMethod == null) {
+            return;
+        }
+        if (commissionRepository.existsByCorrelationId(correlationId)) {
             return;
         }
 
-        // Convert paymentMethod received into CommissionMethod class
         CommissionMethod commissionMethod = CommissionMethod.valueOf(paymentMethod);
-        // Get rate of commission
-        BigDecimal commissionRate = commissionMethod.getCommissionRate();
-        // Calculate commission amount
-        BigDecimal commissionAmount = amount.multiply(commissionRate);
-        // Calculate total amount. Commission + amount of operation
+        BigDecimal commissionAmount = amount.multiply(commissionMethod.getCommissionRate());
         BigDecimal totalAmount = amount.add(commissionAmount);
 
-        // Create object commission to save in database
-        Commission commission = new Commission(correlationId, amount, commissionAmount, totalAmount,
-                                    commissionMethod, CommissionState.CALCULATED, LocalDateTime.now());
+        Commission commission = new Commission(correlationId, amount, commissionAmount,
+                totalAmount, commissionMethod, CommissionState.CALCULATED, LocalDateTime.now());
 
-        // Save commission apply into database
-        commission.calculated();
+        //commission.calculated();
         commissionRepository.save(commission);
-
-        // Publish event in rabbit Account queue
-        commissionPublish.publishCommissionCalculated(commission.getCorrelationId(), amount,
-                                                        commission.getTotalAmount(), paymentMethod);
+        commissionPublish.publishCommissionCalculated(commission.getCorrelationId(),
+                            commission.getTotalAmount(), commission.getTotalAmount(), paymentMethod);
     }
 
     @Transactional
@@ -69,8 +62,9 @@ public class CommissionService {
             return;
         }
 
-        if (!commission.getCorrelationId().equals(correlationId) &&
-                commission.getState() != CommissionState.CALCULATED) {
+        if (!commission.getCorrelationId().equals(correlationId) ||
+                commission.getState() == CommissionState.CALCULATED ||
+                commission.getState() == CommissionState.RELEASED) {
             return;
         }
 
@@ -101,16 +95,11 @@ public class CommissionService {
             return;
         }
 
-        // Local cancellation
+        // Local compensation
         commission.cancel();
         commissionRepository.save(commission);
+        commissionPublish.publishCommissionCanceled(correlationId, commission.getTotalAmount());
 
-        // Local compensation
-        commission.released();
-        commissionRepository.save(commission);
-
-        // Publish compensation event
-        commissionPublish.publishCommissionReleased(commission.getCorrelationId());
     }
 
     // Given an Id of commission get operation of commission

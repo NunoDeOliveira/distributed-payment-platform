@@ -1,17 +1,17 @@
 package com.tfg.paymentservice.message;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.tfg.paymentservice.event.PaymentEvent;
 import com.tfg.paymentservice.service.PaymentService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.messaging.handler.annotation.Header;
-import com.tfg.paymentservice.model.Payment;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class PaymentConsumer {
 
     private final PaymentService paymentService;
+    private static final Logger log = LoggerFactory.getLogger(PaymentConsumer.class);
 
 
     public PaymentConsumer(PaymentService paymentService) {
@@ -20,7 +20,7 @@ public class PaymentConsumer {
 
     // Listens on payment.queue for events published by other services
     @RabbitListener(queues = PaymentPublish.PAYMENT_QUEUE)
-    private void processEvent(PaymentEvent event) {
+    public void processEvent(PaymentEvent event) {
         if (event == null) {
             System.out.println("Received null or invalid event");
             return;
@@ -33,9 +33,13 @@ public class PaymentConsumer {
             case "amount.deducted":
                 paymentService.completePayment(event.getCorrelationId());
                 break;
-
             case "commission.released":
                 paymentService.releasePayment(event.getCorrelationId());
+                break;
+            case "operation.canceled":
+                paymentService.cancellationReceived(event.getCorrelationId(), event.getAmount());
+                log.info("RECEIVED CANCEL EVENT | eventType={} | correlationId={} | amount={}",
+                        event.getEventType(), event.getCorrelationId(), event.getAmount());
                 break;
 
             default:

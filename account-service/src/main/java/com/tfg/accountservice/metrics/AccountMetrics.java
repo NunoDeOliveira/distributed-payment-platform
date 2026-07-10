@@ -8,17 +8,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AccountMetrics {
-
     public AccountMetrics(MeterRegistry meterRegistry, BalanceRepository balanceRepository) {
-        for (BalanceState state : BalanceState.values()) {
-            if (state == BalanceState.REJECTED) {
-                continue;
-            }
-
-            Gauge.builder("account.state.current", balanceRepository, repo ->
-                                    repo.sumAmountByState(state).doubleValue()).tag("state", state.name())
-                                    .register(meterRegistry);
-        }
+        Gauge.builder("account.balance.current", balanceRepository, repo ->
+                        repo.findTopByOrderByIdDesc()
+                                .map(b -> b.getBalanceAccount().doubleValue())
+                                .orElse(0.0))
+                                .description("Current account balance")
+                                .register(meterRegistry);
     }
-
 }

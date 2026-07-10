@@ -33,115 +33,124 @@ public class AccountService {
             return;
         }
 
-        // Check if there are Balance records with the given ID
-        Optional<Balance> amountToReserve = balanceRepo.findByCorrelationId(correlationId);
-        if (amountToReserve.isPresent()) {
-            return;
-        }
+        Balance current = balanceRepo.findTopByOrderByIdDesc()
+                                    .orElseThrow(() -> new RuntimeException("No balance found"));
 
-        // Calculate  available balance from repository
-        BigDecimal available = balanceRepo.calculateAvailableBalance(
-                List.of(BalanceState.RESERVED, BalanceState.CONFIRMED));
-
-        // Check if there are enough funds
-        if (available.compareTo(amount) < 0) {
+        if (current.getBalanceAccount().compareTo(amount) < 0) {
             accountPublish.publishAmountRejected(correlationId);
             return;
         }
 
-        // Save the state of amount reserved.->String correlationId, BigDecimal amount, BalanceState state
-        Balance amountReserved = new Balance(correlationId,amount, BalanceState.RESERVED);
-        balanceRepo.save(amountReserved);
+        BigDecimal newBalance = current.getBalanceAccount().subtract(amount);
 
-        // Publish into Ledger queue
+        //Update the state and publish
+        Balance balance = new Balance(correlationId, newBalance, BalanceState.RESERVED);
+        balance.reserved();
+        balanceRepo.save(balance);
         accountPublish.publishAmountReserved(correlationId, amount);
     }
 
     //@Transactional
     //public void validateDelivery(Long id, int amount){
     @Transactional
-    public void deductAmount(String correlationId) {
+    public void deductAmount(String correlationId, BigDecimal amount) {
         if (correlationId == null) {
             return;
         }
 
         // if it was already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance == null) {
-            return;
-        }
-
-        if (balance.getState() == BalanceState.CONFIRMED || balance.getState() != BalanceState.RESERVED) {
+        if (balance == null || balance.getState() != BalanceState.RESERVED) {
             return;
         }
 
         // // Save the state of balance as debited
-        balance.debited();
+        balance.confirm();
         balanceRepo.save(balance);
-
-        // Release the amount reserved
-        Balance balanceSaved = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        releaseAmount(correlationId);
-
         // publish the event into queue
-        accountPublish.publishAmountDeducted(correlationId, balanceSaved.getAmount());
+        accountPublish.publishAmountDeducted(correlationId, amount);
 
     }
 
-    @Transactional
+    /*@Transactional
     // Given an id and amount of a Production increase the stock of DB
-    public void releaseAmount(String correlationId) {
-        if (correlationId == null) {
+    public void releaseAmount(String correlationId, BigDecimal amount) {
+        if (correlationId == null || amount == null) {
             return;
         }
 
         // If it was already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance == null) {
+        if (balance == null ||
+                balance.getState() == BalanceState.RELEASED ||
+                balance.getState() != BalanceState.RESERVED) {
             return;
         }
 
-        if (balance.getState() == BalanceState.RELEASED || balance.getState() != BalanceState.RESERVED) {
-            return;
-        }
+        // Get balance of correlationId given
+        BigDecimal reservedAmount = balance.getAmount();
 
-        // Change local state to RELEASED
+        // Sum the amount release to account balance
+        BigDecimal currentBalance = getCurrentBalance();
+        BigDecimal newBalance = currentBalance.add(reservedAmount);
+
+        // Change local state to RELEASED and sum amount
+        balance.setBalanceAccount(newBalance);
+        balance.setState(BalanceState.RELEASED);
         balance.released();
         balanceRepo.save(balance);
 
-        // Publish compensation event
-        accountPublish.publishAmountReleased(correlationId);
-    }
+        // Update cancel state before to release
+        cancelReserveAmount(correlationId, amount);
+
+    }*/
 
     // Given and id of product and amount release a reservation
-    @Transactional
-    public void cancelReserveAmount(String correlationId) {
-        // Check input data
-        if (correlationId == null) {
-            return;
-        }
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void cancelReserveAmount(String correlationId, BigDecimal amount) {
+        if (correlationId == null || amount == null) return;
 
-        // Idempotency: if it is already released, do not release it again
         Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance == null) {
-            return;
-        }
+        if (balance == null || balance.getState() != BalanceState.RESERVED) return;
 
-        if (balance.getState() == BalanceState.RELEASED || balance.getState() != BalanceState.RESERVED) {
-            return;
-        }
-
-        // Local trace: cancelled is not published as a Saga event
+        BigDecimal restoredBalance = balance.getBalanceAccount().add(amount);
+        balance.setBalanceAccount(restoredBalance);
         balance.canceled();
         balanceRepo.save(balance);
-        // Final state for the Saga compensation
-        balance.released();
-        balanceRepo.save(balance);
 
-        accountPublish.publishAmountReleased(correlationId);
+        accountPublish.publishAmountCanceled(correlationId, amount);
     }
 
+    // Get the current balance stored in the account
+    private BigDecimal getCurrentBalance() {
+        Optional<Balance> lastBalance = balanceRepo.findTopByOrderByIdDesc();
+        if (lastBalance.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return lastBalance.get().getBalanceAccount();
 
+    }
+
+    // Given an amount deposit that amount into the account
+    @Transactional
+    public void addBalance(BigDecimal balanceAdded) {
+        // Check the input data
+        if (balanceAdded == null || balanceAdded.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        // Get currentBalance and add balanceAdded to balance
+        BigDecimal currentBalance = getCurrentBalance();
+        BigDecimal newBalance = currentBalance.add(balanceAdded);
+
+        //
+        Balance balance = new Balance();
+        balance.setBalanceAccount(balanceAdded.abs());
+        balance.setBalanceAccount(newBalance);
+        balance.setTime(LocalDateTime.now());
+
+        balanceRepo.save(balance);
+    }
 
     // Get available balance
     public BigDecimal getAvailableBalance() {
@@ -152,7 +161,7 @@ public class AccountService {
         for (Balance balance : balances) {
 
             BalanceState state = balance.getState();
-            BigDecimal amount = balance.getAmount();
+            BigDecimal amount = balance.getBalanceAccount();
             if (amount == null) {
                 continue;
             }
@@ -165,20 +174,6 @@ public class AccountService {
         return availableBalance;
     }
 
-    // Given an amount deposit that amount into the account
-    @Transactional
-    public void addBalance(BigDecimal amount) {
-        // Check the input data
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return;
-        }
-
-        Balance balance = new Balance();
-        balance.setAmount(amount);
-        balance.setTime(LocalDateTime.now());
-
-        balanceRepo.save(balance);
-    }
 
 
 }

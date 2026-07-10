@@ -1,11 +1,9 @@
 package com.tfg.accountservice.controller;
 
-import com.tfg.accountservice.model.Balance;
 import com.tfg.accountservice.service.AccountService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,10 +16,11 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    // Insert balance
     @PostMapping("/add")
-    public Map<String, String> addBalance(@RequestParam BigDecimal amount) {
+    public Map<String, String> addBalance(@RequestParam BigDecimal balanceAccount) {
 
-        accountService.addBalance(amount);
+        accountService.addBalance(balanceAccount);
 
         return Map.of("status", "successful");
     }

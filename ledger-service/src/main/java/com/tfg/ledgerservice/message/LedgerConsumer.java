@@ -10,10 +10,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 
 @Component
 public class LedgerConsumer {
-
     private final LedgerService ledgerService;
     private static final Logger log = LoggerFactory.getLogger(LedgerConsumer.class);
-
 
     public LedgerConsumer(LedgerService ledgerService) {
         this.ledgerService = ledgerService;
@@ -21,25 +19,19 @@ public class LedgerConsumer {
 
     @RabbitListener(queues = LedgerPublish.LEDGER_QUEUE)
     public void processEvent(LedgerEvent event) {
-
-        String eventType = event.getEventType();
-        switch (eventType) {
-            case "amount.reserved":
-                ledgerService.recordMovement(event.getCorrelationId(), event.getAmount());
-                log.info("CONSUMER | amount.reserved | correlationId={} | totalAmount={}",
-                        event.getCorrelationId(), event.getAmount());
-                break;
-            case "operation.canceled":
-                ledgerService.cancelMovement(event.getCorrelationId());
-                System.out.println("operation.canceled: " + event.getEventType()
-                                + " correlationId=" + event.getCorrelationId()
-                                + " amount=" + event.getAmount());
-                break;
-
-            default:
-                System.out.println("Event unknown: " + eventType);
+        if (!"amount.reserved".equals(event.getEventType())) {
+            return;
         }
+        ledgerService.recordMovement(event.getCorrelationId(), event.getAmount());
+        log.info("CONSUMER | amount.reserved | correlationId={}", event.getCorrelationId());
     }
 
-
+    @RabbitListener(queues = LedgerPublish.LEDGER_CANCEL_QUEUE)
+    public void processCanceledEvent(LedgerEvent event) {
+        if (!"operation.canceled".equals(event.getEventType())) {
+            return;
+        }
+        ledgerService.cancelMovement(event.getCorrelationId());
+        log.info("CONSUMER | operation.canceled | correlationId={}", event.getCorrelationId());
+    }
 }

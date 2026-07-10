@@ -18,6 +18,8 @@ public interface CommissionRepository extends JpaRepository<Commission, Long> {
 
     Optional<Commission> findByCorrelationId(String correlationId);
 
+    boolean existsByCorrelationId(String correlationId);
+
     @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Commission p WHERE p.state = :state")
     Integer sumAmountByState(@Param("state") CommissionState state);
 }

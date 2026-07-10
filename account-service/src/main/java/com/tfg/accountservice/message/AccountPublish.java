@@ -99,5 +99,18 @@ public class AccountPublish {
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
 
+    public void publishAmountCanceled(String correlationId, BigDecimal amount) {
+        // Create an object account event to publish in commission queue
+        AccountEvent event;
+        event = new AccountEvent("operation.canceled", correlationId, amount, null);
+
+        log.info("PUBLISH | operation.canceled | correlationId={} | amount={}",
+                correlationId, event.getAmount());
+
+        // Convert to JSON format and send
+        rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
+    }
+
+
 
 }

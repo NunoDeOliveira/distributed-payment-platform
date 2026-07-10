@@ -240,3 +240,49 @@ The execution can be verified through service logs, RabbitMQ queues and PostgreS
 - Integrate Prometheus and Grafana for monitoring.
 - Prepare deployment in AWS.
 
+============================================================================
+
+# Payment Microservices — Saga Choreography
+
+## Indice
+1. Overview
+2. Architecture of Application
+3. Behavior of Application
+4. Tech Stack
+5. Infraestructure Design
+6. Getting Started
+    - Developer of aplication
+    - Local tests
+    - Implementing infrastructure in AWS
+    - Deployment microservices
+8. Observability and monitoring
+
+
+## Overview
+This work represente
+
+## Architecture
+  - System Diagram
+  - Payment Service
+  - Commission Service
+  - Account Service
+  - Ledger Service
+## Domain Behavior
+  - State Machines
+  - Events & Transactions
+  - Happy Path Flow
+  - Cancellation Flow
+## Tech Stack
+## Infrastructure
+  - AWS & Terraform
+  - Kubernetes (K3s)
+  - Docker
+  - CI/CD with GitHub Actions
+## Observability
+  - Prometheus & Grafana
+  - Network Metrics
+  - Latency & Throughput
+## Getting Started
+## Local Test Evidence
+## Design Decisions
+

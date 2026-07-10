@@ -34,7 +34,7 @@ public class CommissionConsumer {
             case "operation.rejected":
                 commissionService.releaseCommission(event.getCorrelationId());
                 break;
-            case "payment.canceled":
+            case "operation.canceled":
                 commissionService.cancelCommission(event.getCorrelationId());
                 break;
             default:

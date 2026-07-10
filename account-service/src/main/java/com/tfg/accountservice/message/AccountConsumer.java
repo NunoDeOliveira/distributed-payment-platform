@@ -34,13 +34,13 @@ public class AccountConsumer {
                         event.getCorrelationId(), event.getAmount());
                 break;
             case "movement.recorded":
-                accountService.deductAmount(event.getCorrelationId());
+                accountService.deductAmount(event.getCorrelationId(), event.getAmount());
                 log.info("CONSUMER | movement.recorded | correlationId={} | amount={}",
                         event.getCorrelationId(), event.getAmount());
                 break;
-            case "payment.canceled":
-                accountService.cancelReserveAmount(event.getCorrelationId());
-                log.info("CONSUMER | payment.canceled | correlationId={} | amount={}",
+            case "operation.canceled":
+                accountService.cancelReserveAmount(event.getCorrelationId(), event.getAmount());
+                log.info("CONSUMER | operation.canceled | correlationId={} | amount={}",
                         event.getCorrelationId(), event.getAmount());
                 break;
 

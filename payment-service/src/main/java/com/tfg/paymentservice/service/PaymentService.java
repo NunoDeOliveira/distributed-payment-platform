@@ -5,7 +5,6 @@ import com.tfg.paymentservice.model.Payment;
 import com.tfg.paymentservice.model.PaymentMethod;
 import com.tfg.paymentservice.model.PaymentState;
 import com.tfg.paymentservice.repository.PaymentRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-//import org.springframework.scheduling.annotation.Scheduled;
 
 
 @Service
@@ -81,7 +79,7 @@ public class PaymentService {
     }
 
     @Transactional
-    // Given an id of payment cancell that payment
+    // Given an id of payment cancel that payment
     public void cancelPayment(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId).orElse(null);
         if (payment == null) {
@@ -89,15 +87,36 @@ public class PaymentService {
         }
         // Check the current state before save
         if (payment.getState() == PaymentState.CANCELLED ||
-                payment.getState() == PaymentState.REJECTED || payment.getState() == PaymentState.FAILED) {
+                payment.getState() == PaymentState.REJECTED) {
             return;
         }
 
-        // Save the state into repository
-        payment.cancelled();
-        paymentRepository.save(payment);
         // Publish on RabbitMQ for consume the new payment created
-        paymentPublish.publishPaymentCancelled(payment.getId(), payment.getCorrelationId());
+        paymentPublish.publishPaymentCancelled(payment.getId(), payment.getCorrelationId(),
+                                                payment.getAmount());
+    }
+
+    // AUX TO CANCEL:
+    public void cancellationReceived(String correlationId, BigDecimal amount) {
+        if (correlationId == null) {
+            return;
+        }
+
+        Payment payment = paymentRepository.findByCorrelationId(correlationId).orElse(null);
+
+        if (payment == null) {
+            return;
+        }
+
+        if (payment.getState() == PaymentState.CANCELLED ||
+                payment.getState() == PaymentState.COMPLETED) {
+            return;
+        }
+
+        // Save the payment as canceled
+        payment.canceled();
+        paymentRepository.save(payment);
+
     }
 
     @Transactional
@@ -123,7 +142,8 @@ public class PaymentService {
     // Get payment by ID
     public Payment getPayment(Long id) {
         Optional<Payment> payment = paymentRepository.findById(id);
-        Payment paymentToReturn = payment.orElseThrow(() -> new RuntimeException("Payment " + id + "not found"));
+        Payment paymentToReturn = payment.orElseThrow(() -> new RuntimeException("Payment "
+                                                                                + id + "not found"));
 
         return paymentToReturn;
     }

@@ -41,11 +41,11 @@ public class CommissionPublish {
 
 
     // Given a commission publish commission calculated
-    public void publishCommissionCalculated(String CorrelationId, BigDecimal amount,
+    public void publishCommissionCalculated(String correlationId, BigDecimal amount,
                                             BigDecimal totalAmount, String method) {
 
         CommissionEvent event = new CommissionEvent("commission.calculated",
-                                                    CorrelationId, amount, totalAmount, method);
+                                                    correlationId, totalAmount, totalAmount, method);
         // Send to rabbit account queue
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
@@ -69,4 +69,16 @@ public class CommissionPublish {
 
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }*/
+
+    // Given a commission publish commission released
+    public void publishCommissionCanceled(String correlationId, BigDecimal totalAmount) {
+        CommissionEvent event;
+        event = new CommissionEvent("operation.canceled", correlationId, null, totalAmount, null);
+
+        // Send to rabbit payment queue
+        rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
+    }
+
+
+
 }

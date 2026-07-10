@@ -16,7 +16,9 @@ public interface BalanceRepository extends JpaRepository<Balance, Long> {
 
     long countByState(BalanceState state);
 
-    @Query("SELECT COALESCE(SUM(b.amount), 0) " + "FROM Balance b " + "WHERE b.state IN :states")
+    Optional<Balance> findTopByOrderByIdDesc();
+
+    /*@Query("SELECT COALESCE(SUM(b.amount), 0) " + "FROM Balance b " + "WHERE b.state IN :states")
     BigDecimal sumAmountByStateIn(@Param("states") Collection<BalanceState> states);
 
     @Query("SELECT COALESCE(SUM(b.amount), 0) " + "FROM Balance b " +
@@ -24,5 +26,7 @@ public interface BalanceRepository extends JpaRepository<Balance, Long> {
     BigDecimal calculateAvailableBalance(@Param("states") Collection<BalanceState> states);
 
     @Query("SELECT COALESCE(SUM(b.amount), 0) " + "FROM Balance b " + "WHERE b.state = :state")
-    BigDecimal sumAmountByState(@Param("state") BalanceState state);
+    BigDecimal sumAmountByState(@Param("state") BalanceState state);*/
+
+
 }

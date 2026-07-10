@@ -25,5 +25,6 @@ public interface LedgerMovementRepository extends JpaRepository<Movement, Long> 
 
     // Find by Id to cancel a ledger
 
-    Optional<Object> findByCorrelationId(String correlationId);
+    Optional<Movement> findByCorrelationId(String correlationId);
+    boolean existsByCorrelationId(String correlationId);
 }

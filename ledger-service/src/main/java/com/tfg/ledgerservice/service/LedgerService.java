@@ -4,21 +4,23 @@ import com.tfg.ledgerservice.message.LedgerPublish;
 import com.tfg.ledgerservice.model.Movement;
 import com.tfg.ledgerservice.model.MovementState;
 import com.tfg.ledgerservice.repository.LedgerMovementRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 public class LedgerService {
     // Attributes
     private final LedgerMovementRepository movementRepo;
     private final LedgerPublish ledgerPublish;
-
+    private static final Logger log = LoggerFactory.getLogger(LedgerService.class);
     // Constructor
     public LedgerService(LedgerMovementRepository movementRepo, LedgerPublish ledgerPublish) {
         this.movementRepo = movementRepo;
@@ -33,51 +35,82 @@ public class LedgerService {
             return;
         }
 
-        // Idempotency
-        if (movementRepo.findByCorrelationId(correlationId).isPresent()) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return;
         }
 
-        // Create the ledger entry
-        Movement movement = new Movement(correlationId, amount, MovementState.RECORDED, LocalDateTime.now());
+        Movement movement = movementRepo.findByCorrelationId(correlationId).orElse(null);
 
-        try {
-            movement.recorded();
+        // Check if there are movements in pending state before recorded
+        if (movement != null && movement.getState() == MovementState.WAITING) {
+            movement.setAmount(amount.negate()); // negative amount
+            movement.cancelled();
             movementRepo.save(movement);
-            // Publish  recorded event
-            ledgerPublish.publishLedgerMovementRecorded(correlationId, amount);
-
-        } catch (Exception e) {
-            movement.failed();
-            movementRepo.save(movement);
-            // Publish failed event
-            ledgerPublish.publishLedgerMovementFailed(correlationId, amount);
+            // create a new row to RELEASED operation
+            releaseMovement(correlationId, amount);
+            return;
         }
 
+        if (movement != null) {
+            log.info("recordMovement | already exists | correlationId={}", correlationId);
+            return;
+        }
+
+        // If it does not exist this movement update to recorded state
+        Movement recorded = new Movement(correlationId, amount.negate());
+        recorded.recorded();
+        movementRepo.save(recorded);
+        ledgerPublish.publishLedgerMovementRecorded(correlationId, amount);
+        log.info("recordMovement | recorded | correlationId={} | amount={}",
+                                            correlationId, amount.negate());
     }
 
+    // Given an correlationID of an operation and an amount of that operation, cancel movement
     @Transactional
     public void cancelMovement(String correlationId) {
-        // Check input data
-        if (correlationId == null) {
-            return;
-        }
+        if (correlationId == null) return;
 
-        // Get existing movement
-        Movement movement = (Movement) movementRepo.findByCorrelationId(correlationId).orElse(null);
+        Movement movement = movementRepo.findByCorrelationId(correlationId).orElse(null);
+
+        // Case 1: If this operation does not exist or has not yet arrived, update as WAITING
         if (movement == null) {
+            Movement waiting = new Movement(correlationId, BigDecimal.ZERO);
+            waiting.waiting();
+            movementRepo.save(waiting);
+            log.info("cancelMovement | saved as WAITING | correlationId={}", correlationId);
             return;
         }
 
-        // Check the state before cancel
-        MovementState movementToCancel = movement.getState();
-        if (movementToCancel != MovementState.RECORDED) {
+        // Case 2: Already exists
+        if (movement.getState() == MovementState.CANCELED) {
+            log.info("cancelMovement | already CANCELED | correlationId={}", correlationId);
             return;
         }
 
-        // If there are no errors, update state as canceled, save the state and publish the event
-        movement.cancelled();
-        movementRepo.save(movement);
+        // Case 3: Exists and will be canceled
+        if (movement.getState() == MovementState.RECORDED) {
+            movement.cancelled();
+            movementRepo.save(movement);
+            releaseMovement(correlationId, movement.getAmount().abs());
+            log.info("cancelMovement | canceled and released | correlationId={}", correlationId);
+        }
+    }
+
+    // Given a correlation of operation ID and an amount of the same operation, release amount
+    @Transactional
+    public void releaseMovement(String correlationId, BigDecimal amount) {
+        if (correlationId == null || amount == null) {
+            return;
+        }
+
+        Movement returned = new Movement(correlationId, amount);
+        returned.released();
+        movementRepo.save(returned);
+        ledgerPublish.publishLedgerMovementCanceled(correlationId, amount);
+        log.info("releaseMovement | released | correlationId={} | amount={}", correlationId, amount);
     }
 
     // Given an
