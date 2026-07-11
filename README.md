@@ -1,5 +1,4 @@
-
-# Distributed Payment Platform: Saga Choreography
+# Cloud-Native Distributed Payment Platform
 
 ## Indice
 
