@@ -92,17 +92,15 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 
 
-## Tech Stack
+## Technology Stack
 
 | Area | Technologies |
 |---|---|
 | Backend | Spring Boot, Spring Cloud Gateway |
-| Persistence | Spring Data JPA, Hibernate, PostgreSQL |
-| Messaging | RabbitMQ |
-| Containerization | Docker |
-| Orchestration | Kubernetes (K3s) |
-| Cloud and Infrastructure as Code | AWS EC2, Terraform |
-| CI/CD | GitHub Actions |
+| Persistence | PostgreSQL, Spring Data JPA |
+| Communication | RabbitMQ, HTTP |
+| Infrastructure | AWS EC2, Kubernetes (K3s) |
+| Provisioning and Deployment | Terraform, Docker, GitHub Actions |
 
 
 
