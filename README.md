@@ -124,6 +124,8 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 ![Infrastructure](docs/infrastructure-diagram.png)
 
 
+### AWS Network and Compute
+
 - **VPC** — all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
 
 - **Subnets** — the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
@@ -134,6 +136,16 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 - **Security groups** — security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
 
+### Kubernetes (K3s)
+
+- **Control plane** — the K3s server runs the Kubernetes API Server, Scheduler, Controller Manager, and SQLite datastore.
+
+- **Worker nodes** — the two K3s agents run the application Pods selected by the Kubernetes Scheduler.
+
+- **Application workloads** — the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
+
+- **Application access** — external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
+  
 
 
 ## Deployment of microservices
