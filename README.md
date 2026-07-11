@@ -3,23 +3,21 @@
 
 ## Indice
 
-1. Overview
-2. Architecture of Application
-3. Behavior of Application
-- Events and Transactions
-- Application transactions
-- Events published and consumed
-- Happy Path Flow
-- Cancellation Flow
-4. Tech Stack
-5. Design of Infraestructure
-6. Deployment of microservices
-7. Getting Started
-    - Developer of aplication
-    - Local tests
-    - Implementing infrastructure in AWS
-    - Deployment microservices
-8. Observability and monitoring
+1. [Overview](#overview)
+2. [Architecture](#architecture)
+3. [Domain Behavior](#domain-behavior)
+   - [Events and Transactions](#events-and-transactions)
+     - [Application Transactions](#application-transactions)
+     - [Events Published and Consumed](#events-published-and-consumed)
+   - [Happy Path Flow](#happy-path-flow)
+   - [Cancellation Flow](#cancellation-flow)
+4. [Technology Stack](#technology-stack)
+5. [Infrastructure Design](#infrastructure-design)
+   - [AWS Network and Compute](#aws-network-and-compute)
+   - [Kubernetes (K3s)](#kubernetes-k3s)
+6. [Deployment](#deployment)
+   - [Docker](#docker)
+   - [CI/CD with GitHub Actions](#cicd-with-github-actions)
 
 
 
