@@ -97,23 +97,15 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 ## Tech Stack
 
-**Backend**
-- **Spring Boot**: framework for building each microservice
-- **Spring Cloud**: API Gateway 
-- **Spring Data JPA + Hibernate**: ORM for database access and entity management
-- **PostgreSQL**: relational database, one instance per service
-
-**Messaging**
-- **RabbitMQ**: message broker for event-driven communication between services
-
-**Infrastructure**
-- **AWS EC2**: virtual machines hosting the K3s cluster nodes
-- **Kubernetes K3s**: lightweight Kubernetes distribution for container orchestration
-- **Terraform**: infrastructure as code for provisioning AWS resources
-- **Docker**: containerization of each microservice and its dependencies
-
-**CI/CD**
-- **GitHub Actions**: automated pipeline for building Docker images in Kubernetes K3s
+| Area | Technologies |
+|---|---|
+| Backend | Spring Boot, Spring Cloud Gateway |
+| Persistence | Spring Data JPA, Hibernate, PostgreSQL |
+| Messaging | RabbitMQ |
+| Containerization | Docker |
+| Orchestration | Kubernetes (K3s) |
+| Cloud and Infrastructure as Code | AWS EC2, Terraform |
+| CI/CD | GitHub Actions |
 
 
 
