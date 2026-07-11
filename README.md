@@ -1,253 +1,16 @@
-# Digital Banking Platform: Saga Choreography
-
-## Overview
-This microservice is a prototype designed to efficiently and scalably manage the inventory of a distributed warehouse. Its main objective is to demonstrate the viability of the Saga pattern (Choreography) for maintaining eventual consistency in distributed transactions without requiring a central orchestrator.
-
-The system is based on independent services built with Spring Boot that communicate asynchronously via a message broker (RabbitMQ), ensuring temporal and spatial decoupling.
-
-
-
-**Digital Banking Platform** is a distributed microservices prototype that simulates the processing of a banking payment using the **Saga pattern with choreography**.
-
-The main objective of the project is to demonstrate how a distributed transaction can be coordinated without a central orchestrator. Each microservice executes its own local transaction, persists its state independently, and communicates with the rest of the system through asynchronous events.
-
-The system uses **Spring Boot**, **RabbitMQ** and **PostgreSQL** to implement an event-driven architecture with eventual consistency.
-
----
-
-## Contexto del proyecto
-
-La aplicación representa una operación bancaria distribuida compuesta por varios pasos independientes:
-
-1. creación del pago,
-2. cálculo de comisión,
-3. reserva del saldo,
-4. registro contable del movimiento,
-5. confirmación final del pago.
-
-Cada paso pertenece a un microservicio distinto. La consistencia global no se obtiene mediante una transacción distribuida, sino mediante la publicación y consumo de eventos entre servicios.
-
----
-
-## System Components
-
-| Component | Technology | Role | Port / Note |
-|---|---|---|---|
-| API Gateway | Spring Cloud Gateway | Entry point / request routing | 8080 |
-| Payment Service | Spring Boot | Payment creation and final state management | 8081 |
-| Commission Service | Spring Boot | Commission calculation and compensation | 8082 |
-| Account Service | Spring Boot | Balance reservation, confirmation and release | 8083 |
-| Ledger Service | Spring Boot | Ledger movement registration | 8084 |
-| Messaging Broker | RabbitMQ | Asynchronous event communication | 5672 / 15672 |
-| Database | PostgreSQL | Persistent storage per service | 5432 |
-
----
-
-## System Architecture: Application and Infrastructure
-
-
-The platform is designed as a distributed system composed of independent Spring Boot microservices. Each service owns its local data model and communicates with the rest of the system through asynchronous events published in RabbitMQ.
-
-The local version runs with Docker containers for RabbitMQ and PostgreSQL. The target deployment architecture is prepared for **AWS EC2 instances running a K3s cluster**, where each microservice can be deployed as a Kubernetes workload.
-
----
-
-## System Components
-
-| Layer | Component | Technology | Role |
-|---|---|---|---|
-| Cloud Infrastructure | AWS EC2 | Virtual machines | Hosts the K3s cluster nodes |
-| Container Orchestration | K3s | Lightweight Kubernetes | Runs and manages the microservice workloads |
-| Entry Point | API Gateway | Spring Cloud Gateway | Routes external HTTP requests to internal services |
-| Business Service | Payment Service | Spring Boot | Creates and completes payments |
-| Business Service | Commission Service | Spring Boot | Calculates and compensates commissions |
-| Business Service | Account Service | Spring Boot | Reserves, confirms and releases account balance |
-| Business Service | Ledger Service | Spring Boot | Records ledger movements |
-| Messaging | RabbitMQ | Message broker | Enables asynchronous event-driven communication |
-| Persistence | PostgreSQL | Relational database | Stores the local state of each service |
-| Observability | Prometheus / Grafana | Monitoring stack | Collects and visualizes metrics |
-
----
-
-
-## Global Architecture
-
-```mermaid
-flowchart TB
-
-    User[User / Client]
-
-    subgraph AWS["AWS Cloud"]
-        subgraph EC2["EC2 Instances"]
-            subgraph K3S["K3s Cluster"]
-
-                Gateway[API Gateway]
-
-                subgraph Services["Application Services"]
-                    Payment[Payment Service]
-                    Commission[Commission Service]
-                    Account[Account Service]
-                    Ledger[Ledger Service]
-                end
-
-                RabbitMQ[(RabbitMQ)]
-
-                subgraph Databases["PostgreSQL Databases"]
-                    PaymentDB[(paymentdb)]
-                    CommissionDB[(commissiondb)]
-                    AccountDB[(accountdb)]
-                    LedgerDB[(movementdb)]
-                end
-
-                subgraph Observability["Observability"]
-                    Prometheus[Prometheus]
-                    Grafana[Grafana]
-                end
-
-            end
-        end
-    end
-
-    User --> Gateway
-
-    Gateway --> Payment
-    Gateway --> Account
-
-    Services --> RabbitMQ
-    RabbitMQ --> Services
-
-    Payment --> PaymentDB
-    Commission --> CommissionDB
-    Account --> AccountDB
-    Ledger --> LedgerDB
-
-    Prometheus --> Services
-    Prometheus --> RabbitMQ
-    Prometheus --> Databases
-    Grafana --> Prometheus
-```
-
----
-
-## Deployment Model
-
-The application can be executed in two environments:
-
-| Environment | Description |
-|---|---|
-| Local environment | Microservices run locally, while RabbitMQ and PostgreSQL run in Docker containers. |
-| AWS/K3s environment | Microservices are deployed as Kubernetes workloads inside a K3s cluster running on AWS EC2 instances. |
-
-The current local environment is used to validate the Saga flow, database state transitions and asynchronous event communication. The AWS/K3s environment is the target infrastructure for demonstrating deployment in a cloud-based distributed environment.
-
----
-
-## Happy Path / Saga Flow
-
-El flujo principal representa una operación bancaria completada correctamente:
-
-1. El usuario crea un pago mediante `Payment Service`.
-2. `Payment Service` registra el pago en estado `CREATED` y publica el evento `payment.created`.
-3. `Commission Service` consume el evento, calcula la comisión y publica `commission.calculated`.
-4. `Account Service` consume la comisión calculada, reserva el importe total y publica `amount.reserved`.
-5. `Ledger Service` consume la reserva, registra el movimiento contable y publica `movement.recorded`.
-6. `Account Service` consume la confirmación del movimiento, confirma el importe reservado y publica `amount.debited`.
-7. `Payment Service` consume la confirmación final y actualiza el pago a `COMPLETED`.
-
-Resumen del flujo:
-
-```text
-payment.created
-→ commission.calculated
-→ amount.reserved
-→ movement.recorded
-→ amount.debited
-→ payment COMPLETED
-```
-
----
-
-## Transactions
-
-| Service | Transaction | Compensation | Local Transactions |
-|---|---|---|---|
-| Payment Service | `createPayment()` | `rejectPayment()` | `cancelPayment()` |
-| Commission Service | `calculateCommission()` | `releaseCommission()` | `cancelCommission()` |
-| Account Service | `reserveAmount()` | `releaseAmount()` | `cancelReserveAmount()` |
-| Ledger Service | `recordMovement()` | — | `cancelMovement()` |
-
----
-
-## Events
-
-| Service | Events published | Events consumed |
-|---|---|---|
-| Payment Service | `payment.created`<br>`payment.canceled` | `amount.debited`<br>`commission.released` |
-| Commission Service | `commission.calculated`<br>`commission.released`<br>`operation.canceled` | `payment.created`<br>`amount.rejected`<br>`operation.canceled` |
-| Account Service | `amount.reserved`<br>`amount.debited`<br>`amount.rejected`<br>`amount.released` | `commission.calculated`<br>`movement.recorded`<br>`movement.failed`<br>`payment.canceled` |
-| Ledger Service | `movement.recorded`<br>`movement.failed` | `amount.reserved`<br>`operation.canceled` |
-
----
-
-## Details of Each Microservice
-
-| Service | Responsibility | Documentation |
-|---|---|---|
-| Payment Service | Creación y finalización del pago | [payment-service/README.md](payment-service/README.md) |
-| Commission Service | Cálculo y compensación de comisiones | [commission-service/README.md](commission-service/README.md) |
-| Account Service | Reserva, confirmación y liberación de saldo | [account-service/README.md](account-service/README.md) |
-| Ledger Service | Registro del movimiento contable | [ledger-service/README.md](ledger-service/README.md) |
-| API Gateway | Punto de entrada HTTP de la plataforma | [api-gateway/README.md](api-gateway/README.md) |
-
----
-
-## Current Status
-
-The current version supports the complete successful Saga flow in a local environment:
-
-```text
-Payment CREATED
-→ Commission CALCULATED
-→ Account RESERVED
-→ Ledger RECORDED
-→ Account CONFIRMED
-→ Payment COMPLETED
-```
-
-The execution can be verified through service logs, RabbitMQ queues and PostgreSQL queries over the independent databases of each microservice.
-
----
-
-## Technologies
-
-- **Java**
-- **Spring Boot**
-- **Spring Cloud Gateway**
-- **Spring Web / REST**
-- **Spring Data JPA**
-- **RabbitMQ**
-- **PostgreSQL**
-- **Maven**
-- **Docker / Docker Compose**
-
----
-
-## Next Steps
-
-- Add evidence of the successful Saga execution.
-- Document compensation scenarios.
-- Add service failure tests.
-- Integrate Prometheus and Grafana for monitoring.
-- Prepare deployment in AWS.
 
 ============================================================================
 
-# Payment Microservices — Saga Choreography
+# Distributed Payment Platform - Saga Choreography
 
 ## Indice
 1. Overview
 2. Architecture of Application
 3. Behavior of Application
+  - State Machines
+  - Events & Transactions
+  - Happy Path Flow
+  - Cancellation Flow
 4. Tech Stack
 5. Infraestructure Design
 6. Getting Started
@@ -259,30 +22,115 @@ The execution can be verified through service logs, RabbitMQ queues and PostgreS
 
 
 ## Overview
-This work represente
+
+Traditional banking systems can have difficulties when they need to coordinate operations between independent services without using one central database. This project shows how distributed transactions can be managed with the Saga choreography pattern. Each service completes its own local transaction and publishes an event that starts the next step, without using a central coordinator.
+
 
 ## Architecture
-  - System Diagram
-  - Payment Service
-  - Commission Service
-  - Account Service
-  - Ledger Service
+
+The system is composed of five components that communicate through asynchronous 
+events via RabbitMQ. Each service owns its own PostgreSQL database.
+
+![microservices](docs/microservices-diagram.png)
+
+- **API Gateway**: entry point for all HTTP requests. Routes operations to the 
+  appropriate service.
+- **Payment Service**: receives all HTTP requests and manages the payment process. It creates the payment and starts the Saga flow.
+- **Commission Service**: calculates the commission according to the payment method and sends the total amount to the next service.
+- **Account Service**: manages the account balance. It reserves the funds when a payment starts and restores them if the payment is cancelled.
+- **Ledger Service**: stores a permanent record of all money movements and works as the accounting ledger of the system.
+  
+  
 ## Domain Behavior
-  - State Machines
-  - Events & Transactions
-  - Happy Path Flow
-  - Cancellation Flow
+
+### Events and Transactions
+
+The Saga is implemented as a sequence of local transactions and asynchronous events. Each service publishes the result of its transaction, while compensating transactions are used when the operation fails or is cancelled.
+
+#### Application transactions
+
+| Service | Local transaction | Compensation |
+|---|---|---|
+| Payment Service | `createPayment()` | `rejectPayment()` |
+| Commission Service | `calculateCommission()` | `releaseCommission()` |
+| Account Service | `reserveAmount()` | `releasedAmount()` |
+| Ledger Service | `recordMovement()` | `releaseMovement()` |
+
+#### Events published and consumed
+
+| Service | Events published | Events consumed |
+|---|---|---|
+| Payment Service | `payment.created`<br>`operation.canceled` | `amount.deducted`<br>`operation.canceled` |
+| Commission Service | `commission.calculated`<br>`commission.released`<br>`operation.canceled` | `payment.created`<br>`operation.rejected`<br>`operation.canceled` |
+| Account Service | `amount.reserved`<br>`amount.deducted`<br>`amount.rejected` | `commission.calculated`<br>`movement.recorded`<br>`movement.rejected`<br>`operation.canceled` |
+| Ledger Service | `movement.recorded`<br>`movement.rejected`<br>`operation.canceled` | `amount.reserved`<br>`amount.deducted`<br>`operation.canceled` |
+
+### Happy Path Flow
+
+In the successful flow, every service completes its local transaction without errors. Each published event starts the next step until the payment is completed and the account and ledger are updated.
+
+![Happy Path Diagram](docs/happy-path-diagram.png)
+
+### Cancellation Flow
+
+If one of the services rejects the operation or reports an error, the cancellation flow starts. The participating services execute compensating transactions to release reserved resources and restore a consistent state.
+
+![Cancellation Flow Diagram](docs/cancelation-diagram.png)
+  
+  
 ## Tech Stack
+
+**Backend**
+- **Spring Boot**: framework for building each microservice
+- **Spring Cloud**: API Gateway 
+- **Spring Data JPA + Hibernate**: ORM for database access and entity management
+- **PostgreSQL**: relational database, one instance per service
+
+**Messaging**
+- **RabbitMQ**: message broker for event-driven communication between services
+
+**Infrastructure**
+- **AWS EC2**: virtual machines hosting the K3s cluster nodes
+- **Kubernetes K3s**: lightweight Kubernetes distribution for container orchestration
+- **Terraform**: infrastructure as code for provisioning AWS resources
+- **Docker**: containerization of each microservice and its dependencies
+
+**CI/CD**
+- **GitHub Actions**: automated pipeline for building Docker images in Kubernetes K3s
+
+
 ## Infrastructure
-  - AWS & Terraform
-  - Kubernetes (K3s)
-  - Docker
-  - CI/CD with GitHub Actions
-## Observability
-  - Prometheus & Grafana
-  - Network Metrics
-  - Latency & Throughput
+
+The application infrastructure is deployed in AWS. Terraform creates the required cloud resources, while K3s manages the application workloads inside the Kubernetes cluster.
+
+![Infrastructure](docs/infrastructure-diagram.png)
+
+ - **AWS and Terraform** — AWS provides the computing and networking resources required by the application. Terraform defines and creates these resources using infrastructure as code.
+
+- **Kubernetes (K3s)** — K3s manages the microservices inside the cluster. It deploys the containers, maintains the required replicas, and provides internal communication between services.
+
+## Deployment
+
+The deployment process packages each microservice as a Docker image and uses GitHub Actions to automate the delivery of new application versions.
+
+- **Docker** — each microservice is packaged as an independent Docker image, including the application and its required dependencies.
+
+- **CI/CD with GitHub Actions** — GitHub Actions automates the build and publication of Docker images and deploys the Kubernetes configuration to the K3s cluster.
+  
 ## Getting Started
 ## Local Test Evidence
 ## Design Decisions
+
+
+
+## Details of Each Microservice
+
+| Service | Responsibility | Documentation |
+|---|---|---|
+| Payment Service | Creación y finalización del pago | [payment-service/README.md](payment-service/README.md) |
+| Commission Service | Cálculo y compensación de comisiones | [commission-service/README.md](commission-service/README.md) |
+| Account Service | Reserva, confirmación y liberación de saldo | [account-service/README.md](account-service/README.md) |
+| Ledger Service | Registro del movimiento contable | [ledger-service/README.md](ledger-service/README.md) |
+| API Gateway | Punto de entrada HTTP de la plataforma | [api-gateway/README.md](api-gateway/README.md) |
+
 
