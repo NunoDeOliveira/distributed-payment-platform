@@ -35,7 +35,7 @@ owns its own PostgreSQL database.
 
 ![microservices](docs/microservices-diagram.png)
 
-#### *Logical architecture of the application and communication between the Saga participants.*
+##### *Logical architecture of the application and communication between the Saga participants.*
 
 - **API Gateway**: entry point for all HTTP requests. Routes operations to the 
   appropriate service.
@@ -85,7 +85,7 @@ In the successful flow, every service completes its local transaction without er
 
 ![Happy Path Diagram](docs/happy-path-diagram.png)
 
-#### *Successful Saga flow, from payment creation to movement recorded.*
+#####      *Successful Saga flow, from payment creation to movement recorded.*
 
 
 ### Cancellation Flow
@@ -94,7 +94,7 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 ![Cancellation Flow Diagram](docs/cancelation-diagram.png)
 
-#### *Cancellation flow and compensating transactions*
+#####               *Cancellation flow and compensating transactions*
 
 
 
@@ -116,7 +116,7 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 ![Infrastructure](docs/infrastructure-diagram.png)
 
-#### *AWS infrastructure and Kubernetes K3s cluster where Application is deployment.*
+##### *AWS infrastructure and Kubernetes K3s cluster where Application is deployment.*
 
 
 ### AWS Network and Compute
