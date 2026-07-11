@@ -1,9 +1,8 @@
 
-============================================================================
-
-# Distributed Payment Platform - Saga Choreography
+# Distributed Payment Platform: Saga Choreography
 
 ## Indice
+
 1. Overview
 2. Architecture of Application
 3. Behavior of Application
@@ -22,13 +21,14 @@
     - Deployment microservices
 8. Observability and monitoring
 
----
+
 
 ## Overview
 
 Traditional banking systems can have difficulties when they need to coordinate operations between independent services without using one central database. This project shows how distributed transactions can be managed with the Saga choreography pattern. Each service completes its own local transaction and publishes an event that starts the next step, without using a central coordinator.
 
 ---
+
 
 ## Architecture of Application
 
@@ -50,13 +50,15 @@ owns its own PostgreSQL database.
 - **Ledger Service**: stores a permanent record of all money movements and works as the accounting ledger of the system.
 [ledger-service/README.md](ledger-service/README.md)
   
-  ---
-  
+---
+ 
+ 
 ## Behavior of Application
 
 ### Events and Transactions
 
 The Saga is implemented as a sequence of local transactions and asynchronous events. Each service publishes the result of its transaction, while compensating transactions are used when the operation fails or is cancelled.
+
 
 #### Application transactions
 
@@ -67,6 +69,7 @@ The Saga is implemented as a sequence of local transactions and asynchronous eve
 | Account Service | `reserveAmount()` | `releasedAmount()` |
 | Ledger Service | `recordMovement()` | `releaseMovement()` |
 
+
 #### Events published and consumed
 
 | Service | Events published | Events consumed |
@@ -76,11 +79,13 @@ The Saga is implemented as a sequence of local transactions and asynchronous eve
 | Account Service | `amount.reserved`<br>`amount.deducted`<br>`amount.rejected` | `commission.calculated`<br>`movement.recorded`<br>`movement.rejected`<br>`operation.canceled` |
 | Ledger Service | `movement.recorded`<br>`movement.rejected`<br>`operation.canceled` | `amount.reserved`<br>`amount.deducted`<br>`operation.canceled` |
 
+
 ### Happy Path Flow
 
 In the successful flow, every service completes its local transaction without errors. Each published event starts the next step until the payment is completed and the account and ledger are updated.
 
 ![Happy Path Diagram](docs/happy-path-diagram.png)
+
 
 ### Cancellation Flow
 
@@ -88,8 +93,8 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 ![Cancellation Flow Diagram](docs/cancelation-diagram.png)
 
----
-    
+
+
 ## Tech Stack
 
 **Backend**
@@ -110,30 +115,40 @@ If one of the services rejects the operation or reports an error, the cancellati
 **CI/CD**
 - **GitHub Actions**: automated pipeline for building Docker images in Kubernetes K3s
 
----
+
 
 ## Design of Infraestructure
 
-The application infrastructure is deployed in AWS. Terraform creates the required cloud resources, while K3s manages the application workloads inside the Kubernetes cluster.
+The infrastructure runs in the AWS `eu-west-2` region and is created with Terraform. It includes a network, three EC2 instances, and a K3s cluster distributed across three Availability Zones.
 
 ![Infrastructure](docs/infrastructure-diagram.png)
 
 
- - **AWS and Terraform** — AWS provides the computing and networking resources required by the application. Terraform defines and creates these resources using infrastructure as code.
+- **VPC** — all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
 
-- **Kubernetes (K3s)** — K3s manages the microservices inside the cluster. It deploys the containers, maintains the required replicas, and provides internal communication between services.
+- **Subnets** — the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
 
----
+- **Internet connectivity** — the Internet Gateway connects the public subnet to the Internet. The NAT Gateway allows the private worker nodes to access the Internet without accepting direct connections from outside the VPC.
+
+- **EC2 instances** — one EC2 instance runs the K3s control plane, and two EC2 instances work as worker nodes.
+
+- **Security groups** — security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
+
+
 
 ## Deployment of microservices
 
-The deployment process packages each microservice as a Docker image and uses GitHub Actions to automate the delivery of new application versions.
+Each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
 
-- **Docker** — each microservice is packaged as an independent Docker image, including the application and its required dependencies.
+### Docker
 
-- **CI/CD with GitHub Actions** — GitHub Actions automates the build and publication of Docker images and deploys the Kubernetes configuration to the K3s cluster.
+Each service has its own Docker image containing the application and its runtime dependencies.
 
----
+### CI/CD with GitHub Actions
+
+GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
+
+
   
 ## Getting Started
 ## Local Test Evidence
