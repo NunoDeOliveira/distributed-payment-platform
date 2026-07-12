@@ -1,13 +1,21 @@
 # Cloud-Native Distributed Payment Platform
 
-![Java](https://img.shields.io/badge/Java-17-blue)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0+-green)
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-async-orange)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-blue)
-![AWS](https://img.shields.io/badge/AWS-EC2-orange)
-![Status](https://img.shields.io/badge/Status-Academic%20Prototype-yellow)
+[![CI](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml/badge.svg?branch=digital-banking-platform)](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml)
+
+### Infrastructure and Deployment
+
+![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
+![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
+![K3s](https://img.shields.io/badge/Kubernetes-K3s-326CE5)
+![Docker](https://img.shields.io/badge/Docker-Container%20Images-2496ED)
+[![CI](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml/badge.svg?branch=digital-banking-platform)](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml)
+
+### Application Stack
+
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Event%20Messaging-FF6600)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-Microservices-6DB33F)
+![Java](https://img.shields.io/badge/Java-17-007396)
 
 
 ## Table of Contents
