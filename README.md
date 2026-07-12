@@ -13,7 +13,7 @@
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4+-6DB33F)
-![Java](https://img.shields.io/badge/Java-17-#0000FF)
+![Java](https://img.shields.io/badge/Java-17-0074BD)
 
 
 ## Table of Contents
