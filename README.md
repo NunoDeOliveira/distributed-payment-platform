@@ -1,4 +1,4 @@
-# Cloud-Native Distributed Payment Platform
+# Distributed Payment Platform
 
 ### Infrastructure and Deployment
 
@@ -22,18 +22,18 @@
 2. [Architecture](#architecture)
 3. [Domain Behavior](#domain-behavior)
    - [Events and Transactions](#events-and-transactions)
-     - [Application Transactions](#application-transactions)
-     - [Events Published and Consumed](#events-published-and-consumed)
-   - [Happy Path Flow](#happy-path-flow)
-   - [Cancellation Flow](#cancellation-flow)
+   - [Happy Path: Successful Payment](#happy-path-flow)
+   - [Cancellation and Compensation](#cancellation-flow)
 4. [Technology Stack](#technology-stack)
-5. [Infrastructure Design](#infrastructure-design)
-   - [AWS Network and Compute](#aws-network-and-compute)
-   - [Kubernetes (K3s)](#kubernetes-k3s)
-6. [Deployment of application](#deployment)
-   - [Docker](#docker)
-   - [CI/CD with GitHub Actions](#cicd-with-github-actions)
-
+5. [Infrastructure](#infrastructure-design)
+6. [Deployment](#deployment)
+7. [Testing and Validation](#testing-and-validation)
+8. [Observability and Monitoring](#observability-and-monitoring)
+10. [Design Decisions](#design-decisions)
+11. [Current Limitations](#current-limitations)
+12. [Getting Started](#getting-started)
+13. [Repository Structure](#repository-structure)
+14. [License](#license)
 
 
 ## Overview
@@ -41,6 +41,10 @@
 Traditional banking systems can have difficulties when they need to coordinate operations between independent services without using one central database. This project shows how distributed transactions can be managed with the Saga choreography pattern. Each service completes its own local transaction and publishes an event that starts the next step, without using a central coordinator.
 
 ---
+
+## 
+
+The project studies how a distributed payment operation can be coordinated across independent services without using a shared database or a global transaction. The system implements Saga choreography and evaluates its functional behavior, temporary inconsistencies, concurrent execution, and performance.
 
 
 ## Architecture of Application
@@ -52,15 +56,10 @@ The application consists of an API Gateway and four independent microservices. T
 ##### *Logical architecture of the application and communication between the Saga participants.*
 
 - **API Gateway**: entry point for all HTTP requests. Routes operations to the appropriate service.
-[api-gateway/README.md](api-gateway/README.md)
 - **Payment Service**: manages the type of payments and creates the payment and starts the Saga flow.
-[payment-service/README.md](payment-service/README.md)
 - **Commission Service**: calculates the commission according to the payment method and sends the total amount to the next service.
-[commission-service/README.md](commission-service/README.md)
 - **Account Service**: manages the account balance. It reserves the funds when a payment starts and restores them if the payment is cancelled.
-[account-service/README.md](account-service/README.md)
 - **Ledger Service**: stores a permanent record of all money movements and works as the accounting ledger of the system.
-[ledger-service/README.md](ledger-service/README.md)
   
 ---
  
@@ -118,7 +117,7 @@ If one of the services rejects the operation or reports an error, the cancellati
 | Backend | Spring Boot, Spring Cloud Gateway |
 | Persistence | PostgreSQL, Spring Data JPA |
 | Communication | RabbitMQ, HTTP |
-| Infrastructure cloud-native | AWS EC2, Kubernetes (K3s), Docker |
+| Infrastructure | AWS EC2, Kubernetes (K3s), Docker |
 | For Deployment | Terraform (IaC), GitHub Actions (CI/CD) |
 
 
