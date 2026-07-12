@@ -172,17 +172,24 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 ## Getting Started
 
 ### Run local
+Execute this commands
+```bash
 git clone https://github.com/NunoDeOliveira/distributed-payment-platform
 cd distributed-payment-platform
 docker-compose up
+```
 
-Test a payment
+Test a payment.
+```bash
 curl -X POST http://localhost:8080/payments \
   -H "Content-Type: application/json" \
   -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
+```
 
 Cancel a payment
+```bash
 curl -X DELETE http://localhost:8080/payments/{id}
+```
 
 ### Local Evidence
 
