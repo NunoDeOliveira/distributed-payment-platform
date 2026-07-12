@@ -121,25 +121,25 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 ### AWS Network and Compute
 
-- **VPC** — all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
+- **VPC**: all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
 
-- **Subnets** — the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
+- **Subnets**: the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
 
-- **Internet connectivity** — the Internet Gateway connects the public subnet to the Internet. The NAT Gateway allows the private worker nodes to access the Internet without accepting direct connections from outside the VPC.
+- **Internet connectivity**: the Internet Gateway connects the public subnet to the Internet. The NAT Gateway allows the private worker nodes to access the Internet without accepting direct connections from outside the VPC.
 
-- **EC2 instances** — one EC2 instance runs the K3s control plane, and two EC2 instances work as worker nodes.
+- **EC2 instances**: one EC2 instance runs the K3s control plane, and two EC2 instances work as worker nodes.
 
-- **Security groups** — security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
+- **Security groups**: security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
 
 ### Kubernetes (K3s)
 
-- **Control plane** — the K3s server runs the Kubernetes API Server, Scheduler, Controller Manager, and SQLite datastore.
+- **Control plane**: the K3s server runs the Kubernetes API Server, Scheduler, Controller Manager, and SQLite datastore.
 
-- **Worker nodes** — the two K3s agents run the application Pods selected by the Kubernetes Scheduler.
+- **Worker nodes**: the two K3s agents run the application Pods selected by the Kubernetes Scheduler.
 
-- **Application workloads** — the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
+- **Application workloads**: the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
 
-- **Application access** — external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
+- **Application access**: external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
   
 
 
