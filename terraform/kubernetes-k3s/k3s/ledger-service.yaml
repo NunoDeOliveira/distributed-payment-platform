@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: movement-service
-        image: nunohenriquedeoliveira/delivery-service:main
+        image: nunohenriquedeoliveira/ledger-service:main
         imagePullPolicy: Always
         ports:
         - containerPort: 8084

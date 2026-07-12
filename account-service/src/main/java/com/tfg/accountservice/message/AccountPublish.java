@@ -51,7 +51,6 @@ public class AccountPublish {
     }
 
 
-    // Publish an event accepting delivery in the delivery queue
     public void publishAmountRejected(String correlationId) {
         // Create an object account event to publish in commission queue
         AccountEvent event;

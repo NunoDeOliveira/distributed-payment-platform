@@ -139,7 +139,6 @@ public class LedgerService {
         ledgerPublish.publishLedgerMovementRejected(ledgerId, correlationId, movement.getAmount());
     }
 
-    // Get delivery by ID
     public Movement getLedgerMovement(Long id) {
         return movementRepo.findById(id).orElseThrow(() -> new RuntimeException("Movement " + id + " not found"));
     }

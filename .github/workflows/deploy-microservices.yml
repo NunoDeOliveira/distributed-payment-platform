@@ -3,8 +3,8 @@ on:
   workflow_run:
     workflows: 
       - "Java CI with Maven - payment-service"
-      - "Java CI with Maven - delivery-service"
-      - "Java CI with Maven - inventory-service"
+      - "Java CI with Maven - ledger-service"
+      - "Java CI with Maven - account-service"
       - "Java CI with Maven - api-gateway"
     types: [completed]
 jobs:

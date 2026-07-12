@@ -34,7 +34,6 @@ public class PaymentPublish {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    // Define a queue for Inventory to receive events
     @Bean
     public Queue commissionQueue() {
         return new Queue(COMMISSION_QUEUE, true);

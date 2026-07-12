@@ -1,4 +1,4 @@
-# dockerfile for inventory-service
+# Dockerfile for account-service
 
 FROM eclipse-temurin:17-jre-alpine
 ARG JAR_FILE=target/*.jar

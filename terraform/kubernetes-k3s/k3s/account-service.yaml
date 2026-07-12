@@ -37,8 +37,6 @@ spec:
           value: "rabbit"
         - name: SERVER_PORT
           value: "8083"
-        - name: INVENTORY_STOCK_LIMIT
-          value: "30"
         resources:
           requests:
             memory: "128Mi"

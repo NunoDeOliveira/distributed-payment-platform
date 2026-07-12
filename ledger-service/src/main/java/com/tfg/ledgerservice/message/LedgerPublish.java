@@ -67,7 +67,6 @@ public class LedgerPublish {
         rabbitTemplate.convertAndSend(ACCOUNT_QUEUE, event);
     }
 
-    // Given an Id and amount of delivery publish a pending delivery
     public void publishLedgerMovementCanceled(String correlationId, BigDecimal amount) {
         // Create an event to publish in the queue
         LedgerEvent event =  new LedgerEvent("operation.canceled",  correlationId, amount, null);
@@ -79,7 +78,6 @@ public class LedgerPublish {
     }
 
 
-    // Given an Id and amount of delivery publish a pending delivery
     public void publishLedgerMovementFailed(String correlationId, BigDecimal amount) {
         // Create an event to publish in the queue
         LedgerEvent event =  new LedgerEvent("movement.failed",  correlationId, amount, null);

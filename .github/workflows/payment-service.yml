@@ -24,7 +24,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_DB: productiondb
+          POSTGRES_DB: paymentdb
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: >-

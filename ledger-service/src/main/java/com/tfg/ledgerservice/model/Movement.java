@@ -53,7 +53,6 @@ public class Movement {
         this.register = state.name() + " " + startTime + " | ";
     }
 
-    // Switch to RECORDED state and record the production start time
     public void recorded() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.RECORDED;
@@ -61,7 +60,6 @@ public class Movement {
         this.register += "RECORDED " + now.toLocalTime() + " | ";
     }
 
-    // Switch state to CANCELED and record the delivery start time
     public void cancelled() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.CANCELED;

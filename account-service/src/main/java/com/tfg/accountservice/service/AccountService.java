@@ -51,7 +51,6 @@ public class AccountService {
     }
 
     //@Transactional
-    //public void validateDelivery(Long id, int amount){
     @Transactional
     public void deductAmount(String correlationId, BigDecimal amount) {
         if (correlationId == null) {
@@ -73,7 +72,6 @@ public class AccountService {
     }
 
     /*@Transactional
-    // Given an id and amount of a Production increase the stock of DB
     public void releaseAmount(String correlationId, BigDecimal amount) {
         if (correlationId == null || amount == null) {
             return;
