@@ -19,21 +19,19 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Domain Behavior](#domain-behavior)
+2. [Application Architecture](#architecture)
+3. [Saga Behavior](#domain-behavior)
    - [Events and Transactions](#events-and-transactions)
    - [Happy Path: Successful Payment](#happy-path-flow)
    - [Cancellation and Compensation](#cancellation-flow)
-4. [Technology Stack](#technology-stack)
-5. [Infrastructure](#infrastructure-design)
-6. [Deployment](#deployment)
-7. [Testing and Validation](#testing-and-validation)
-8. [Observability and Monitoring](#observability-and-monitoring)
-10. [Design Decisions](#design-decisions)
+4. [Design Decisions](#design-decisions)
+5. [Technology Stack](#technology-stack)
+6. [Infrastructure](#infrastructure-design)
+7. [Deployment](#deployment)
+8. [Getting Started](#getting-started)
+9. [Testing and Validation](#testing-and-validation)
 11. [Current Limitations](#current-limitations)
-12. [Getting Started](#getting-started)
 13. [Repository Structure](#repository-structure)
-14. [License](#license)
 
 
 ## Overview
@@ -47,7 +45,7 @@ Traditional banking systems can have difficulties when they need to coordinate o
 The project studies how a distributed payment operation can be coordinated across independent services without using a shared database or a global transaction. The system implements Saga choreography and evaluates its functional behavior, temporary inconsistencies, concurrent execution, and performance.
 
 
-## Architecture of Application
+## Application Architecture
 
 The application consists of an API Gateway and four independent microservices. The services communicate asynchronously through RabbitMQ, and each microservice owns its own PostgreSQL database.
 
@@ -64,7 +62,7 @@ The application consists of an API Gateway and four independent microservices. T
 ---
  
  
-## Behavior of Application
+## Saga Behavior
 
 ### Events and Transactions
 
@@ -157,7 +155,9 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 ## Deployment of application
 
-Each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
+For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
+
+CI/CD For more detail, check this link --> 
 
 ### Docker
 
@@ -170,7 +170,29 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 
   
 ## Getting Started
-## Local Test Evidence
+
+### Run local
+git clone https://github.com/NunoDeOliveira/distributed-payment-platform
+cd distributed-payment-platform
+docker-compose up
+
+Test a payment
+curl -X POST http://localhost:8080/payments \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
+
+Cancel a payment
+curl -X DELETE http://localhost:8080/payments/{id}
+
+### Local Evidence
+
+
+### Run in AWS
+
+
+### AWS Evidence
+
+
 ## Design Decisions
 
 
