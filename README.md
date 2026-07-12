@@ -1,21 +1,19 @@
 # Cloud-Native Distributed Payment Platform
 
-[![CI](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml/badge.svg?branch=digital-banking-platform)](https://github.com/NunoDeOliveira/tfg-microservices-saga-pattern/actions/workflows/ci.yml)
-
 ### Infrastructure and Deployment
 
 ![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
 ![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
 ![K3s](https://img.shields.io/badge/Kubernetes-K3s-yellow)
-![Docker](https://img.shields.io/badge/Docker-Container%20Images-2496ED)
-[![CI](https://img.shields.io/badge/CI/CD-GitHub%20Actions-7B42BC)
+![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
 
-### Application Stack
+### Application
 
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4+-6DB33F)
-![Java](https://img.shields.io/badge/Java-17-red)
+![Java](https://img.shields.io/badge/Java-17-#0000FF)
 
 
 ## Table of Contents
