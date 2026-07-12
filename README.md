@@ -1,6 +1,16 @@
 # Cloud-Native Distributed Payment Platform
 
-## Indice
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0+-green)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-async-orange)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-blue)
+![AWS](https://img.shields.io/badge/AWS-EC2-orange)
+![Status](https://img.shields.io/badge/Status-Academic%20Prototype-yellow)
+
+
+## Table of Contents
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
@@ -14,7 +24,7 @@
 5. [Infrastructure Design](#infrastructure-design)
    - [AWS Network and Compute](#aws-network-and-compute)
    - [Kubernetes (K3s)](#kubernetes-k3s)
-6. [Deployment](#deployment)
+6. [Deployment of application](#deployment)
    - [Docker](#docker)
    - [CI/CD with GitHub Actions](#cicd-with-github-actions)
 
@@ -102,8 +112,8 @@ If one of the services rejects the operation or reports an error, the cancellati
 | Backend | Spring Boot, Spring Cloud Gateway |
 | Persistence | PostgreSQL, Spring Data JPA |
 | Communication | RabbitMQ, HTTP |
-| Infrastructure | AWS EC2, Kubernetes (K3s) |
-| Provisioning and Deployment | Terraform, Docker, GitHub Actions |
+| Infrastructure cloud-native | AWS EC2, Kubernetes (K3s), Docker |
+| For Deployment | Terraform (IaC), GitHub Actions (CI/CD) |
 
 
 
@@ -140,7 +150,7 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
   
 
 
-## Deployment of microservices
+## Deployment of application
 
 Each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
 
