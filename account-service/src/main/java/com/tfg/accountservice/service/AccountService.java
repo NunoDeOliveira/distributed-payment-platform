@@ -71,38 +71,6 @@ public class AccountService {
 
     }
 
-    /*@Transactional
-    public void releaseAmount(String correlationId, BigDecimal amount) {
-        if (correlationId == null || amount == null) {
-            return;
-        }
-
-        // If it was already released, do not release it again
-        Balance balance = balanceRepo.findByCorrelationId(correlationId).orElse(null);
-        if (balance == null ||
-                balance.getState() == BalanceState.RELEASED ||
-                balance.getState() != BalanceState.RESERVED) {
-            return;
-        }
-
-        // Get balance of correlationId given
-        BigDecimal reservedAmount = balance.getAmount();
-
-        // Sum the amount release to account balance
-        BigDecimal currentBalance = getCurrentBalance();
-        BigDecimal newBalance = currentBalance.add(reservedAmount);
-
-        // Change local state to RELEASED and sum amount
-        balance.setBalanceAccount(newBalance);
-        balance.setState(BalanceState.RELEASED);
-        balance.released();
-        balanceRepo.save(balance);
-
-        // Update cancel state before to release
-        cancelReserveAmount(correlationId, amount);
-
-    }*/
-
     // Given and id of product and amount release a reservation
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void cancelReserveAmount(String correlationId, BigDecimal amount) {

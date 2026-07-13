@@ -1,14 +1,12 @@
 # Distributed Payment Platform
 
-### Infrastructure and Deployment
+### Tech Stack
 
 ![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
 ![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
 ![K3s](https://img.shields.io/badge/Kubernetes-K3s-yellow)
 ![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
 ![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
-
-### Application
 
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
@@ -171,25 +169,36 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
   
 ## Getting Started
 
-### Run local
-Execute this commands
+### Run locally
+
+Clone the repository and start all services with Docker Compose:
+
 ```bash
 git clone https://github.com/NunoDeOliveira/distributed-payment-platform
 cd distributed-payment-platform
 docker-compose up
 ```
 
-Test a payment.
+Before making any payment, add an initial balance to the account:
+
+```bash
+curl -X POST "http://localhost:8083/balances/add?balanceAccount=1000.00"
+```
+
+Create a payment:
+
 ```bash
 curl -X POST http://localhost:8080/payments \
   -H "Content-Type: application/json" \
   -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
 ```
 
-Cancel a payment
+Cancel a payment by its ID:
+
 ```bash
 curl -X DELETE http://localhost:8080/payments/{id}
 ```
+
 
 ### Local Evidence
 
