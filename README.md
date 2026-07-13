@@ -66,7 +66,7 @@ The application consists of an API Gateway and four independent microservices. T
 The Saga is implemented as a sequence of local transactions and asynchronous events. Each service publishes the result of its transaction, while compensating transactions are used when the operation fails or is cancelled.
 
 
-#### Application transactions
+#### Transactions
 
 | Service | Local transaction | Compensation |
 |---|---|---|
@@ -115,6 +115,7 @@ If one of the services rejects the operation or reports an error, the cancellati
 | Infrastructure | AWS EC2, Kubernetes (K3s), Docker |
 | For Deployment | Terraform (IaC), GitHub Actions (CI/CD) |
 
+---
 
 
 ## Design of Infraestructure
@@ -164,13 +165,17 @@ Each service has its own Docker image containing the application and its runtime
 
 GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
 
-
+---
+  
   
 ## Getting Started
 
 ### Run locally
 
-Clone the repository, start all services with Docker Compose:
+**Prerequisites**
+- Docker and Docker Compose installed
+
+**1. Clone and start all services**
 
 ```bash
 git clone https://github.com/NunoDeOliveira/distributed-payment-platform
@@ -178,33 +183,76 @@ cd distributed-payment-platform
 docker-compose up
 ```
 
-Before making any payment, add an initial balance to the account:
+Wait a few seconds for all services to initialize.
+
+**2. Add an initial balance to the account**
 
 ```bash
 curl -X POST "http://localhost:8083/balances/add?balanceAccount=1000.00"
 ```
 
-Create a payment:
+**3. Create a payment**
 
 ```bash
-curl -X POST http://localhost:8080/payments -H "Content-Type: application/json" -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
+curl -X POST "http://localhost:8080/payments" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
 ```
 
-Cancel a payment by its ID:
+The response includes the payment `id`. Use it to list or cancel the payment:
+
+**4. List all payments**
 
 ```bash
-curl -X DELETE http://localhost:8080/payments/{id}
+curl http://localhost:8080/payments
 ```
 
+**5. Cancel a payment**
+
+```bash
+curl -X DELETE "http://localhost:8080/payments/{id}"
+```
+
+
+### Run in AWS
+
+**Prerequisites**
+- AWS account with credentials configured
+- Terraform installed
+
+**1. Provision the infrastructure**
+
+```bash
+cd infrastructure/terraform
+terraform init
+terraform apply
+```
+
+Terraform provisions the EC2 instances, installs K3s and deploys the microservices 
+automatically. The output includes the Control Plane IP address.
+
+**2. Access the cluster**
+
+```bash
+ssh -i YOUR_KEY.pem ubuntu@<CONTROL_PLANE_IP>
+```
+
+**3. Verify the deployment**
+
+```bash
+kubectl get pods
+kubectl get services
+```
+
+---
+
+
+## Testing and Validation
 
 ### Local Evidence
 
-The following queries verify the state of each service database after running both 
-a successful payment and a cancellation. Each service records its local transaction 
-independently, demonstrating the Saga choreography pattern in action.
+The following queries verify the state of each service database after running both a successful payment and a cancellation. Each service records its local transaction  independently, demonstrating the Saga choreography pattern flow.
 
-> **Note:** Credentials shown are for local development only.
-> Never use these values in a production environment.
 
 **Payment Service**- shows the payment lifecycle:
 ```bash
@@ -252,11 +300,10 @@ Result:
 
 
 
-### Run in AWS
-
-
 ### AWS Evidence
 
+
+---
 
 ## Design Decisions
 
