@@ -3,6 +3,7 @@
 version: '3.8'
 
 services:
+# Infrastructure of application 
   postgres:
     image: postgres
     container_name: postgres-tfg
@@ -24,7 +25,95 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      
+      
+  # Microservices
+  payment-service:
+    image: nunohenriquedeoliveira/payment-service:main
+    container_name: payment-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/paymentdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=nuno
+      - SPRING_RABBITMQ_PASSWORD=rabbit
+    depends_on:
+      - postgres
+      - rabbitmq
 
+  commission-service:
+    image: nunohenriquedeoliveira/commission-service:main
+    container_name: commission-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/commissiondb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=nuno
+      - SPRING_RABBITMQ_PASSWORD=rabbit
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  account-service:
+    image: nunohenriquedeoliveira/account-service:main
+    container_name: account-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/accountdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=nuno
+      - SPRING_RABBITMQ_PASSWORD=rabbit
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  ledger-service:
+    image: nunohenriquedeoliveira/ledger-service:main
+    container_name: ledger-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/movementdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=nuno
+      - SPRING_RABBITMQ_PASSWORD=rabbit
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  api-gateway:
+    image: nunohenriquedeoliveira/api-gateway:main
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=nuno
+      - SPRING_RABBITMQ_PASSWORD=rabbit
+    depends_on:
+      - payment-service
+      - commission-service
+      - account-service
+      - ledger-service
+
+
+  # Observability
   prometheus:
     container_name: prometheus
     image: prom/prometheus

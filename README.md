@@ -2,11 +2,11 @@
 
 ### Tech Stack
 
-![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
 ![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
+![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
 ![K3s](https://img.shields.io/badge/Kubernetes-K3s-yellow)
-![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
 ![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
+![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-microservices-6DB33F)
@@ -170,7 +170,7 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 
 ### Run locally
 
-Clone the repository and start all services with Docker Compose:
+Clone the repository, start all services with Docker Compose:
 
 ```bash
 git clone https://github.com/NunoDeOliveira/distributed-payment-platform
@@ -187,9 +187,7 @@ curl -X POST "http://localhost:8083/balances/add?balanceAccount=1000.00"
 Create a payment:
 
 ```bash
-curl -X POST http://localhost:8080/payments \
-  -H "Content-Type: application/json" \
-  -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
+curl -X POST http://localhost:8080/payments -H "Content-Type: application/json" -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
 ```
 
 Cancel a payment by its ID:
@@ -200,6 +198,58 @@ curl -X DELETE http://localhost:8080/payments/{id}
 
 
 ### Local Evidence
+
+The following queries verify the state of each service database after running both 
+a successful payment and a cancellation. Each service records its local transaction 
+independently, demonstrating the Saga choreography pattern in action.
+
+> **Note:** Credentials shown are for local development only.
+> Never use these values in a production environment.
+
+**Payment Service**- shows the payment lifecycle:
+```bash
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c \
+"SELECT id, amount, correlation_id \
+ AS \"correlationId\", register \
+ FROM payments ORDER BY id ASC;"
+```
+Result:
+
+![Payment Service Database](docs/database-payment-service.png)
+
+**Commission Service** - shows the commission calculated:
+```bash
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c \
+"SELECT id, amount, total_amount \
+ AS \"totalAmount\", correlation_id AS \"correlationId\", register \
+ FROM commissions ORDER BY id ASC;"
+```
+Result:
+
+![Commission Service Database](docs/database-commission-service.png)
+
+**Account Service** - shows the account balance:
+```bash
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c \
+"SELECT id, balance_account \
+ AS \"balanceAccount\", correlation_id AS \"correlationId\", register \
+ FROM balances ORDER BY id ASC;"
+```
+Result:
+
+![Account Service Database](docs/database-account-service.png)
+
+**Ledger Service** - shows the immutable the record movements:
+```bash
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c \
+"SELECT id, amount, correlation_id \
+ AS \"correlationId\", register \
+ FROM deliveries ORDER BY id ASC;"
+```
+Result:
+
+![Ledger Service Database](docs/database-ledger-service.png)
+
 
 
 ### Run in AWS

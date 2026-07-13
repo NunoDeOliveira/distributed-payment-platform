@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 @Getter
 @Setter
 @Entity
-@Table(name = "deliveries")
+@Table(name = "movements")
 public class Movement {
 
     @Id
