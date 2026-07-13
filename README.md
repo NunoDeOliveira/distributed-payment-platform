@@ -7,7 +7,6 @@
 ![K3s](https://img.shields.io/badge/Kubernetes-K3s-yellow)
 ![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
 ![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
-
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-microservices-6DB33F)
