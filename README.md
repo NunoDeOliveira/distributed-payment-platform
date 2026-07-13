@@ -59,21 +59,11 @@ The application consists of an API Gateway and four independent microservices. T
 ---
  
  
-## Saga Behavior
+## Application Behavior
 
 ### Events and Transactions
 
 The Saga is implemented as a sequence of local transactions and asynchronous events. Each service publishes the result of its transaction, while compensating transactions are used when the operation fails or is cancelled.
-
-
-#### Transactions
-
-| Service | Local transaction | Compensation |
-|---|---|---|
-| Payment Service | `createPayment()` | `cancelPayment()` |
-| Commission Service | `calculateCommission()` | `cancelCommission()` |
-| Account Service | `reserveAmount()` | `cancelReservationAmount()` |
-| Ledger Service | `recordMovement()` | `cancelMovement()` |
 
 
 #### Events published and consumed
@@ -84,6 +74,16 @@ The Saga is implemented as a sequence of local transactions and asynchronous eve
 | Commission Service | `commission.calculated`<br>`commission.released`<br>`operation.canceled` | `payment.created`<br>`operation.rejected`<br>`operation.canceled` |
 | Account Service | `amount.reserved`<br>`amount.deducted`<br>`amount.rejected` | `commission.calculated`<br>`movement.recorded`<br>`movement.rejected`<br>`operation.canceled` |
 | Ledger Service | `movement.recorded`<br>`movement.rejected`<br>`operation.canceled` | `amount.reserved`<br>`amount.deducted`<br>`operation.canceled` |
+
+
+#### Transactions and Compensations
+
+| Service | Local transaction | Compensation |
+|---|---|---|
+| Payment Service | `createPayment()` | `cancelPayment()` |
+| Commission Service | `calculateCommission()` | `cancelCommission()` |
+| Account Service | `reserveAmount()` | `cancelReservationAmount()` |
+| Ledger Service | `recordMovement()` | `cancelMovement()` |
 
 
 ### Happy Path Flow
