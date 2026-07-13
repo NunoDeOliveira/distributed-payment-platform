@@ -204,3 +204,62 @@ curl -X DELETE http://localhost:8080/payments/{id}
 
 
 
+## References
+
+[1] C. Richardson, *Microservices Patterns: With Examples in Java*.
+Shelter Island, NY, USA: Manning Publications, 2019.
+
+[2] E. Daraghmi, C.-P. Zhang, and S.-M. Yuan, “Enhancing Saga Pattern
+for Distributed Transactions within a Microservices Architecture,”
+*Applied Sciences*, vol. 12, no. 12, Art. no. 6242, Jun. 2022,
+doi: 10.3390/app12126242.
+
+[3] GitHub, “Workflow syntax for GitHub Actions,” *GitHub Docs*.
+[Online]. Available:
+https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions.
+[Accessed: Jul. 13, 2026].
+
+[4] GitHub, “Publishing Docker images,” *GitHub Docs*. [Online].
+Available:
+https://docs.github.com/actions/guides/publishing-docker-images.
+[Accessed: Jul. 13, 2026].
+
+[5] Apache Maven Project, “Maven Surefire Plugin.” [Online].
+Available:
+https://maven.apache.org/surefire/maven-surefire-plugin/.
+[Accessed: Jul. 13, 2026].
+
+[6] Kubernetes Authors, “Deployments,” *Kubernetes Documentation*.
+[Online]. Available:
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment/.
+[Accessed: Jul. 13, 2026].
+
+[7] Kubernetes Authors, “kubectl port-forward,”
+*Kubernetes Documentation*. [Online]. Available:
+https://kubernetes.io/docs/reference/kubectl/generated/kubectl_port-forward/.
+[Accessed: Jul. 13, 2026].
+
+[8] Spring, “Actuator endpoints,” *Spring Boot Reference Documentation*.
+[Online]. Available:
+https://docs.spring.io/spring-boot/reference/actuator/endpoints.html.
+[Accessed: Jul. 13, 2026].
+
+[9] K3s Project, “Architecture,” *K3s Documentation*. [Online].
+Available:
+https://docs.k3s.io/architecture.
+[Accessed: Jul. 13, 2026].
+
+[10] HashiCorp, “What is Terraform?,” *Terraform Documentation*.
+[Online]. Available:
+https://developer.hashicorp.com/terraform/intro.
+[Accessed: Jul. 13, 2026].
+
+[11] Amazon Web Services, “What is Amazon VPC?,”
+*Amazon VPC User Guide*. [Online]. Available:
+https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html.
+[Accessed: Jul. 13, 2026].
+
+[12] Amazon Web Services, “What is Amazon EC2?,”
+*Amazon EC2 User Guide*. [Online]. Available:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html.
+[Accessed: Jul. 13, 2026].
