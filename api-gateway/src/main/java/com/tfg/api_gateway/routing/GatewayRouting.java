@@ -30,7 +30,7 @@ public class GatewayRouting {
                 )
 
                 .route("commission_route", r -> r.path("/commissions/**").and()
-                        .method(HttpMethod.GET).filters(f -> f.stripPrefix(1)
+                        .method(HttpMethod.GET).filters(f -> f.stripPrefix(0)
                                 .circuitBreaker(c -> {
                                     c.setName("commissionCircuitBreaker");
                                     c.setFallbackUri("forward:/fallback-commission");
@@ -42,7 +42,7 @@ public class GatewayRouting {
                 .route("account_route", r -> r
                                 .path("/balances/**")
                                 .and()
-                                .method(HttpMethod.GET)
+                                .method(HttpMethod.GET, HttpMethod.POST)
                                 .filters(f -> f
                                         .stripPrefix(0)
                                         .circuitBreaker(c -> {
@@ -54,7 +54,7 @@ public class GatewayRouting {
                 )
 
                 .route("ledger_route", r -> r.path("/movements/**").and()
-                        .method(HttpMethod.GET).filters(f -> f.stripPrefix(1)
+                        .method(HttpMethod.GET).filters(f -> f.stripPrefix(0)
                                 .circuitBreaker(c -> {
                                     c.setName("ledgerCircuitBreaker");
                                     c.setFallbackUri("forward:/fallback-ledger");
