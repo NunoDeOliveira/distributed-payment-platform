@@ -2,33 +2,38 @@
 
 ### Tech Stack
 
-![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
-![AWS](https://img.shields.io/badge/AWS-EC2-FF9900)
-![K3s](https://img.shields.io/badge/Kubernetes-K3s-yellow)
-![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-black)
-![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-AMQP-FF6600)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-microservices-6DB33F)
+![Infrastructure as Code](https://img.shields.io/badge/Infrastructure%20as%20Code-Terraform-7B42BC)
+![Cloud Provider](https://img.shields.io/badge/Cloud Provider-AWS-EC2-FF9900)
+![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes-(K3s)-yellow)
+![Deployment](https://img.shields.io/badge/Deployment-GitHub%20Actions-black)
+![Containers](https://img.shields.io/badge/Containers-Docker-2496ED)
+![Asynchronous](https://img.shields.io/badge/Asynchronous-RabbitMQ-FF6600)
+![Persistence](https://img.shields.io/badge/Persistence-PostgreSQL-4169E1)
+![Microservices](https://img.shields.io/badge/Microservices-Spring%20Boot-6DB33F)
 ![Java](https://img.shields.io/badge/Java-17-0074BD)
 
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Application Architecture](#architecture)
-3. [Saga Behavior](#domain-behavior)
+2. [Application Architecture](#application-architecture)
+3. [Application Behavior](#application-behavior)
    - [Events and Transactions](#events-and-transactions)
-   - [Happy Path: Successful Payment](#happy-path-flow)
-   - [Cancellation and Compensation](#cancellation-flow)
-4. [Design Decisions](#design-decisions)
-5. [Technology Stack](#technology-stack)
-6. [Infrastructure](#infrastructure-design)
-7. [Deployment](#deployment)
-8. [Getting Started](#getting-started)
-9. [Testing and Validation](#testing-and-validation)
-11. [Current Limitations](#current-limitations)
-13. [Repository Structure](#repository-structure)
+   - [Happy Path Flow](#happy-path-flow)
+   - [Cancellation Flow](#cancellation-flow)
+4. [Infrastructure Design](#infrastructure-design)
+   - [AWS Network and Compute](#aws-network-and-compute)
+   - [Kubernetes K3s](#kubernetes-k3s)
+5. [Tech Stack](#tech-stack)
+6. [Getting Started](#getting-started)
+   - [Run locally](#run-locally)
+   - [Run in AWS](#run-in-aws)
+7. [Testing and Validation](#testing-and-validation)
+   - [Local Evidence](#local-evidence)
+   - [AWS Evidence](#aws-evidence)
+8. [Observability and Monitoring](#observability-and-monitoring)
+9. [Current Limitations](#current-limitations)
+10. [License](#license)
 
 
 ## Overview

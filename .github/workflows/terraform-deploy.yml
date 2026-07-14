@@ -1,0 +1,117 @@
+name: Validate infrastructure and deploy platform
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - "digital-banking-platform"
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-deploy.yml"
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: platform-deployment-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  terraform-check:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize Terraform without backend
+        run: terraform init -backend=false
+
+      - name: Validate Terraform configuration
+        run: terraform validate
+
+  deploy-manifests:
+    name: Deploy Kubernetes manifests
+    runs-on: ubuntu-latest
+    needs: terraform-check
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy manifests to K3s control plane
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.K3S_HOST }}
+          username: ubuntu
+          key: ${{ secrets.K3S_SSH_KEY }}
+          source: "terraform/kubernetes-k3s"
+          target: "/home/ubuntu/platform-deployment"
+
+      - name: Apply Kubernetes manifests
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.K3S_HOST }}
+          username: ubuntu
+          key: ${{ secrets.K3S_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "Waiting for K3s..."
+
+            for attempt in $(seq 1 30); do
+              if sudo k3s kubectl get nodes >/dev/null 2>&1; then
+                echo "K3s is available"
+                break
+              fi
+
+              if [ "$attempt" -eq 30 ]; then
+                echo "K3s did not become available"
+                exit 1
+              fi
+
+              sleep 10
+            done
+
+            sudo k3s kubectl apply \
+              -f /home/ubuntu/platform-deployment/terraform/kubernetes-k3s/
+
+            sudo k3s kubectl get pods
+            sudo k3s kubectl get services
+
+  commission-service:
+    name: Deploy Commission Service
+    needs: deploy-manifests
+    uses: ./.github/workflows/commission-service.yml
+    secrets: inherit
+
+  account-service:
+    name: Deploy Account Service
+    needs: commission-service
+    uses: ./.github/workflows/account-service.yml
+    secrets: inherit
+
+  ledger-service:
+    name: Deploy Ledger Service
+    needs: account-service
+    uses: ./.github/workflows/ledger-service.yml
+    secrets: inherit
+
+  payment-service:
+    name: Deploy Payment Service
+    needs: ledger-service
+    uses: ./.github/workflows/payment-service.yml
+    secrets: inherit
