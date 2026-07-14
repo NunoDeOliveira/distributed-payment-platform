@@ -14,15 +14,19 @@ public class GatewayRouting {
         return builder.routes()
 
                 // Payment service
-                .route("payment_route", r -> r.path("/payments/**").and()
-                        .method(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
-                        .filters(f -> f.stripPrefix(1).circuitBreaker(c -> {
-                                    c.setName("paymentCircuitBreak");
-                                    c.setFallbackUri("forward:/fallback-payment");
-                                }).addResponseHeader("Gateway-Service", "Payment-Service")
-                        )
-                        .uri("http://payment-service:8081")
-                        //.uri("http://localhost:8081")
+                .route("payment_route", r -> r
+                                .path("/payments/**")
+                                .and()
+                                .method(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
+                                .filters(f -> f
+                                        .stripPrefix(0)
+                                        .circuitBreaker(c -> {
+                                            c.setName("paymentCircuitBreak");
+                                            c.setFallbackUri("forward:/fallback-payment");
+                                        }).addResponseHeader("Gateway-Service", "Payment-Service")
+                                )
+                                .uri("http://payment-service:8081")
+                                //.uri("http://localhost:8081")
                 )
 
                 .route("commission_route", r -> r.path("/commissions/**").and()
@@ -35,14 +39,18 @@ public class GatewayRouting {
                         //.uri("http://localhost:8082")
                 )
 
-                .route("account_route", r -> r.path("/operations/**").and()
-                        .method(HttpMethod.GET).filters(f -> f.stripPrefix(1)
-                                .circuitBreaker(c -> {
-                                    c.setName("accountCircuitBreaker");
-                                    c.setFallbackUri("forward:/fallback-account");
-                                }).addResponseHeader("Gateway-Service", "Account-Service"))
-                        .uri("http://account-service:8083")
-                        //.uri("http://localhost:8083")
+                .route("account_route", r -> r
+                                .path("/operations/**")
+                                .and()
+                                .method(HttpMethod.GET)
+                                .filters(f -> f
+                                        .stripPrefix(0)
+                                        .circuitBreaker(c -> {
+                                            c.setName("accountCircuitBreaker");
+                                            c.setFallbackUri("forward:/fallback-account");
+                                        }).addResponseHeader("Gateway-Service", "Account-Service"))
+                                .uri("http://account-service:8083")
+                                //.uri("http://localhost:8083")
                 )
 
                 .route("ledger_route", r -> r.path("/movements/**").and()
