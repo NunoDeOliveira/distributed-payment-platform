@@ -193,15 +193,13 @@ Wait a few seconds for all services to initialize.
 **2. Add an initial balance to the account**
 
 ```bash
-curl -X POST "http://localhost:8083/balances/add?balanceAccount=1000.00"
+curl -X POST "http://localhost:8080/balances/add?balanceAccount=1000.00"
 ```
 
 **3. Create a payment**
 
 ```bash
-curl -X POST "http://localhost:8080/payments" \
-  -H "Content-Type: application/json" \
-  -d '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
+curl -X POST "http://localhost:8080/payments" -H "Content-Type: application/json" -d \ '{"amount": 100.00, "method": "INTERNATIONAL_TRANSFER"}'
 ```
 
 The response includes the payment `id`. Use it to list or cancel the payment:
@@ -263,6 +261,14 @@ terraform destroy
 ### Local Evidence
 
 The following queries verify the state of each service database after running both a successful payment and a cancellation. Each service records its local transaction  independently, demonstrating the Saga choreography pattern flow.
+
+First all
+
+![Ingress Account](docs/ingress-account.png)
+
+Then execute the script
+
+![Transfer And Cancell](docs/transfer-and-cancell.png)
 
 
 **Payment Service**- shows the payment lifecycle:
