@@ -91,7 +91,9 @@ jobs:
         context: ./payment-service
         file: ./payment-service/Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+          nunohenriquedeoliveira/payment-service:latest
+          nunohenriquedeoliveira/payment-service:${{ github.sha }}
         labels: ${{ steps.meta.outputs.labels }}
 
 

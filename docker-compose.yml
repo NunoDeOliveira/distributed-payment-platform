@@ -1,9 +1,7 @@
-# Define a docker compose file for rabbit & postgresql
- 
-version: '3.8'
+# Define a docker compose file for the distributed payment platform
 
 services:
-# Infrastructure of application 
+  # Infrastructure
   postgres:
     image: postgres
     container_name: postgres-tfg
@@ -25,13 +23,15 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-      
-      
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Microservices
   payment-service:
-    build:
-      context: ./payment-service
-      dockerfile: Dockerfile
+    image: nunohenriquedeoliveira/payment-service:latest
     container_name: payment-service
     ports:
       - "8081:8081"
@@ -44,13 +44,13 @@ services:
       - SPRING_RABBITMQ_USERNAME=nuno
       - SPRING_RABBITMQ_PASSWORD=rabbit
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   commission-service:
-    build:
-      context: ./commission-service
-      dockerfile: Dockerfile
+    image: nunohenriquedeoliveira/commission-service:latest
     container_name: commission-service
     ports:
       - "8082:8082"
@@ -63,13 +63,13 @@ services:
       - SPRING_RABBITMQ_USERNAME=nuno
       - SPRING_RABBITMQ_PASSWORD=rabbit
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   account-service:
-    build:
-      context: ./account-service
-      dockerfile: Dockerfile
+    image: nunohenriquedeoliveira/account-service:latest
     container_name: account-service
     ports:
       - "8083:8083"
@@ -82,13 +82,13 @@ services:
       - SPRING_RABBITMQ_USERNAME=nuno
       - SPRING_RABBITMQ_PASSWORD=rabbit
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   ledger-service:
-    build:
-      context: ./ledger-service
-      dockerfile: Dockerfile
+    image: nunohenriquedeoliveira/ledger-service:latest
     container_name: ledger-service
     ports:
       - "8084:8084"
@@ -101,13 +101,13 @@ services:
       - SPRING_RABBITMQ_USERNAME=nuno
       - SPRING_RABBITMQ_PASSWORD=rabbit
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 
   api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+    image: nunohenriquedeoliveira/api-gateway:latest
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -117,12 +117,8 @@ services:
       - SPRING_RABBITMQ_USERNAME=nuno
       - SPRING_RABBITMQ_PASSWORD=rabbit
     depends_on:
-      - payment-service
-      - commission-service
-      - account-service
-      - ledger-service
-
-
+      rabbitmq:
+        condition: service_healthy
 
   # Observability
   prometheus:
@@ -131,7 +127,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - 9090:9090
+      - "9090:9090"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -139,11 +135,10 @@ services:
     container_name: grafana
     image: grafana/grafana
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=nuno
       - GF_SECURITY_ADMIN_PASSWORD=grafana
-    # added 14 may
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

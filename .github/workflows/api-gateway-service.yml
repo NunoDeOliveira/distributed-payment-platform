@@ -42,5 +42,7 @@ jobs:
         context: ./api-gateway
         file: ./api-gateway/Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+          nunohenriquedeoliveira/api-gateway:latest
+          nunohenriquedeoliveira/api-gateway:${{ github.sha }}
         labels: ${{ steps.meta.outputs.labels }}
