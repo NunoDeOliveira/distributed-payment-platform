@@ -40,7 +40,7 @@ public class GatewayRouting {
                 )
 
                 .route("account_route", r -> r
-                                .path("/operations/**")
+                                .path("/balances/**")
                                 .and()
                                 .method(HttpMethod.GET)
                                 .filters(f -> f
