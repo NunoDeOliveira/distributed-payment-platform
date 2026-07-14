@@ -29,7 +29,9 @@ services:
       
   # Microservices
   payment-service:
-    image: nunohenriquedeoliveira/payment-service:latest
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
     container_name: payment-service
     ports:
       - "8081:8081"
@@ -46,7 +48,9 @@ services:
       - rabbitmq
 
   commission-service:
-    image: nunohenriquedeoliveira/commission-service:latest
+    build:
+      context: ./commission-service
+      dockerfile: Dockerfile
     container_name: commission-service
     ports:
       - "8082:8082"
@@ -63,7 +67,9 @@ services:
       - rabbitmq
 
   account-service:
-    image: nunohenriquedeoliveira/account-service:latest
+    build:
+      context: ./account-service
+      dockerfile: Dockerfile
     container_name: account-service
     ports:
       - "8083:8083"
@@ -80,7 +86,9 @@ services:
       - rabbitmq
 
   ledger-service:
-    image: nunohenriquedeoliveira/ledger-service:latest
+    build:
+      context: ./ledger-service
+      dockerfile: Dockerfile
     container_name: ledger-service
     ports:
       - "8084:8084"
@@ -97,7 +105,9 @@ services:
       - rabbitmq
 
   api-gateway:
-    image: nunohenriquedeoliveira/api-gateway:latest
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -111,6 +121,7 @@ services:
       - commission-service
       - account-service
       - ledger-service
+
 
 
   # Observability
