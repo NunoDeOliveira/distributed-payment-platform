@@ -3,14 +3,14 @@
 ### Tech Stack
 
 ![Infrastructure as Code](https://img.shields.io/badge/Infrastructure%20as%20Code-Terraform-7B42BC)
-![Cloud Provider](https://img.shields.io/badge/Cloud Provider-AWS-EC2-FF9900)
-![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes-(K3s)-yellow)
+![Cloud Provider](https://img.shields.io/badge/Cloud%20Provider-AWS-EC2-FF9900)
+![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes%20(K3s)-yellow)
 ![Deployment](https://img.shields.io/badge/Deployment-GitHub%20Actions-black)
 ![Containers](https://img.shields.io/badge/Containers-Docker-2496ED)
 ![Asynchronous](https://img.shields.io/badge/Asynchronous-RabbitMQ-FF6600)
 ![Persistence](https://img.shields.io/badge/Persistence-PostgreSQL-4169E1)
 ![Microservices](https://img.shields.io/badge/Microservices-Spring%20Boot-6DB33F)
-![Java](https://img.shields.io/badge/Java-17-0074BD)
+![Programming Language](https://img.shields.io/badge/Programming%20Language-Java%2017-0074BD)
 
 
 ## Table of Contents
