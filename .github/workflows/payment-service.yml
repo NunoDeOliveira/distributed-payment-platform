@@ -8,7 +8,7 @@ name: CI/CD payement-service
 #============= Events for init workflow
 on:
   push:
-    branches: [ ""digital-banking-platform"" ]
+    branches: [ "digital-banking-platform" ]
     #Only runs if the push modify any file of this microservice 
     paths: 
       - "payment-service/**"

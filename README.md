@@ -3,14 +3,14 @@
 ### Tech Stack
 
 ![Infrastructure as Code](https://img.shields.io/badge/Infrastructure%20as%20Code-Terraform-7B42BC)
-![Cloud Provider](https://img.shields.io/badge/Cloud%20Provider-AWS%20EC2-FF9900)
+![Cloud Provider](https://img.shields.io/badge/Cloud%20Provider-AWS-FF9900)
 ![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes%20(K3s)-yellow)
 ![Deployment](https://img.shields.io/badge/Deployment-GitHub%20Actions-black)
 ![Containers](https://img.shields.io/badge/Containers-Docker-2496ED)
-![Asynchronous](https://img.shields.io/badge/Asynchronous-RabbitMQ-FF6600)
+![Asynchronous Commnunication](https://img.shields.io/badge/Asynchronous%20Commnunication-RabbitMQ-FF6600)
 ![Persistence](https://img.shields.io/badge/Persistence-PostgreSQL-4169E1)
 ![Microservices](https://img.shields.io/badge/Microservices-Spring%20Boot-6DB33F)
-![Programming Language](https://img.shields.io/badge/Programming%20Language-Java%2017-0074BD)
+![Programming Language](https://img.shields.io/badge/Programming%20Language-Java-0074BD)
 
 
 ## Table of Contents
@@ -123,7 +123,7 @@ If one of the services rejects the operation or reports an error, the cancellati
 ---
 
 
-## Design of Infraestructure
+## Infrastructure Design
 
 The infrastructure runs in the AWS `eu-west-2` region and is created with Terraform. It includes a network, three EC2 instances, and a K3s cluster distributed across three Availability Zones.
 
@@ -247,6 +247,12 @@ ssh -i YOUR_KEY.pem ubuntu@<CONTROL_PLANE_IP>
 ```bash
 kubectl get pods
 kubectl get services
+```
+
+**4. **
+
+```bash
+terraform destroy
 ```
 
 ---

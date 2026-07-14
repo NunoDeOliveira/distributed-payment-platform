@@ -2,14 +2,14 @@ name: CI/CD ledger-service
 
 on:
   push:
-    branches:
+    branches: [ "digital-banking-platform" ]
       - "digital-banking-platform"
     paths:
       - "ledger-service/**"
       - ".github/workflows/ledger-service.yml"
 
   pull_request:
-    branches:
+    branches: [ "digital-banking-platform" ]
       - "digital-banking-platform"
     paths:
       - "ledger-service/**"

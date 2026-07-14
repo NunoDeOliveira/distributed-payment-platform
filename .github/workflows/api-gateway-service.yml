@@ -2,9 +2,9 @@
 name: Java CI with Maven - api-gateway
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "digital-banking-platform" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "digital-banking-platform" ]
 jobs:
   build:
     runs-on: ubuntu-latest
