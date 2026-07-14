@@ -5,7 +5,6 @@ on:
   # Method push to run workflow
   push:
     branches: [ "digital-banking-platform" ]
-      - "digital-banking-platform"
     # Only runs if the push modifies any file of this microservice
     paths:
       - "commission-service/**"
@@ -14,7 +13,6 @@ on:
   # Method pull_request to run workflow
   pull_request:
     branches: [ "digital-banking-platform" ]
-      - "digital-banking-platform"
     paths:
       - "commission-service/**"
       - ".github/workflows/commission-service.yml"
