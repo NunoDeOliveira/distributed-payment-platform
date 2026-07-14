@@ -38,14 +38,17 @@
 
 ## Overview
 
-Traditional banking systems can have difficulties when they need to coordinate operations between independent services without using one central database. This project shows how distributed transactions can be managed with the Saga choreography pattern. Each service completes its own local transaction and publishes an event that starts the next step, without using a central coordinator.
+## Overview
+
+This project presents the design, deployment and evaluation of a distributed payment platform in a cloud environment.
+
+At the application level, it implements a distributed payment platform based on the **Saga choreography pattern**. Each microservice completes a local transaction and publishes an asynchronous event that is consumed by another service. When an operation fails or is cancelled, each service executes a compensating transaction to reverse the previous steps and return the system to an eventually consistent state.
+
+At the infrastructure level, Terraform creates the AWS environment required to run the platform. The architecture includes a VPC, one public subnet, two private subnets across three Availability Zones, security groups and three EC2 instances that form a Kubernetes K3s cluster.
+
+Each application component is packaged as a Docker image and deployed on Kubernetes. GitHub Actions automates the build, image publication and deployment process independently for each service.
 
 ---
-
-## 
-
-The project studies how a distributed payment operation can be coordinated across independent services without using a shared database or a global transaction. The system implements Saga choreography and evaluates its functional behavior, temporary inconsistencies, concurrent execution, and performance.
-
 
 ## Application Architecture
 
@@ -121,56 +124,6 @@ If one of the services rejects the operation or reports an error, the cancellati
 | For Deployment | Terraform (IaC), GitHub Actions (CI/CD) |
 
 ---
-
-
-## Infrastructure Design
-
-The infrastructure runs in the AWS `eu-west-2` region and is created with Terraform. It includes a network, three EC2 instances, and a K3s cluster distributed across three Availability Zones.
-
-![Infrastructure](docs/infrastructure-diagram.png)
-
-*AWS infrastructure and Kubernetes K3s cluster where Application is deployment.*
-
-
-### AWS Network and Compute
-
-- **VPC**: all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
-
-- **Subnets**: the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
-
-- **Internet connectivity**: the Internet Gateway connects the public subnet to the Internet. The NAT Gateway allows the private worker nodes to access the Internet without accepting direct connections from outside the VPC.
-
-- **EC2 instances**: one EC2 instance runs the K3s control plane, and two EC2 instances work as worker nodes.
-
-- **Security groups**: security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
-
-### Kubernetes (K3s)
-
-- **Control plane**: the K3s server runs the Kubernetes API Server, Scheduler, Controller Manager, and SQLite datastore.
-
-- **Worker nodes**: the two K3s agents run the application Pods selected by the Kubernetes Scheduler.
-
-- **Application workloads**: the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
-
-- **Application access**: external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
-  
-
-
-## Deployment of application
-
-For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
-
-CI/CD For more detail, check this link --> 
-
-### Docker
-
-Each service has its own Docker image containing the application and its runtime dependencies.
-
-### CI/CD with GitHub Actions
-
-GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
-
----
   
   
 ## Getting Started
@@ -215,46 +168,7 @@ curl http://localhost:8080/payments
 ```bash
 curl -X DELETE "http://localhost:8080/payments/{id}"
 ```
-
-
-### Run in AWS
-
-**Prerequisites**
-- AWS account with credentials configured
-- Terraform installed
-
-**1. Provision the infrastructure**
-
-```bash
-cd infrastructure/terraform
-terraform init
-terraform apply
-```
-
-Terraform provisions the EC2 instances, installs K3s and deploys the microservices 
-automatically. The output includes the Control Plane IP address.
-
-**2. Access the cluster**
-
-```bash
-ssh -i YOUR_KEY.pem ubuntu@<CONTROL_PLANE_IP>
-```
-
-**3. Verify the deployment**
-
-```bash
-kubectl get pods
-kubectl get services
-```
-
-**4. **
-
-```bash
-terraform destroy
-```
-
 ---
-
 
 ## Testing and Validation
 
@@ -306,15 +220,107 @@ Result:
 
 **Ledger Service** - shows the immutable the record movements:
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c \
-"SELECT id, amount, correlation_id \
- AS \"correlationId\", register \
- FROM deliveries ORDER BY id ASC;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb   -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM movements ORDER BY id DESC LIMIT 20;"
 ```
 Result:
 
 ![Ledger Service Database](docs/database-ledger-service.png)
 
+---
+
+
+## Infrastructure Design
+
+The infrastructure runs in the AWS `eu-west-2` region and is created with Terraform. It includes a network, three EC2 instances, and a K3s cluster distributed across three Availability Zones.
+
+![Infrastructure](docs/infrastructure-diagram.png)
+
+*AWS infrastructure and Kubernetes K3s cluster where Application is deployment.*
+
+
+### AWS Network and Compute
+
+- **VPC**: all infrastructure resources are placed inside a `10.0.0.0/16` Virtual Private Cloud.
+
+- **Subnets**: the VPC has one public subnet for the K3s server and two private subnets for the worker nodes. Each subnet is located in a different Availability Zone.
+
+- **Internet connectivity**: the Internet Gateway connects the public subnet to the Internet. The NAT Gateway allows the private worker nodes to access the Internet without accepting direct connections from outside the VPC.
+
+- **EC2 instances**: one EC2 instance runs the K3s control plane, and two EC2 instances work as worker nodes.
+
+- **Security groups**: security groups control access to SSH, the K3s API, the application `NodePort`, PostgreSQL, and communication between the cluster nodes.
+
+### Kubernetes (K3s)
+
+- **Control plane**: the K3s server runs the Kubernetes API Server, Scheduler, Controller Manager, and SQLite datastore.
+
+- **Worker nodes**: the two K3s agents run the application Pods selected by the Kubernetes Scheduler.
+
+- **Application workloads**: the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
+
+- **Application access**: external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
+  
+
+
+## Deployment of application
+
+For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
+
+CI/CD For more detail, check this link --> 
+
+### Docker
+
+Each service has its own Docker image containing the application and its runtime dependencies.
+
+### CI/CD with GitHub Actions
+
+GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
+
+---
+
+### Run in AWS
+
+**Prerequisites**
+- AWS account and configured credentials;
+- Terraform;
+- an existing AWS EC2 key pair;
+- SSH private key for the control-plane instance.
+
+**1. Provision the infrastructure**
+
+```bash
+cd infrastructure/terraform
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+Terraform provisions the EC2 instances, installs K3s and deploys the microservices 
+automatically. The output includes the Control Plane IP address.
+
+**2. Access the cluster**
+
+```bash
+ssh -i YOUR_KEY.pem ubuntu@<CONTROL_PLANE_IP>
+```
+
+**3. Verify the deployment**
+
+```bash
+sudo k3s kubectl get nodes
+sudo k3s kubectl get deployments
+sudo k3s kubectl get pods
+sudo k3s kubectl get services
+```
+
+**4. Destroy the AWS infrastructure**
+
+```bash
+terraform destroy
+```
+
+---
 
 
 ### AWS Evidence
