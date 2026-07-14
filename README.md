@@ -3,7 +3,7 @@
 ### Tech Stack
 
 ![Infrastructure as Code](https://img.shields.io/badge/Infrastructure%20as%20Code-Terraform-7B42BC)
-![Cloud Provider](https://img.shields.io/badge/Cloud%20Provider-AWS-EC2-FF9900)
+![Cloud Provider](https://img.shields.io/badge/Cloud%20Provider-AWS%20EC2-FF9900)
 ![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes%20(K3s)-yellow)
 ![Deployment](https://img.shields.io/badge/Deployment-GitHub%20Actions-black)
 ![Containers](https://img.shields.io/badge/Containers-Docker-2496ED)
