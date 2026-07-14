@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-RESPONSE=$(curl -s -X POST "http://localhost:8081/payments" \
+RESPONSE=$(curl -s -X POST "http://localhost:8080/payments" \
   -H "Content-Type: application/json" \
   -d '{"amount":100.00,"method":"INTERNATIONAL_TRANSFER"}') && \
 echo "$RESPONSE" && \
