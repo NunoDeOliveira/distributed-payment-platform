@@ -170,6 +170,7 @@ cd distributed-payment-platform
 
 
 **Payment Service**: shows the payment lifecycle:
+
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c \
 "SELECT id, amount, correlation_id \
@@ -179,6 +180,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c
 
 
 **Commission Service**: shows the commission calculated:
+
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c \
 "SELECT id, amount, total_amount \
@@ -188,6 +190,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb
 
 
 **Account Service**: shows the account balance:
+
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c \
 "SELECT id, balance_account \
@@ -197,6 +200,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c
 
 
 **Ledger Service**: shows the immutable the record movements:
+
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb   -c \ 
 "SELECT id, amount, correlation_id \ 
@@ -205,7 +209,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb  
 ```
 
 
-Now using the `watch` command combined with operator `&&`, all four database queries can be unified into a single command, allowing the real-time observation of the state of each service stored in database. The command is shown below.:
+Now using the `watch` command combined with operator `&&`, all four database queries can be unified into a single command, allowing the real-time observation of the state of each service stored in database. The command is shown below:
 
 ```bash
 watch -n 2 '
@@ -218,9 +222,52 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -
 
 > **Note:**: The refresh interval can be adjusted by changing the value of the `-n` parameter. The default time is 2 seconds.
 
-**Result**: The following screenshot shows the states of all four databases for each transaction:
+The test results are shown below. For all tests, the database screenshots follow the same numerical order:
 
-![Local Evidence](docs/local-evidence.png)
+1. Payment Service
+2. Commission Service
+3. Account Service 
+4. Ledger Service
+
+
+### Validation 1: Successful Payment Flow
+
+In the first test, a payment is processed through the successful flow. The expected states are:
+
+| Microservice | Expected state |
+|---|---|
+| Payment Service | `COMPLETED` |
+| Commission Service | `CALCULATED` |
+| Account Service | `CONFIRMED` |
+| Ledger Service | `RECORDED` |
+
+The result is:
+
+![Transfer Case](docs/transfer-case.png)
+
+1. A payment request for 100.00 monetary units is received. Payment Service creates the payment with correlation ID e8b58a2e….
+2. Commission Service calculates the commission according to the payment type. The resulting total amount is 102.00 monetary units.
+3. The initial account balance is 500.00. After processing the payment and its commission, the resulting balance is 398.00.
+4. Finally, Ledger Service records the movement for the 102.00 monetary units deducted from the account.
+
+Therefore, the successful payment flow finishes correctly.
+
+
+### Validation 2: Cancellation and Compensation Flow
+
+In the next scenario, the payment is canceled before the flow is completed. The expected result is that all local states of each microservice must be `CANCELED`. The result is:
+ 
+![Cancelation Test](docs/cancelation-test.png)
+
+Examining the row associated with correlation ID `d441e0c2 …`, it can be seen that all microservices finish with the expected state. After receiving the cancellation, Ledger Service (the fourth table) records the `WAITING` state because it is waiting for the transaction to arrive. It then processes the transaction as `CANCELED` and releases the amount of the transaction with ID = 3.
+
+
+### Validation 3: Insufficient Balance Flow
+
+In the final scenario, the payment is rejected because the account balance is not sufficient to make the payment. The expected result is that Account Service rejects the operation and propagates the cancellation to the Payment Service. The result is showing below:
+
+![Transfer Rejected](docs/transfer-rejected.png)
+
 
 
 ---
@@ -275,6 +322,7 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 ### Run in AWS
 
 **Prerequisites**
+
 - AWS account and configured credentials;
 - Terraform;
 - an existing AWS EC2 key pair;
