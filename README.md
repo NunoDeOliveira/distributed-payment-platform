@@ -56,7 +56,7 @@ The application consists of an API Gateway and four independent microservices. T
 
 ![microservices](docs/microservices-diagram.png)
 
-##### *Logical architecture of the application and communication between the Saga participants.*
+
 
 - **API Gateway**: entry point for all HTTP requests. Routes operations to the appropriate service.
 - **Payment Service**: manages the type of payments and creates the payment and starts the Saga flow.
@@ -94,13 +94,12 @@ The Saga is implemented as a sequence of local transactions and asynchronous eve
 | Ledger Service | `recordMovement()` | `cancelMovement()` |
 
 
-### Happy Path Flow
+### Payment successfull
 
 In the successful flow, every service completes its local transaction without errors. Each published event starts the next step until the payment is completed and the account and ledger are updated.
 
 ![Happy Path Diagram](docs/happy-path-diagram.png)
 
-####      *Successful Saga flow, from payment creation to movement recorded.*
 
 
 ### Cancellation Flow
@@ -109,7 +108,6 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 ![Cancellation Flow Diagram](docs/cancelation-diagram.png)
 
-####               *Cancellation flow and compensating transactions*
 
 ---
   
@@ -234,7 +232,6 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 ![Infrastructure](docs/infrastructure-diagram.png)
 
-*AWS infrastructure and Kubernetes K3s cluster where Application is deployment.*
 
 
 ### AWS Network and Compute
