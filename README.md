@@ -21,22 +21,21 @@
    - [Events and Transactions](#events-and-transactions)
    - [Happy Path Flow](#happy-path-flow)
    - [Cancellation Flow](#cancellation-flow)
-4. [Infrastructure Design](#infrastructure-design)
+4. [Getting Started](#getting-started)
+   - [Run locally](#run-locally)
+   - [Local Evidence](#local-evidence)
+   - [Successful Payment Flow](#successful-payment-flow)
+   - [Cancellation and Compensation Flow](#cancellation-and-compensation-flow)
+   - [Insufficient Balance Flow](#insufficient-balance-flow)
+5. [Infrastructure Design](#infrastructure-design)
    - [AWS Network and Compute](#aws-network-and-compute)
    - [Kubernetes K3s](#kubernetes-k3s)
-5. [Tech Stack](#tech-stack)
-6. [Getting Started](#getting-started)
-   - [Run locally](#run-locally)
+6. [Testing and Validation](#testing-and-validation)
    - [Run in AWS](#run-in-aws)
-7. [Testing and Validation](#testing-and-validation)
-   - [Local Evidence](#local-evidence)
    - [AWS Evidence](#aws-evidence)
-8. [Observability and Monitoring](#observability-and-monitoring)
-9. [Current Limitations](#current-limitations)
-10. [License](#license)
+7. [Current Limitations](#current-limitations)
+8. [License](#license)
 
-
-## Overview
 
 ## Overview
 
@@ -156,7 +155,6 @@ curl -X DELETE "http://localhost:8080/payments/{id}"
 ```
 ---
 
-## Testing and Validation
 
 ### Local Evidence
 
@@ -230,7 +228,7 @@ The test results are shown below. For all tests, the database screenshots follow
 4. Ledger Service
 
 
-### Validation 1: Successful Payment Flow
+### Successful Payment Flow
 
 In the first test, a payment is processed through the successful flow. The expected states are:
 
@@ -253,7 +251,7 @@ The result is:
 Therefore, the successful payment flow finishes correctly.
 
 
-### Validation 2: Cancellation and Compensation Flow
+### Cancellation and Compensation Flow
 
 In the next scenario, the payment is canceled before the flow is completed. The expected result is that all local states of each microservice must be `CANCELED`. The result is:
  
@@ -262,7 +260,7 @@ In the next scenario, the payment is canceled before the flow is completed. The 
 Examining the row associated with correlation ID `d441e0c2 …`, it can be seen that all microservices finish with the expected state. After receiving the cancellation, Ledger Service (the fourth table) records the `WAITING` state because it is waiting for the transaction to arrive. It then processes the transaction as `CANCELED` and releases the amount of the transaction with ID = 3.
 
 
-### Validation 3: Insufficient Balance Flow
+### Insufficient Balance Flow
 
 In the final scenario, the payment is rejected because the account balance is not sufficient to make the payment. The expected result is that Account Service rejects the operation and propagates the cancellation to the Payment Service. The result is showing below:
 
