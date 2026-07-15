@@ -111,18 +111,6 @@ If one of the services rejects the operation or reports an error, the cancellati
 
 ####               *Cancellation flow and compensating transactions*
 
-
-
-## Technology Stack
-
-| Area | Technologies |
-|---|---|
-| Backend | Spring Boot, Spring Cloud Gateway |
-| Persistence | PostgreSQL, Spring Data JPA |
-| Communication | RabbitMQ, HTTP |
-| Infrastructure | AWS EC2, Kubernetes (K3s), Docker |
-| For Deployment | Terraform (IaC), GitHub Actions (CI/CD) |
-
 ---
   
   
@@ -146,7 +134,7 @@ Wait a few seconds for all services to initialize.
 **2. Add an initial balance to the account**
 
 ```bash
-curl -X POST "http://localhost:8080/balances/add?balanceAccount=1000.00"
+curl -X POST "http://localhost:8080/balances/add?balanceAccount=500.00"
 ```
 
 **3. Create a payment**
@@ -176,55 +164,66 @@ curl -X DELETE "http://localhost:8080/payments/{id}"
 
 The following queries verify the state of each service database after running both a successful payment and a cancellation. Each service records its local transaction  independently, demonstrating the Saga choreography pattern flow.
 
-First all
-
-![Ingress Account](docs/ingress-account.png)
-
-Then execute the script
-
-![Transfer And Cancell](docs/transfer-and-cancell.png)
+For local testing, a script is provided to automate the creation and cancellation of a payment. For running the test: 
+```bash
+cd distributed-payment-platform
+./test-cancel-payment.sh
+```
 
 
-**Payment Service**- shows the payment lifecycle:
+**Payment Service**: shows the payment lifecycle:
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c \
 "SELECT id, amount, correlation_id \
  AS \"correlationId\", register \
  FROM payments ORDER BY id ASC;"
 ```
-Result:
 
-![Payment Service Database](docs/database-payment-service.png)
 
-**Commission Service** - shows the commission calculated:
+**Commission Service**: shows the commission calculated:
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c \
 "SELECT id, amount, total_amount \
  AS \"totalAmount\", correlation_id AS \"correlationId\", register \
  FROM commissions ORDER BY id ASC;"
 ```
-Result:
 
-![Commission Service Database](docs/database-commission-service.png)
 
-**Account Service** - shows the account balance:
+**Account Service**: shows the account balance:
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c \
 "SELECT id, balance_account \
  AS \"balanceAccount\", correlation_id AS \"correlationId\", register \
  FROM balances ORDER BY id ASC;"
 ```
-Result:
 
-![Account Service Database](docs/database-account-service.png)
 
-**Ledger Service** - shows the immutable the record movements:
+**Ledger Service**: shows the immutable the record movements:
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb   -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM movements ORDER BY id DESC LIMIT 20;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb   -c \ 
+"SELECT id, amount, correlation_id \ 
+ AS \"correlationId\", register \
+ FROM movements ORDER BY id  DESC LIMIT 20;"
 ```
-Result:
 
-![Ledger Service Database](docs/database-ledger-service.png)
+
+Now using the `watch` command combined with operator `&&`, all four database queries can be unified into a single command, allowing the real-time observation of the state of each service stored in database. The command is shown below.:
+
+```bash
+watch -n 2 '
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM payments ORDER BY id ASC;" &&
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c "SELECT id, amount, total_amount AS \"totalAmount\", correlation_id AS \"correlationId\", register FROM commissions ORDER BY id ASC;" &&
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c "SELECT id, balance_account AS \"balanceAccount\", correlation_id AS \"correlationId\", register FROM balances ORDER BY id ASC;" &&
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM deliveries ORDER BY id ASC;"
+'
+```
+
+> **Note:**: The refresh interval can be adjusted by changing the value of the `-n` parameter. The default time is 2 seconds.
+
+**Result**: The following screenshot shows the states of all four databases for each transaction:
+
+![Local Evidence](docs/local-evidence.png)
+
 
 ---
 
@@ -266,8 +265,6 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
 
-CI/CD For more detail, check this link --> 
-
 ### Docker
 
 Each service has its own Docker image containing the application and its runtime dependencies.
@@ -289,15 +286,14 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 **1. Provision the infrastructure**
 
 ```bash
-cd infrastructure/terraform
+cd terraform
 terraform init
 terraform validate
 terraform plan
 terraform apply
 ```
 
-Terraform provisions the EC2 instances, installs K3s and deploys the microservices 
-automatically. The output includes the Control Plane IP address.
+Terraform provisions the EC2 instances, installs K3s and deploys the microservices automatically. The output includes the Control Plane IP address.
 
 **2. Access the cluster**
 
@@ -327,8 +323,6 @@ terraform destroy
 
 
 ---
-
-## Design Decisions
 
 
 
