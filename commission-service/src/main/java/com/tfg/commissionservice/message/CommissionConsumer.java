@@ -1,7 +1,6 @@
 package com.tfg.commissionservice.message;
 
 import com.tfg.commissionservice.event.CommissionEvent;
-import com.tfg.commissionservice.model.CommissionMethod;
 import com.tfg.commissionservice.service.CommissionService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

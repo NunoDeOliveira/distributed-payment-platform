@@ -58,13 +58,7 @@ public class CommissionService {
 
         // Get commission from repository
         Commission commission = commissionRepository.findByCorrelationId(correlationId).orElse(null);
-        if (commission == null) {
-            return;
-        }
-
-        if (!commission.getCorrelationId().equals(correlationId) ||
-                commission.getState() == CommissionState.CALCULATED ||
-                commission.getState() == CommissionState.RELEASED) {
+        if (commission == null || commission.getState() != CommissionState.CALCULATED) {
             return;
         }
 
