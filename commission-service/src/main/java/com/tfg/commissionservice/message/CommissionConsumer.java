@@ -31,8 +31,8 @@ public class CommissionConsumer {
                 commissionService.calculateCommission(event.getCorrelationId(),
                                                     event.getAmount(), event.getMethod());
                 break;
-            case "operation.rejected":
-                commissionService.releaseCommission(event.getCorrelationId());
+            case "amount.rejected":
+                commissionService.rejectedCommission(event.getCorrelationId());
                 break;
             case "operation.canceled":
                 commissionService.cancelCommission(event.getCorrelationId());

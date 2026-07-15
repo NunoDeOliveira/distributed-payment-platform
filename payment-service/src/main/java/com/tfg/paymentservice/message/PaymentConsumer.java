@@ -33,7 +33,7 @@ public class PaymentConsumer {
             case "amount.deducted":
                 paymentService.completePayment(event.getCorrelationId());
                 break;
-            case "commission.released":
+            case "operation.rejected":
                 paymentService.releasePayment(event.getCorrelationId());
                 break;
             case "operation.canceled":

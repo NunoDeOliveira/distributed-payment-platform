@@ -51,24 +51,13 @@ public class CommissionPublish {
     }
 
     // Given a commission publish commission released
-    public void publishCommissionReleased(String correlationId) {
+    public void publishCommissionRejected(String correlationId) {
         CommissionEvent event;
-        event = new CommissionEvent("commission.released", correlationId, null, null, null);
+        event = new CommissionEvent("operation.rejected", correlationId, null, null, null);
 
         // Send to rabbit payment queue
         rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
     }
-
-    // Given a commission publish commission rejected
-    /*public void publishCommissionRejected(Commission commission) {
-        CommissionEvent event = new CommissionEvent("commission.rejected", commission.getId(),
-                                                    commission.getCorrelationId(), commission.getAmount(),
-                                                    commission.getCommissionAmount(),
-                                                    commission.getTotalAmount(),
-                                                    commission.getMethod(), LocalDateTime.now());
-
-        rabbitTemplate.convertAndSend(PAYMENT_QUEUE, event);
-    }*/
 
     // Given a commission publish commission released
     public void publishCommissionCanceled(String correlationId, BigDecimal totalAmount) {

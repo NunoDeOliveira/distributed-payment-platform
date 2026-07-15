@@ -128,8 +128,10 @@ public class PaymentService {
         }
 
         // Check the current state before save
-        if (payment.getState() == PaymentState.COMPLETED || payment.getState() == PaymentState.CANCELLED ||
-                payment.getState() == PaymentState.REJECTED || payment.getState() == PaymentState.FAILED) {
+        if (payment.getState() == PaymentState.COMPLETED ||
+                payment.getState() == PaymentState.CANCELLED ||
+                payment.getState() == PaymentState.REJECTED ||
+                 payment.getState() == PaymentState.FAILED) {
             return;
         }
 

@@ -50,7 +50,7 @@ public class CommissionService {
     }
 
     @Transactional
-    public void releaseCommission(String correlationId) {
+    public void rejectedCommission(String correlationId) {
         // Check input data
         if (correlationId == null) {
             return;
@@ -69,11 +69,11 @@ public class CommissionService {
         }
 
         // Release commission and save the state
-        commission.released();
+        commission.rejected();
         commissionRepository.save(commission);
 
         // Publish in rabbit Payment queue
-        commissionPublish.publishCommissionReleased(commission.getCorrelationId());
+        commissionPublish.publishCommissionRejected(commission.getCorrelationId());
     }
 
     // If the payment/operation is canceled,

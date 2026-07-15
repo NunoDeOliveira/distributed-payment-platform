@@ -78,8 +78,8 @@ The Saga is implemented as a sequence of local transactions and asynchronous eve
 
 | Service | Events published | Events consumed |
 |---|---|---|
-| Payment Service | `payment.created`<br>`operation.canceled` | `amount.deducted`<br>`operation.canceled` |
-| Commission Service | `commission.calculated`<br>`commission.released`<br>`operation.canceled` | `payment.created`<br>`operation.rejected`<br>`operation.canceled` |
+| Payment Service | `payment.created`<br>`operation.canceled`<br>`operation.rejected` | `amount.deducted`<br>`operation.canceled`<br>`operation.rejected` |
+| Commission Service | `commission.calculated`<br>`operation.rejected`<br>`operation.canceled` | `payment.created`<br>`amount.rejected`<br>`operation.canceled` |
 | Account Service | `amount.reserved`<br>`amount.deducted`<br>`amount.rejected` | `commission.calculated`<br>`movement.recorded`<br>`movement.rejected`<br>`operation.canceled` |
 | Ledger Service | `movement.recorded`<br>`movement.rejected`<br>`operation.canceled` | `amount.reserved`<br>`amount.deducted`<br>`operation.canceled` |
 
@@ -214,7 +214,7 @@ watch -n 2 '
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM payments ORDER BY id ASC;" &&
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c "SELECT id, amount, total_amount AS \"totalAmount\", correlation_id AS \"correlationId\", register FROM commissions ORDER BY id ASC;" &&
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c "SELECT id, balance_account AS \"balanceAccount\", correlation_id AS \"correlationId\", register FROM balances ORDER BY id ASC;" &&
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM deliveries ORDER BY id ASC;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM movements ORDER BY id ASC;"
 '
 ```
 
