@@ -41,7 +41,7 @@
 
 This project presents the design, deployment and evaluation of a distributed payment platform in a cloud environment.
 
-At the application level, it implements a distributed payment platform based on the **Saga choreography pattern**. Each microservice completes a local transaction and publishes an asynchronous event that is consumed by another service. When an operation fails or is cancelled, each service executes a compensating transaction to reverse the previous steps and return the system to an eventually consistent state.
+At the application level, it implements a distributed payment platform based on the Saga choreography pattern. Each microservice completes a local transaction and publishes an asynchronous event that is consumed by another service. When an operation fails or is cancelled, each service executes a compensating transaction to reverse the previous steps and return the system to an eventually consistent state.
 
 At the infrastructure level, Terraform creates the AWS environment required to run the platform. The architecture includes a VPC, one public subnet, two private subnets across three Availability Zones, security groups and three EC2 instances that form a Kubernetes K3s cluster.
 
@@ -105,9 +105,20 @@ In the successful flow, every service completes its local transaction without er
 
 If one of the services rejects the operation or reports an error, the cancellation flow starts. The participating services execute compensating transactions to release reserved resources and restore a consistent state.
 
-![Cancellation Flow Diagram](docs/cancelation-diagram.png)
+| Publisher | Event | Consumer |
+|---|---|---|
+| Payment Service | `operation.canceled` | Ledger Service |
+| Ledger Service | `operation.canceled` | Account Service |
+| Account Service | `operation.canceled` | Commission Service |
+| Commission Service | `operation.canceled` | Payment Service |
 
 
+### Rejection flow
+
+| Publisher | Event | Consumer |
+|---|---|---|
+| Account Service | `amount.rejected` | Commission Service |
+| Commission Service | `operation.rejected` | Payment Service |
 ---
   
   
@@ -200,7 +211,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c
 **Ledger Service**: shows the immutable the record movements:
 
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb   -c \ 
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c \ 
 "SELECT id, amount, correlation_id \ 
  AS \"correlationId\", register \
  FROM movements ORDER BY id  DESC LIMIT 20;"
@@ -244,8 +255,11 @@ The result is:
 ![Transfer Case](docs/transfer-case.png)
 
 1. A payment request for 100.00 monetary units is received. Payment Service creates the payment with correlation ID e8b58a2e….
+
 2. Commission Service calculates the commission according to the payment type. The resulting total amount is 102.00 monetary units.
+
 3. The initial account balance is 500.00. After processing the payment and its commission, the resulting balance is 398.00.
+
 4. Finally, Ledger Service records the movement for the 102.00 monetary units deducted from the account.
 
 Therefore, the successful payment flow finishes correctly.
@@ -253,7 +267,16 @@ Therefore, the successful payment flow finishes correctly.
 
 ### Cancellation and Compensation Flow
 
-In the next scenario, the payment is canceled before the flow is completed. The expected result is that all local states of each microservice must be `CANCELED`. The result is:
+In the next scenario, the payment is canceled before the flow is completed. The expected result is: 
+
+| Microservice | Expected state |
+|---|---|
+| Payment Service | `CANCELED` |
+| Commission Service | `CANCELED` |
+| Account Service | `CANCELED` |
+| Ledger Service | `CANCELED` |
+
+The result is:
  
 ![Cancelation Test](docs/cancelation-test.png)
 
@@ -300,22 +323,24 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 - **Application workloads**: the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
 
 - **Application access**: external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
-  
+
+---  
 
 
 ## Deployment of application
 
-For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
-
 ### Docker
 
-Each service has its own Docker image containing the application and its runtime dependencies.
+For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
 
 ### CI/CD with GitHub Actions
 
 GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
 
 ---
+
+
+## Getting Started
 
 ### Run in AWS
 
@@ -331,7 +356,6 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 ```bash
 cd terraform
 terraform init
-terraform validate
 terraform plan
 terraform apply
 ```
