@@ -58,9 +58,13 @@ The application consists of an API Gateway and four independent microservices. T
 
 
 - **API Gateway**: entry point for all HTTP requests. Routes operations to the appropriate service.
+
 - **Payment Service**: manages the type of payments and creates the payment and starts the Saga flow.
+
 - **Commission Service**: calculates the commission according to the payment method and sends the total amount to the next service.
+
 - **Account Service**: manages the account balance. It reserves the funds when a payment starts and restores them if the payment is cancelled.
+
 - **Ledger Service**: stores a permanent record of all money movements and works as the accounting ledger of the system.
   
 ---
@@ -167,7 +171,7 @@ curl -X DELETE "http://localhost:8080/payments/{id}"
 ---
 
 
-### Local Evidence
+### Querys for Databases
 
 The following queries verify the state of each service database after running both a successful payment and a cancellation. Each service records its local transaction  independently, demonstrating the Saga choreography pattern flow.
 
@@ -235,6 +239,9 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -
 
 > **Note:**: The refresh interval can be adjusted by changing the value of the `-n` parameter. The default time is 2 seconds.
 
+
+### Local evidency
+
 The test results are shown below. For all tests, the database screenshots follow the same numerical order:
 
 1. Payment Service
@@ -242,8 +249,7 @@ The test results are shown below. For all tests, the database screenshots follow
 3. Account Service 
 4. Ledger Service
 
-
-### Successful Payment Flow
+#### Successful Payment Flow
 
 In the first test, a payment is processed through the successful flow. The expected states are:
 
@@ -269,7 +275,7 @@ The result is:
 Therefore, the successful payment flow finishes correctly.
 
 
-### Cancellation and Compensation Flow
+#### Cancellation and Compensation Flow
 
 In the next scenario, the payment is canceled before the flow is completed. The expected result is: 
 
@@ -287,7 +293,7 @@ The result is:
 Examining the row associated with correlation ID `d441e0c2 …`, it can be seen that all microservices finish with the expected state. After receiving the cancellation, Ledger Service (the fourth table) records the `WAITING` state because it is waiting for the transaction to arrive. It then processes the transaction as `CANCELED` and releases the amount of the transaction with ID = 3.
 
 
-### Insufficient Balance Flow
+#### Insufficient Balance Flow
 
 In the final scenario, the payment is rejected because the account balance is not sufficient to make the payment. The expected result is that Account Service rejects the operation and propagates the cancellation to the Payment Service. The result is showing below:
 
