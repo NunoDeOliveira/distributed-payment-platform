@@ -1,4 +1,3 @@
-## Commission-service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,44 +15,46 @@ spec:
         app: commission-service
     spec:
       containers:
-      - name: commission-service
-        image: nunohenriquedeoliveira/commission-service:main
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8082
-        env:
-        - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres-payment:5432/commission"
-        - name: SPRING_DATASOURCE_USERNAME
-          value: "postgres"
-        - name: SPRING_DATASOURCE_PASSWORD
-          value: "postgres"
-        - name: SPRING_RABBITMQ_HOST
-          value: "rabbitmq"
-        - name: SPRING_RABBITMQ_PORT
-          value: "5672"
-        - name: SPRING_RABBITMQ_USERNAME
-          value: "nuno"
-        - name: SPRING_RABBITMQ_PASSWORD
-          value: "rabbit"
-        - name: SERVER_PORT
-          value: "8082"
-        resources:
-          requests:
-            memory: "128Mi"
-          limits:
-            memory: "256Mi"
-
+        - name: commission-service
+          image: nunohenriquedeoliveira/commission-service:fd26107620aa7678811b8abae16ce9e1a68a8b78
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-commission:5432/commissiondb"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "postgres"
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "nuno"
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "rabbit"
+            - name: SERVER_PORT
+              value: "8082"
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "512Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: commission-service
+  labels:
+    app: commission-service
 spec:
   type: NodePort
   selector:
     app: commission-service
   ports:
-    - port: 8082
+    - name: http
+      port: 8082
       targetPort: 8082
       nodePort: 30082

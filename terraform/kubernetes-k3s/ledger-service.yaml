@@ -39,9 +39,9 @@ spec:
           value: "8084"
         resources:
           requests:
-            memory: "128Mi"
-          limits:
             memory: "256Mi"
+          limits:
+            memory: "512Mi"
 
 ---
 # Service

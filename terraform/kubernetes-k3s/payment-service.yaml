@@ -39,9 +39,9 @@ spec:
           value: "8081"
         resources:
           requests:
-            memory: "128Mi"
-          limits:
             memory: "256Mi"
+          limits:
+            memory: "512Mi"
 
 ---
 apiVersion: v1
