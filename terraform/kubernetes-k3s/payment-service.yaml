@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: nunohenriquedeoliveira/payment-service:main
+        image: nunohenriquedeoliveira/payment-service:e392c49e3966e3267bec9269d089aa6440e06101
         imagePullPolicy: Always
         ports:
         - containerPort: 8081

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: nunohenriquedeoliveira/api-gateway:main
+        image: nunohenriquedeoliveira/api-gateway:eb74c19dce809dc7a39c6b05b5561a1ed89e46de
         ports:
         - containerPort: 8080
         env:

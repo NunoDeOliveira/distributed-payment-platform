@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ledger-service
-        image: nunohenriquedeoliveira/ledger-service:latest
+        image: nunohenriquedeoliveira/ledger-service@sha256:86d71b5ed5910a74106ac79a8608bd741dcea2a3b7aa7c6b0ac6d611b0bafd1b
         imagePullPolicy: Always
         ports:
         - containerPort: 8084

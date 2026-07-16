@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: account-service
-        image: nunohenriquedeoliveira/account-service:main
+        image: nunohenriquedeoliveira/account-service:abf3af55a6c3625cd32b74a85ebacbb2b5d181f8
         imagePullPolicy: Always
         ports:
         - containerPort: 8083
