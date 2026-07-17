@@ -1,0 +1,119 @@
+name: Deploy platform to K3s
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-k3s
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy complete platform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Kubernetes manifests
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.K3S_HOST }}
+          username: ubuntu
+          key: ${{ secrets.K3S_SSH_KEY }}
+          source: >-
+            terraform/kubernetes-k3s/postgres.yaml,
+            terraform/kubernetes-k3s/rabbitmq.yaml,
+            terraform/kubernetes-k3s/payment-service.yaml,
+            terraform/kubernetes-k3s/commission-service.yaml,
+            terraform/kubernetes-k3s/account-service.yaml,
+            terraform/kubernetes-k3s/ledger-service.yaml,
+            terraform/kubernetes-k3s/api-gateway.yaml
+          target: /home/ubuntu/k3s-manifests
+          strip_components: 2
+
+      - name: Deploy and verify platform
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.K3S_HOST }}
+          username: ubuntu
+          key: ${{ secrets.K3S_SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            set -euo pipefail
+
+            MANIFEST_DIR="/home/ubuntu/k3s-manifests"
+
+            echo "=== Checking K3s cluster ==="
+            sudo k3s kubectl get nodes
+
+            echo "=== Deploying PostgreSQL and RabbitMQ ==="
+            sudo k3s kubectl apply \
+              -f "$MANIFEST_DIR/postgres.yaml" \
+              -f "$MANIFEST_DIR/rabbitmq.yaml"
+
+            echo "=== Waiting for infrastructure ==="
+            for deployment in \
+              postgres-payment \
+              postgres-commission \
+              postgres-account \
+              postgres-movement \
+              rabbitmq
+            do
+              sudo k3s kubectl rollout status \
+                "deployment/$deployment" \
+                --namespace default \
+                --timeout=300s
+            done
+
+            echo "=== Deploying application services ==="
+            sudo k3s kubectl apply \
+              -f "$MANIFEST_DIR/payment-service.yaml" \
+              -f "$MANIFEST_DIR/commission-service.yaml" \
+              -f "$MANIFEST_DIR/account-service.yaml" \
+              -f "$MANIFEST_DIR/ledger-service.yaml" \
+              -f "$MANIFEST_DIR/api-gateway.yaml"
+
+            echo "=== Pulling the latest published images ==="
+            for deployment in \
+              payment-service \
+              commission-service \
+              account-service \
+              ledger-service \
+              api-gateway
+            do
+              sudo k3s kubectl rollout restart \
+                "deployment/$deployment" \
+                --namespace default
+            done
+
+            echo "=== Waiting for application rollouts ==="
+            for deployment in \
+              payment-service \
+              commission-service \
+              account-service \
+              ledger-service \
+              api-gateway
+            do
+              sudo k3s kubectl rollout status \
+                "deployment/$deployment" \
+                --namespace default \
+                --timeout=300s
+            done
+
+            echo "=== Deployment completed ==="
+            sudo k3s kubectl get pods -o wide
+            sudo k3s kubectl get services
+
+            echo "=== Deployed images ==="
+            sudo k3s kubectl get deployments \
+              payment-service \
+              commission-service \
+              account-service \
+              ledger-service \
+              api-gateway \
+              -o custom-columns='SERVICE:.metadata.name,IMAGE:.spec.template.spec.containers[0].image'
