@@ -80,7 +80,7 @@ public class Movement {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         this.state = MovementState.CANCELING;
         this.startTime = now;
-        this.register += "WAITING " + now.toLocalTime() + " | ";
+        this.register += "CANCELING " + now.toLocalTime() + " | ";
     }
 
     // Switch state to RELEASED and record time

@@ -19,22 +19,25 @@
 2. [Application Architecture](#application-architecture)
 3. [Application Behavior](#application-behavior)
    - [Events and Transactions](#events-and-transactions)
-   - [Happy Path Flow](#happy-path-flow)
+   - [Payment successfull](#payment-successfull)
    - [Cancellation Flow](#cancellation-flow)
+   - [Rejection Flow](#rejection-flow)
 4. [Getting Started](#getting-started)
-   - [Run locally](#run-locally)
-   - [Local Evidence](#local-evidence)
+    - [Run locally](#run-locally)
+5. [Local Evidence](#local-evidence)
    - [Successful Payment Flow](#successful-payment-flow)
    - [Cancellation and Compensation Flow](#cancellation-and-compensation-flow)
    - [Insufficient Balance Flow](#insufficient-balance-flow)
-5. [Infrastructure Design](#infrastructure-design)
+6. [Infrastructure Design](#infrastructure-design)
    - [AWS Network and Compute](#aws-network-and-compute)
    - [Kubernetes K3s](#kubernetes-k3s)
-6. [Testing and Validation](#testing-and-validation)
+7. [Deployment of application](#deployment-of-application)
+8. [Testing and Validation in AWS](#testing-and-alidation-in-AWS)
    - [Run in AWS](#run-in-aws)
    - [AWS Evidence](#aws-evidence)
-7. [Current Limitations](#current-limitations)
-8. [License](#license)
+9. [Conclusions and Current Limitations](#current-limitations)
+10. [](#)
+12. [References](#references)
 
 
 
@@ -351,7 +354,7 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 ---
 
 
-## Getting Started
+## Testing and Validation in AWS
 
 ### Run in AWS
 
@@ -399,8 +402,14 @@ terraform destroy
 
 ### AWS Evidence
 
+**1. The first is checking the deployment**
+
+
 
 ---
+
+
+## Conclusions and Current Limitations
 
 
 
