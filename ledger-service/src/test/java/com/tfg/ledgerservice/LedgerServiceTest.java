@@ -169,7 +169,7 @@ class LedgerServiceTest {
                 .thenAnswer(invocation -> {
                     Movement movement = invocation.getArgument(0);
 
-                    if (movement.getState() == MovementState.WAITING) {
+                    if (movement.getState() == MovementState.CANCELING) {
                         storedMovement.set(movement);
                     }
 
@@ -181,7 +181,7 @@ class LedgerServiceTest {
         Movement waitingMovement = storedMovement.get();
 
         assertNotNull(waitingMovement);
-        assertEquals(MovementState.WAITING, waitingMovement.getState());
+        assertEquals(MovementState.CANCELING, waitingMovement.getState());
         assertEquals(0, waitingMovement.getAmount().compareTo(BigDecimal.ZERO));
         assertTrue(waitingMovement.getRegister().contains("WAITING"));
 
