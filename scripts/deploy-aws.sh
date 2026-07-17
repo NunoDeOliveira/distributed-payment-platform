@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-TERRAFORM_DIR="/home/vant/aws-k3s-cluster-terraform"
+TERRAFORM_DIR="/home/vant/aws-k3s-cluster-terraform/terraform"
 REPOSITORY="NunoDeOliveira/distributed-payment-platform"
 BRANCH="digital-banking-platform"
 WORKFLOW="deploy-k3s.yml"
@@ -148,6 +148,6 @@ gh run watch "$RUN_ID" \
 
 echo
 echo "=========================================="
-echo " DESPLIEGUE COMPLETADO CORRECTAMENTE"
+echo " DEPLOYMENT SUCCESSFUL"
 echo " Control plane: $K3S_HOST"
 echo "=========================================="

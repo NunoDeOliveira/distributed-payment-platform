@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledger-service
+  labels:
+    app: ledger-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ledger-service
+  template:
+    metadata:
+      labels:
+        app: ledger-service
+    spec:
+      containers:
+      - name: ledger-service
+        image: nunohenriquedeoliveira/ledger-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8084
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-movement:5432/movementdb"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "postgres"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "postgres"
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: SPRING_RABBITMQ_PORT
+          value: "5672"
+        - name: SPRING_RABBITMQ_USERNAME
+          value: "nuno"
+        - name: SPRING_RABBITMQ_PASSWORD
+          value: "rabbit"
+        - name: SERVER_PORT
+          value: "8084"
+        resources:
+          requests:
+            memory: "256Mi"
+          limits:
+            memory: "512Mi"
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ledger-service
+spec:
+  type: NodePort
+  selector:
+    app: ledger-service
+  ports:
+    - port: 8084
+      targetPort: 8084
+      nodePort: 30084

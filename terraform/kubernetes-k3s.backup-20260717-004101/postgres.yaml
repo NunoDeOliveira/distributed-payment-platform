@@ -1,0 +1,192 @@
+# PostgreSQL for Payment Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-payment
+  labels:
+    app: postgres-payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-payment
+  template:
+    metadata:
+      labels:
+        app: postgres-payment
+    spec:
+      containers:
+      - name: postgres-payment
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "paymentdb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-payment
+spec:
+  type: NodePort
+  selector:
+    app: postgres-payment
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30432
+---
+# PostgreSQL for Commission Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-commission
+  labels:
+    app: postgres-commission
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-commission
+  template:
+    metadata:
+      labels:
+        app: postgres-commission
+    spec:
+      containers:
+      - name: postgres-commission
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "commissiondb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-commission
+spec:
+  type: NodePort
+  selector:
+    app: postgres-commission
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30433
+
+---
+# PostgreSQL for Ledger Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-movement
+  labels:
+    app: postgres-movement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-movement
+  template:
+    metadata:
+      labels:
+        app: postgres-movement
+    spec:
+      containers:
+      - name: postgres-movement
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "movementdb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-movement
+spec:
+  type: NodePort
+  selector:
+    app: postgres-movement
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30434
+---
+# PostgreSQL for Account Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-account
+  labels:
+    app: postgres-account
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-account
+  template:
+    metadata:
+      labels:
+        app: postgres-account
+    spec:
+      containers:
+      - name: postgres-account
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "accountdb"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-account
+spec:
+  type: NodePort
+  selector:
+    app: postgres-account
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30435
