@@ -19,6 +19,9 @@ public class Balance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Version
+    private Long version;
 
     @Column(unique = true)
     private String correlationId;

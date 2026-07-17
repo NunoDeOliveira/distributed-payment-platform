@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -34,7 +35,7 @@ public class AccountService {
         }
 
         Balance current = balanceRepo.findTopByOrderByIdDesc()
-                                    .orElseThrow(() -> new RuntimeException("No balance found"));
+                              .orElseThrow(() -> new RuntimeException("No balance found"));
 
         if (current.getBalanceAccount().compareTo(amount) < 0) {
             accountPublish.publishAmountRejected(correlationId);
@@ -105,6 +106,7 @@ public class AccountService {
             return;
         }
 
+        String correlationId = UUID.randomUUID().toString();
         // Get currentBalance and add balanceAdded to balance
         BigDecimal currentBalance = getCurrentBalance();
         BigDecimal newBalance = currentBalance.add(balanceAdded);
@@ -114,8 +116,9 @@ public class AccountService {
         balance.setBalanceAccount(balanceAdded.abs());
         balance.setBalanceAccount(newBalance);
         balance.setTime(LocalDateTime.now());
-
         balanceRepo.save(balance);
+
+        accountPublish.publishDepositCreated(correlationId, balanceAdded);
     }
 
     // Get available balance

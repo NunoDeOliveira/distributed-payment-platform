@@ -110,6 +110,13 @@ public class AccountPublish {
         rabbitTemplate.convertAndSend(COMMISSION_QUEUE, event);
     }
 
+    public void publishDepositCreated(String correlationId, BigDecimal amount) {
+        AccountEvent event = new AccountEvent("deposit.created", correlationId, amount, null);
+
+        log.info("PUBLISH | deposit.created | correlationId={} | amount={}", correlationId, amount);
+        rabbitTemplate.convertAndSend(LEDGER_QUEUE, event);
+    }
+
 
 
 }

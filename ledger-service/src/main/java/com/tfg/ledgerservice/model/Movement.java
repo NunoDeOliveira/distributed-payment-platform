@@ -78,7 +78,7 @@ public class Movement {
     // Switch state to WAITING and record time
     public void waiting() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        this.state = MovementState.WAITING;
+        this.state = MovementState.CANCELING;
         this.startTime = now;
         this.register += "WAITING " + now.toLocalTime() + " | ";
     }
@@ -89,5 +89,12 @@ public class Movement {
         this.state = MovementState.RELEASED;
         this.endTime = now;
         this.register += "RELEASED " + now.toLocalTime() + " | ";
+    }
+
+    public void deposited() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        this.state = MovementState.DEPOSIT;
+        this.startTime = now;
+        this.register += "DEPOSIT " + now.toLocalTime() + " | ";
     }
 }

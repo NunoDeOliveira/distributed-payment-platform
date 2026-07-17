@@ -45,7 +45,7 @@ public class LedgerService {
         Movement movement = movementRepo.findByCorrelationId(correlationId).orElse(null);
 
         // Check if there are movements in pending state before recorded
-        if (movement != null && movement.getState() == MovementState.WAITING) {
+        if (movement != null && movement.getState() == MovementState.CANCELING) {
             movement.setAmount(amount.negate()); // negative amount
             movement.cancelled();
             movementRepo.save(movement);
@@ -111,6 +111,15 @@ public class LedgerService {
         movementRepo.save(returned);
         ledgerPublish.publishLedgerMovementCanceled(correlationId, amount);
         log.info("releaseMovement | released | correlationId={} | amount={}", correlationId, amount);
+    }
+
+    @Transactional
+    public void recordDeposit(String correlationId, BigDecimal amount) {
+        if (correlationId == null || amount == null) return;
+        Movement movement = new Movement(correlationId, amount);
+        movement.deposited();
+        movementRepo.save(movement);
+        log.info("recordDeposit | recorded | correlationId={} | amount={}", correlationId, amount);
     }
 
     // Given an

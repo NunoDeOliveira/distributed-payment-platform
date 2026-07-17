@@ -19,11 +19,20 @@ public class LedgerConsumer {
 
     @RabbitListener(queues = LedgerPublish.LEDGER_QUEUE)
     public void processEvent(LedgerEvent event) {
-        if (!"amount.reserved".equals(event.getEventType())) {
-            return;
+        if (event == null) return;
+
+        switch (event.getEventType()) {
+            case "amount.reserved":
+                ledgerService.recordMovement(event.getCorrelationId(), event.getAmount());
+                log.info("CONSUMER | amount.reserved | correlationId={}", event.getCorrelationId());
+                break;
+            case "deposit.created":
+                ledgerService.recordDeposit(event.getCorrelationId(), event.getAmount());
+                log.info("CONSUMER | deposit.created | correlationId={}", event.getCorrelationId());
+                break;
+            default:
+                log.warn("CONSUMER | unknown event | eventType={}", event.getEventType());
         }
-        ledgerService.recordMovement(event.getCorrelationId(), event.getAmount());
-        log.info("CONSUMER | amount.reserved | correlationId={}", event.getCorrelationId());
     }
 
     @RabbitListener(queues = LedgerPublish.LEDGER_CANCEL_QUEUE)
@@ -34,4 +43,6 @@ public class LedgerConsumer {
         ledgerService.cancelMovement(event.getCorrelationId());
         log.info("CONSUMER | operation.canceled | correlationId={}", event.getCorrelationId());
     }
+
+
 }

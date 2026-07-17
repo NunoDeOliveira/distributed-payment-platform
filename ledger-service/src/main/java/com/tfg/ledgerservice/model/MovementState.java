@@ -5,5 +5,6 @@ public enum MovementState {
     CANCELED,
     REJECTED,
     RELEASED,
-    WAITING
+    CANCELING,
+    DEPOSIT
 }
