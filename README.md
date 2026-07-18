@@ -164,7 +164,7 @@ The response includes the payment `id`. Use it to list or cancel the payment:
 **4. List all payments**
 
 ```bash
-curl http://localhost:8080/payments
+curl "http://localhost:8080/payments"
 ```
 
 **5. Cancel a payment**
@@ -180,6 +180,7 @@ curl -X DELETE "http://localhost:8080/payments/{id}"
 The following queries verify the state of each service database after running both a successful payment and a cancellation. Each service records its local transaction  independently, demonstrating the Saga choreography pattern flow.
 
 For local testing, a script is provided to automate the creation and cancellation of a payment. For running the test: 
+
 ```bash
 cd distributed-payment-platform
 ./test-cancel-payment.sh
@@ -189,40 +190,28 @@ cd distributed-payment-platform
 **Payment Service**: shows the payment lifecycle:
 
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c \
-"SELECT id, amount, correlation_id \
- AS \"correlationId\", register \
- FROM payments ORDER BY id ASC;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d paymentdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM payments ORDER BY id ASC;"
 ```
 
 
 **Commission Service**: shows the commission calculated:
 
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c \
-"SELECT id, amount, total_amount \
- AS \"totalAmount\", correlation_id AS \"correlationId\", register \
- FROM commissions ORDER BY id ASC;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d commissiondb -c "SELECT id, amount, total_amount AS \"totalAmount\", correlation_id AS \"correlationId\", register FROM commissions ORDER BY id ASC;"
 ```
 
 
 **Account Service**: shows the account balance:
 
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c \
-"SELECT id, balance_account \
- AS \"balanceAccount\", correlation_id AS \"correlationId\", register \
- FROM balances ORDER BY id ASC;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c "SELECT id, balance_account AS \"balanceAccount\", correlation_id AS \"correlationId\", register FROM balances ORDER BY id ASC;"
 ```
 
 
 **Ledger Service**: shows the immutable the record movements:
 
 ```bash
-docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c \ 
-"SELECT id, amount, correlation_id \ 
- AS \"correlationId\", register \
- FROM movements ORDER BY id  DESC LIMIT 20;"
+docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM movements ORDER BY id DESC LIMIT 20;"
 ```
 
 
@@ -351,6 +340,8 @@ For deployment, each microservice is packaged as a Docker image. GitHub Actions 
 
 GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
 
+![Diagram of Deployment](docs/diagram-of-deployment.png)
+
 ---
 
 
@@ -361,17 +352,16 @@ GitHub Actions builds and publishes the Docker images and deploys the Kubernetes
 **Prerequisites**
 
 - AWS account and configured credentials;
+- SSH private key for the control-plane instance
+- an existing AWS EC2 key pair
 - Terraform;
-- an existing AWS EC2 key pair;
-- SSH private key for the control-plane instance.
+
+
 
 **1. Provision the infrastructure**
 
 ```bash
-cd terraform
-terraform init
-terraform plan
-terraform apply
+./scripts/deploy-aws.sh
 ```
 
 Terraform provisions the EC2 instances, installs K3s and deploys the microservices automatically. The output includes the Control Plane IP address.
@@ -404,7 +394,25 @@ terraform destroy
 
 **1. The first is checking the deployment**
 
+![Services deployed](docs/services-deployed.png)
 
+**2. Scale to 3 replicas per microservice. Execute this command in control plane**
+
+```bash
+sudo k3s kubectl scale deployment payment-service --replicas=3 &&
+sudo k3s kubectl scale deployment commission-service --replicas=3 &&
+sudo k3s kubectl scale deployment account-service --replicas=3 &&
+sudo k3s kubectl scale deployment ledger-service --replicas=3
+```
+
+**3. The capture**
+
+![Services Replicated](docs/services-replicated.png)
+
+
+**4. Capture**
+
+![Test in AWS with replicas](docs/test-in-AWS-with-replicas.png)
 
 ---
 
@@ -425,50 +433,48 @@ doi: 10.3390/app12126242.
 
 [3] GitHub, “Workflow syntax for GitHub Actions,” *GitHub Docs*.
 [Online]. Available:
-https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions.
-[Accessed: Jul. 13, 2026].
+https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions
 
 [4] GitHub, “Publishing Docker images,” *GitHub Docs*. [Online].
 Available:
-https://docs.github.com/actions/guides/publishing-docker-images.
-[Accessed: Jul. 13, 2026].
+https://docs.github.com/actions/guides/publishing-docker-images
 
 [5] Apache Maven Project, “Maven Surefire Plugin.” [Online].
 Available:
 https://maven.apache.org/surefire/maven-surefire-plugin/.
-[Accessed: Jul. 13, 2026].
 
 [6] Kubernetes Authors, “Deployments,” *Kubernetes Documentation*.
 [Online]. Available:
-https://kubernetes.io/docs/concepts/workloads/controllers/deployment/.
-[Accessed: Jul. 13, 2026].
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 
 [7] Kubernetes Authors, “kubectl port-forward,”
 *Kubernetes Documentation*. [Online]. Available:
-https://kubernetes.io/docs/reference/kubectl/generated/kubectl_port-forward/.
-[Accessed: Jul. 13, 2026].
+https://kubernetes.io/docs/reference/kubectl/generated/kubectl_port-forward/
 
 [8] Spring, “Actuator endpoints,” *Spring Boot Reference Documentation*.
 [Online]. Available:
-https://docs.spring.io/spring-boot/reference/actuator/endpoints.html.
-[Accessed: Jul. 13, 2026].
+https://docs.spring.io/spring-boot/reference/actuator/endpoints.html
 
 [9] K3s Project, “Architecture,” *K3s Documentation*. [Online].
 Available:
 https://docs.k3s.io/architecture.
-[Accessed: Jul. 13, 2026].
 
 [10] HashiCorp, “What is Terraform?,” *Terraform Documentation*.
 [Online]. Available:
 https://developer.hashicorp.com/terraform/intro.
-[Accessed: Jul. 13, 2026].
 
 [11] Amazon Web Services, “What is Amazon VPC?,”
 *Amazon VPC User Guide*. [Online]. Available:
-https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html.
-[Accessed: Jul. 13, 2026].
+https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 
 [12] Amazon Web Services, “What is Amazon EC2?,”
 *Amazon EC2 User Guide*. [Online]. Available:
-https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html.
-[Accessed: Jul. 13, 2026].
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html
+
+[13] Working with objects, “Objects In Kubernetes,”
+*Kubernetes Documentation*. [Online]. Available:
+https://kubernetes.io/docs/concepts/overview/working-with-objects/
+
+[14] FreeCodeCamp "Bash Scripting Tutorial – Linux Shell Script and Command Line for Beginners,”
+*Bash*. [Online]. Available:
+https://www.freecodecamp.org/news/bash-scripting-tutorial-linux-shell-script-and-command-line-for-beginners/

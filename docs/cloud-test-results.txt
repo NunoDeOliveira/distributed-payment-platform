@@ -1,0 +1,204 @@
+=== PAYMENT SERVICE ===
+ id | amount |            correlationId             |                 register                 
+----+--------+--------------------------------------+------------------------------------------
+  1 | 200.00 | be2261a9-3d6c-4111-99da-53e5bc8b6f02 | CREATED 17:02:58 | REJECTED 17:03 | 
+  2 | 200.00 | daca41ba-7102-4963-b129-3c4d58be9eee | CREATED 17:02:58 | COMPLETED 17:02:59 | 
+  3 | 200.00 | 548aa1c6-3710-4ac7-b322-0d72c3f072fa | CREATED 17:02:58 | COMPLETED 17:03:03 | 
+  4 | 100.00 | 55aef20b-359c-4983-837d-2b59bfbb8790 | CREATED 17:02:58 | CANCELLED 17:03:01 | 
+  5 | 100.00 | 09b2729c-9c43-4e79-828b-4c5253c2f04c | CREATED 17:02:58 | CANCELLED 17:03:02 | 
+  6 | 100.00 | a81409b4-1fd8-4cbf-8b03-df0024b6bcab | CREATED 17:02:58 | REJECTED 17:03:02 | 
+  7 | 300.00 | b1e27d42-b87f-4ec3-a3b2-7744257cfe1d | CREATED 17:02:58 | COMPLETED 17:03:02 | 
+  8 | 300.00 | 2677c831-d513-49ec-b895-da149a917ccf | CREATED 17:02:58 | REJECTED 17:03:02 | 
+  9 | 300.00 | dffa78ed-6c0f-4b38-a7e3-6cd5e79d4813 | CREATED 17:02:58 | COMPLETED 17:03:01 | 
+ 10 | 200.00 | 00491aa5-8ce1-404d-9d58-11285c497b9e | CREATED 17:02:59 | COMPLETED 17:03:01 | 
+ 11 | 200.00 | de65ac78-b365-4e41-a045-ea26750dfdaa | CREATED 17:02:59 | COMPLETED 17:03:02 | 
+ 12 | 100.00 | b483b801-750d-4d28-bfe0-2ba8d1a13689 | CREATED 17:02:59 | CANCELLED 17:03:02 | 
+ 13 | 100.00 | f1b3dc61-4fa9-43ab-a02e-849272914097 | CREATED 17:02:59 | CANCELLED 17:03:03 | 
+ 14 | 300.00 | 5e37f8a6-fba8-4612-9c4a-a277f2636b2a | CREATED 17:02:59 | REJECTED 17:03 | 
+ 15 | 300.00 | e0ecd6a6-f13a-4bc1-93c6-5865e62aa28a | CREATED 17:02:59 | REJECTED 17:03:02 | 
+ 16 | 200.00 | c8baffe5-f4f2-4b9d-b37e-ca90ae2cde13 | CREATED 17:03 | COMPLETED 17:03:02 | 
+ 17 | 100.00 | 15caf7c3-a4a8-438e-acb6-12c63d021f16 | CREATED 17:03 | CANCELLED 17:03:03 | 
+ 18 | 300.00 | 6bb2a620-327c-44d9-b21b-e18da22063a5 | CREATED 17:03 | REJECTED 17:03:02 | 
+ 19 | 200.00 | ba0801a5-e814-49cd-ad44-0bab9a107a14 | CREATED 17:03 | COMPLETED 17:03:03 | 
+ 20 | 200.00 | c6431d02-62ac-45ee-a903-5211f10d4072 | CREATED 17:03:01 | COMPLETED 17:03:04 | 
+ 21 | 200.00 | d199145c-1656-4843-a958-b49b4b77c6c2 | CREATED 17:03:01 | COMPLETED 17:03:04 | 
+ 22 | 100.00 | b8d4dd3e-c234-41db-82d5-cd6884d1fcc5 | CREATED 17:03:01 | CANCELLED 17:03:04 | 
+ 23 | 100.00 | e8ca7ef4-1e1d-4773-ba50-81b6a03c8e91 | CREATED 17:03:01 | CANCELLED 17:03:06 | 
+ 24 | 100.00 | f69b8e1e-42fe-40e4-b496-441ab94b5a9f | CREATED 17:03:01 | CANCELLED 17:03:05 | 
+ 25 | 300.00 | d8b64e2b-6238-4150-8f51-1e8690289366 | CREATED 17:03:01 | REJECTED 17:03:01 | 
+ 26 | 300.00 | 48e2ca93-e616-448a-bdc6-53244be66625 | CREATED 17:03:01 | REJECTED 17:03:02 | 
+ 27 | 300.00 | 83f55315-54a6-4b71-97d2-b2a91162348d | CREATED 17:03:01 | REJECTED 17:03:02 | 
+ 28 | 200.00 | 11886161-4d23-4142-a7a4-7c33d2f52f3d | CREATED 17:03:01 | COMPLETED 17:03:05 | 
+ 29 | 200.00 | b5745927-5a16-4995-9f08-cae3a0d9ee08 | CREATED 17:03:02 | COMPLETED 17:03:06 | 
+ 30 | 200.00 | 66b6d1fb-337b-4337-b754-816b31837dcd | CREATED 17:03:02 | COMPLETED 17:03:06 | 
+ 31 | 100.00 | a9e44887-2409-4ae9-9378-c05502ad59e2 | CREATED 17:03:02 | CANCELLED 17:03:07 | 
+ 32 | 100.00 | 9d76eef6-dd23-4c33-bbac-df644532d316 | CREATED 17:03:02 | CANCELLED 17:03:08 | 
+ 33 | 100.00 | 1ece24b7-49ea-40ec-a3c6-e99925302112 | CREATED 17:03:02 | CANCELLED 17:03:07 | 
+ 34 | 300.00 | d6dbf67c-5317-4a0f-b03f-bc4ab7c15bcf | CREATED 17:03:02 | COMPLETED 17:03:07 | 
+ 35 | 300.00 | c94f4e8d-9299-4c58-8f44-f00547587b48 | CREATED 17:03:02 | COMPLETED 17:03:08 | 
+ 36 | 300.00 | 7d4aca48-0ab9-4dc1-b703-1de7b4596ffb | CREATED 17:03:02 | REJECTED 17:03:02 | 
+ 37 | 200.00 | 97b834f4-3e16-42d0-abf1-273bdf26e650 | CREATED 17:03:02 | COMPLETED 17:03:09 | 
+ 38 | 200.00 | 1bf980f8-4321-4d20-b775-aa46103a587a | CREATED 17:03:02 | COMPLETED 17:03:08 | 
+ 39 | 200.00 | 7afd60fe-e2de-46ef-9a85-e3ddaf14d174 | CREATED 17:03:02 | COMPLETED 17:03:09 | 
+ 40 | 100.00 | 58605dee-a704-4207-806a-62a58bef7fb6 | CREATED 17:03:02 | CANCELLED 17:03:10 | 
+ 41 | 100.00 | e36f3d51-865f-42ab-a06b-e4d745d32e23 | CREATED 17:03:02 | CANCELLED 17:03:09 | 
+ 42 | 100.00 | 11c9c43d-ca8e-41bd-aad6-f414a00a207d | CREATED 17:03:02 | CANCELLED 17:03:10 | 
+ 43 | 300.00 | f6bccbe4-6fcd-4830-a8d8-8fdc0e1af358 | CREATED 17:03:03 | REJECTED 17:03:03 | 
+ 44 | 300.00 | 4c257edb-bdcb-4a35-9acf-7d02fcdf5741 | CREATED 17:03:03 | REJECTED 17:03:03 | 
+ 45 | 300.00 | ccf08c9b-2627-4767-abdd-acfc6c2fa9a8 | CREATED 17:03:03 | REJECTED 17:03:03 | 
+(45 rows)
+
+=== COMMISSION SERVICE ===
+ id | amount | totalAmount |            correlationId             |                  register                  
+----+--------+-------------+--------------------------------------+--------------------------------------------
+  1 | 200.00 |      204.00 | daca41ba-7102-4963-b129-3c4d58be9eee | CALCULATED 17:02:58 | 
+  2 | 200.00 |      204.00 | be2261a9-3d6c-4111-99da-53e5bc8b6f02 | CALCULATED 17:02:58 | REJECTED 17:03 | 
+  3 | 300.00 |      306.00 | b1e27d42-b87f-4ec3-a3b2-7744257cfe1d | CALCULATED 17:02:58 | 
+  4 | 200.00 |      204.00 | 00491aa5-8ce1-404d-9d58-11285c497b9e | CALCULATED 17:02:59 | 
+  5 | 100.00 |      102.00 | f1b3dc61-4fa9-43ab-a02e-849272914097 | CALCULATED 17:02:59 | CANCELED 17:03:03 | 
+  6 | 100.00 |      102.00 | 55aef20b-359c-4983-837d-2b59bfbb8790 | CALCULATED 17:02:59 | CANCELED 17:03:01 | 
+  7 | 100.00 |      102.00 | a81409b4-1fd8-4cbf-8b03-df0024b6bcab | CALCULATED 17:02:59 | REJECTED 17:03 | 
+  8 | 300.00 |      306.00 | dffa78ed-6c0f-4b38-a7e3-6cd5e79d4813 | CALCULATED 17:02:59 | 
+  9 | 100.00 |      102.00 | b483b801-750d-4d28-bfe0-2ba8d1a13689 | CALCULATED 17:02:59 | CANCELED 17:03:01 | 
+ 10 | 300.00 |      306.00 | e0ecd6a6-f13a-4bc1-93c6-5865e62aa28a | CALCULATED 17:02:59 | REJECTED 17:03 | 
+ 11 | 200.00 |      204.00 | 548aa1c6-3710-4ac7-b322-0d72c3f072fa | CALCULATED 17:02:59 | 
+ 12 | 200.00 |      204.00 | c8baffe5-f4f2-4b9d-b37e-ca90ae2cde13 | CALCULATED 17:03 | 
+ 13 | 100.00 |      102.00 | 09b2729c-9c43-4e79-828b-4c5253c2f04c | CALCULATED 17:03 | CANCELED 17:03:02 | 
+ 14 | 300.00 |      306.00 | 2677c831-d513-49ec-b895-da149a917ccf | CALCULATED 17:03 | REJECTED 17:03 | 
+ 15 | 200.00 |      204.00 | de65ac78-b365-4e41-a045-ea26750dfdaa | CALCULATED 17:03 | 
+ 16 | 300.00 |      306.00 | 5e37f8a6-fba8-4612-9c4a-a277f2636b2a | CALCULATED 17:03 | REJECTED 17:03 | 
+ 17 | 100.00 |      102.00 | 15caf7c3-a4a8-438e-acb6-12c63d021f16 | CALCULATED 17:03 | CANCELED 17:03:02 | 
+ 18 | 300.00 |      306.00 | 6bb2a620-327c-44d9-b21b-e18da22063a5 | CALCULATED 17:03 | REJECTED 17:03 | 
+ 19 | 200.00 |      204.00 | ba0801a5-e814-49cd-ad44-0bab9a107a14 | CALCULATED 17:03 | 
+ 20 | 200.00 |      204.00 | c6431d02-62ac-45ee-a903-5211f10d4072 | CALCULATED 17:03:01 | 
+ 21 | 200.00 |      204.00 | d199145c-1656-4843-a958-b49b4b77c6c2 | CALCULATED 17:03:01 | 
+ 22 | 100.00 |      102.00 | b8d4dd3e-c234-41db-82d5-cd6884d1fcc5 | CALCULATED 17:03:01 | CANCELED 17:03:04 | 
+ 23 | 100.00 |      102.00 | f69b8e1e-42fe-40e4-b496-441ab94b5a9f | CALCULATED 17:03:01 | CANCELED 17:03:05 | 
+ 24 | 100.00 |      102.00 | e8ca7ef4-1e1d-4773-ba50-81b6a03c8e91 | CALCULATED 17:03:01 | CANCELED 17:03:05 | 
+ 25 | 300.00 |      306.00 | d8b64e2b-6238-4150-8f51-1e8690289366 | CALCULATED 17:03:01 | REJECTED 17:03:01 | 
+ 26 | 300.00 |      306.00 | 48e2ca93-e616-448a-bdc6-53244be66625 | CALCULATED 17:03:01 | REJECTED 17:03:01 | 
+ 27 | 300.00 |      306.00 | 83f55315-54a6-4b71-97d2-b2a91162348d | CALCULATED 17:03:01 | REJECTED 17:03:01 | 
+ 28 | 200.00 |      204.00 | 11886161-4d23-4142-a7a4-7c33d2f52f3d | CALCULATED 17:03:01 | 
+ 29 | 200.00 |      204.00 | b5745927-5a16-4995-9f08-cae3a0d9ee08 | CALCULATED 17:03:02 | 
+ 30 | 200.00 |      204.00 | 66b6d1fb-337b-4337-b754-816b31837dcd | CALCULATED 17:03:02 | 
+ 31 | 100.00 |      102.00 | a9e44887-2409-4ae9-9378-c05502ad59e2 | CALCULATED 17:03:02 | CANCELED 17:03:07 | 
+ 32 | 100.00 |      102.00 | 9d76eef6-dd23-4c33-bbac-df644532d316 | CALCULATED 17:03:02 | CANCELED 17:03:08 | 
+ 33 | 100.00 |      102.00 | 1ece24b7-49ea-40ec-a3c6-e99925302112 | CALCULATED 17:03:02 | CANCELED 17:03:07 | 
+ 34 | 300.00 |      306.00 | d6dbf67c-5317-4a0f-b03f-bc4ab7c15bcf | CALCULATED 17:03:02 | 
+ 35 | 300.00 |      306.00 | c94f4e8d-9299-4c58-8f44-f00547587b48 | CALCULATED 17:03:02 | 
+ 36 | 300.00 |      306.00 | 7d4aca48-0ab9-4dc1-b703-1de7b4596ffb | CALCULATED 17:03:02 | REJECTED 17:03:02 | 
+ 37 | 200.00 |      204.00 | 97b834f4-3e16-42d0-abf1-273bdf26e650 | CALCULATED 17:03:02 | 
+ 38 | 200.00 |      204.00 | 1bf980f8-4321-4d20-b775-aa46103a587a | CALCULATED 17:03:02 | 
+ 39 | 200.00 |      204.00 | 7afd60fe-e2de-46ef-9a85-e3ddaf14d174 | CALCULATED 17:03:02 | 
+ 40 | 100.00 |      102.00 | 58605dee-a704-4207-806a-62a58bef7fb6 | CALCULATED 17:03:02 | CANCELED 17:03:10 | 
+ 41 | 100.00 |      102.00 | e36f3d51-865f-42ab-a06b-e4d745d32e23 | CALCULATED 17:03:02 | CANCELED 17:03:09 | 
+ 42 | 100.00 |      102.00 | 11c9c43d-ca8e-41bd-aad6-f414a00a207d | CALCULATED 17:03:02 | CANCELED 17:03:10 | 
+ 43 | 300.00 |      306.00 | f6bccbe4-6fcd-4830-a8d8-8fdc0e1af358 | CALCULATED 17:03:03 | REJECTED 17:03:03 | 
+ 44 | 300.00 |      306.00 | 4c257edb-bdcb-4a35-9acf-7d02fcdf5741 | CALCULATED 17:03:03 | REJECTED 17:03:03 | 
+ 45 | 300.00 |      306.00 | ccf08c9b-2627-4767-abdd-acfc6c2fa9a8 | CALCULATED 17:03:03 | REJECTED 17:03:03 | 
+(45 rows)
+
+=== ACCOUNT SERVICE ===
+ id | balanceAccount |            correlationId             |                 register                  
+----+----------------+--------------------------------------+-------------------------------------------
+  1 |         500.00 |                                      | 
+  2 |        1000.00 |                                      | 
+  3 |         796.00 | daca41ba-7102-4963-b129-3c4d58be9eee | RESERVED 17:02:58 | CONFIRMED 17:02:59 | 
+  4 |        1296.00 |                                      | 
+  5 |        1796.00 |                                      | 
+  6 |        1592.00 | 00491aa5-8ce1-404d-9d58-11285c497b9e | RESERVED 17:02:59 | CONFIRMED 17:03 | 
+  7 |        1286.00 | b1e27d42-b87f-4ec3-a3b2-7744257cfe1d | RESERVED 17:02:59 | CONFIRMED 17:03 | 
+  8 |        1286.00 | 55aef20b-359c-4983-837d-2b59bfbb8790 | RESERVED 17:02:59 | CANCELED 17:03:01 | 
+  9 |        1184.00 | b483b801-750d-4d28-bfe0-2ba8d1a13689 | RESERVED 17:02:59 | CANCELED 17:03:01 | 
+ 10 |         776.00 | dffa78ed-6c0f-4b38-a7e3-6cd5e79d4813 | RESERVED 17:02:59 | CONFIRMED 17:03:01 | 
+ 11 |        1684.00 |                                      | 
+ 13 |        1684.00 |                                      | 
+ 14 |         572.00 | c8baffe5-f4f2-4b9d-b37e-ca90ae2cde13 | RESERVED 17:03 | CONFIRMED 17:03:01 | 
+ 16 |         572.00 | 09b2729c-9c43-4e79-828b-4c5253c2f04c | RESERVED 17:03 | CANCELED 17:03:02 | 
+ 19 |         266.00 | de65ac78-b365-4e41-a045-ea26750dfdaa | RESERVED 17:03 | CONFIRMED 17:03:02 | 
+ 21 |         266.00 | 15caf7c3-a4a8-438e-acb6-12c63d021f16 | RESERVED 17:03 | CANCELED 17:03:02 | 
+ 22 |         164.00 | f1b3dc61-4fa9-43ab-a02e-849272914097 | RESERVED 17:03 | CANCELED 17:03:03 | 
+ 23 |         562.00 |                                      | 
+ 24 |         562.00 |                                      | 
+ 25 |         358.00 | 548aa1c6-3710-4ac7-b322-0d72c3f072fa | RESERVED 17:03 | CONFIRMED 17:03:03 | 
+ 26 |        1062.00 |                                      | 
+ 27 |         858.00 | ba0801a5-e814-49cd-ad44-0bab9a107a14 | RESERVED 17:03 | CONFIRMED 17:03:03 | 
+ 28 |         654.00 | d199145c-1656-4843-a958-b49b4b77c6c2 | RESERVED 17:03:01 | CONFIRMED 17:03:04 | 
+ 29 |         450.00 | c6431d02-62ac-45ee-a903-5211f10d4072 | RESERVED 17:03:01 | CONFIRMED 17:03:04 | 
+ 30 |         450.00 | b8d4dd3e-c234-41db-82d5-cd6884d1fcc5 | RESERVED 17:03:01 | CANCELED 17:03:04 | 
+ 31 |         348.00 | f69b8e1e-42fe-40e4-b496-441ab94b5a9f | RESERVED 17:03:01 | CANCELED 17:03:05 | 
+ 32 |         246.00 | e8ca7ef4-1e1d-4773-ba50-81b6a03c8e91 | RESERVED 17:03:01 | CANCELED 17:03:05 | 
+ 33 |         644.00 |                                      | 
+ 34 |        1144.00 |                                      | 
+ 35 |        1644.00 |                                      | 
+ 36 |        1440.00 | 11886161-4d23-4142-a7a4-7c33d2f52f3d | RESERVED 17:03:02 | CONFIRMED 17:03:05 | 
+ 37 |        1236.00 | b5745927-5a16-4995-9f08-cae3a0d9ee08 | RESERVED 17:03:02 | CONFIRMED 17:03:06 | 
+ 38 |        1236.00 | a9e44887-2409-4ae9-9378-c05502ad59e2 | RESERVED 17:03:02 | CANCELED 17:03:07 | 
+ 40 |         930.00 | 66b6d1fb-337b-4337-b754-816b31837dcd | RESERVED 17:03:02 | CONFIRMED 17:03:06 | 
+ 42 |         930.00 | 1ece24b7-49ea-40ec-a3c6-e99925302112 | RESERVED 17:03:02 | CANCELED 17:03:07 | 
+ 43 |         828.00 | 9d76eef6-dd23-4c33-bbac-df644532d316 | RESERVED 17:03:02 | CANCELED 17:03:08 | 
+ 44 |         420.00 | d6dbf67c-5317-4a0f-b03f-bc4ab7c15bcf | RESERVED 17:03:02 | CONFIRMED 17:03:07 | 
+ 46 |         114.00 | c94f4e8d-9299-4c58-8f44-f00547587b48 | RESERVED 17:03:02 | CONFIRMED 17:03:08 | 
+ 47 |         614.00 |                                      | 
+ 48 |         614.00 |                                      | 
+ 49 |        1114.00 |                                      | 
+ 50 |         910.00 | 97b834f4-3e16-42d0-abf1-273bdf26e650 | RESERVED 17:03:02 | CONFIRMED 17:03:09 | 
+ 52 |         706.00 | 1bf980f8-4321-4d20-b775-aa46103a587a | RESERVED 17:03:02 | CONFIRMED 17:03:08 | 
+ 53 |         502.00 | 7afd60fe-e2de-46ef-9a85-e3ddaf14d174 | RESERVED 17:03:02 | CONFIRMED 17:03:09 | 
+ 54 |         502.00 | 58605dee-a704-4207-806a-62a58bef7fb6 | RESERVED 17:03:02 | CANCELED 17:03:10 | 
+ 55 |         400.00 | e36f3d51-865f-42ab-a06b-e4d745d32e23 | RESERVED 17:03:02 | CANCELED 17:03:09 | 
+ 56 |         298.00 | 11c9c43d-ca8e-41bd-aad6-f414a00a207d | RESERVED 17:03:02 | CANCELED 17:03:10 | 
+(47 rows)
+
+=== LEDGER SERVICE ===
+ id | amount  |            correlationId             |                register                 
+----+---------+--------------------------------------+-----------------------------------------
+  1 | -102.00 | 55aef20b-359c-4983-837d-2b59bfbb8790 | WAITING 17:02:58 | CANCELED 17:03 | 
+  2 | -102.00 | b483b801-750d-4d28-bfe0-2ba8d1a13689 | WAITING 17:02:59 | CANCELED 17:03:01 | 
+  3 | -204.00 | daca41ba-7102-4963-b129-3c4d58be9eee | RECORDED 17:02:59 | 
+  4 |    0.00 | a81409b4-1fd8-4cbf-8b03-df0024b6bcab | WAITING 17:02:59 | 
+  5 | -102.00 | 09b2729c-9c43-4e79-828b-4c5253c2f04c | WAITING 17:03 | CANCELED 17:03:02 | 
+  6 | -102.00 | f1b3dc61-4fa9-43ab-a02e-849272914097 | WAITING 17:03 | CANCELED 17:03:03 | 
+  7 | -204.00 | 00491aa5-8ce1-404d-9d58-11285c497b9e | RECORDED 17:03 | 
+  8 | -102.00 | 15caf7c3-a4a8-438e-acb6-12c63d021f16 | WAITING 17:03 | CANCELED 17:03:02 | 
+  9 | -306.00 | b1e27d42-b87f-4ec3-a3b2-7744257cfe1d | RECORDED 17:03 | 
+ 10 |  102.00 | 55aef20b-359c-4983-837d-2b59bfbb8790 | RELEASED 17:03 | 
+ 11 | -102.00 | b8d4dd3e-c234-41db-82d5-cd6884d1fcc5 | WAITING 17:03:01 | CANCELED 17:03:04 | 
+ 12 | -102.00 | f69b8e1e-42fe-40e4-b496-441ab94b5a9f | WAITING 17:03:01 | CANCELED 17:03:05 | 
+ 13 | -102.00 | e8ca7ef4-1e1d-4773-ba50-81b6a03c8e91 | WAITING 17:03:01 | CANCELED 17:03:05 | 
+ 14 |  102.00 | b483b801-750d-4d28-bfe0-2ba8d1a13689 | RELEASED 17:03:01 | 
+ 15 | -204.00 | c8baffe5-f4f2-4b9d-b37e-ca90ae2cde13 | RECORDED 17:03:01 | 
+ 16 | -306.00 | dffa78ed-6c0f-4b38-a7e3-6cd5e79d4813 | RECORDED 17:03:01 | 
+ 17 | -102.00 | a9e44887-2409-4ae9-9378-c05502ad59e2 | WAITING 17:03:02 | CANCELED 17:03:07 | 
+ 18 | -102.00 | 9d76eef6-dd23-4c33-bbac-df644532d316 | WAITING 17:03:02 | CANCELED 17:03:08 | 
+ 19 | -102.00 | 1ece24b7-49ea-40ec-a3c6-e99925302112 | WAITING 17:03:02 | CANCELED 17:03:07 | 
+ 20 |  102.00 | 15caf7c3-a4a8-438e-acb6-12c63d021f16 | RELEASED 17:03:02 | 
+ 21 |  102.00 | 09b2729c-9c43-4e79-828b-4c5253c2f04c | RELEASED 17:03:02 | 
+ 22 | -204.00 | de65ac78-b365-4e41-a045-ea26750dfdaa | RECORDED 17:03:02 | 
+ 23 | -102.00 | 58605dee-a704-4207-806a-62a58bef7fb6 | WAITING 17:03:03 | CANCELED 17:03:10 | 
+ 24 | -102.00 | e36f3d51-865f-42ab-a06b-e4d745d32e23 | WAITING 17:03:03 | CANCELED 17:03:09 | 
+ 25 | -102.00 | 11c9c43d-ca8e-41bd-aad6-f414a00a207d | WAITING 17:03:03 | CANCELED 17:03:10 | 
+ 26 | -204.00 | ba0801a5-e814-49cd-ad44-0bab9a107a14 | RECORDED 17:03:03 | 
+ 27 |  102.00 | f1b3dc61-4fa9-43ab-a02e-849272914097 | RELEASED 17:03:03 | 
+ 28 | -204.00 | 548aa1c6-3710-4ac7-b322-0d72c3f072fa | RECORDED 17:03:03 | 
+ 29 |  102.00 | b8d4dd3e-c234-41db-82d5-cd6884d1fcc5 | RELEASED 17:03:04 | 
+ 30 | -204.00 | d199145c-1656-4843-a958-b49b4b77c6c2 | RECORDED 17:03:04 | 
+ 31 | -204.00 | c6431d02-62ac-45ee-a903-5211f10d4072 | RECORDED 17:03:04 | 
+ 32 | -204.00 | 11886161-4d23-4142-a7a4-7c33d2f52f3d | RECORDED 17:03:05 | 
+ 33 |  102.00 | f69b8e1e-42fe-40e4-b496-441ab94b5a9f | RELEASED 17:03:05 | 
+ 34 |  102.00 | e8ca7ef4-1e1d-4773-ba50-81b6a03c8e91 | RELEASED 17:03:05 | 
+ 35 | -204.00 | 66b6d1fb-337b-4337-b754-816b31837dcd | RECORDED 17:03:06 | 
+ 36 | -204.00 | b5745927-5a16-4995-9f08-cae3a0d9ee08 | RECORDED 17:03:06 | 
+ 37 |  102.00 | a9e44887-2409-4ae9-9378-c05502ad59e2 | RELEASED 17:03:07 | 
+ 38 | -306.00 | d6dbf67c-5317-4a0f-b03f-bc4ab7c15bcf | RECORDED 17:03:07 | 
+ 39 |  102.00 | 1ece24b7-49ea-40ec-a3c6-e99925302112 | RELEASED 17:03:07 | 
+ 40 |  102.00 | 9d76eef6-dd23-4c33-bbac-df644532d316 | RELEASED 17:03:08 | 
+ 41 | -204.00 | 1bf980f8-4321-4d20-b775-aa46103a587a | RECORDED 17:03:08 | 
+ 42 | -306.00 | c94f4e8d-9299-4c58-8f44-f00547587b48 | RECORDED 17:03:08 | 
+ 43 | -204.00 | 97b834f4-3e16-42d0-abf1-273bdf26e650 | RECORDED 17:03:09 | 
+ 44 |  102.00 | e36f3d51-865f-42ab-a06b-e4d745d32e23 | RELEASED 17:03:09 | 
+ 45 | -204.00 | 7afd60fe-e2de-46ef-9a85-e3ddaf14d174 | RECORDED 17:03:09 | 
+ 46 |  102.00 | 58605dee-a704-4207-806a-62a58bef7fb6 | RELEASED 17:03:10 | 
+ 47 |  102.00 | 11c9c43d-ca8e-41bd-aad6-f414a00a207d | RELEASED 17:03:10 | 
+(47 rows)
+

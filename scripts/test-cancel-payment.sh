@@ -2,7 +2,7 @@
 
 RESPONSE=$(curl -s -X POST "http://localhost:8080/payments" \
   -H "Content-Type: application/json" \
-  -d '{"amount":100.00,"method":"INTERNATIONAL_TRANSFER"}') && \
+  -d '{"amount":200.00,"method":"INTERNATIONAL_TRANSFER"}') && \
 echo "$RESPONSE" && \
 PAYMENT_ID=$(python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])' <<< "$RESPONSE") && \
 echo "Cancelling payment id=$PAYMENT_ID after 5 ms..." && \
