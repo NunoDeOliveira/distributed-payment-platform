@@ -412,7 +412,7 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 
 **4. Capture**
 
-![Test in AWS with replicas](docs/test-in-AWS-with-replicas.png)
+![Cloud test results](docs/cloud-test-results.txt)
 
 ---
 
