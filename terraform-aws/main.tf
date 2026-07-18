@@ -178,7 +178,7 @@ resource "aws_security_group" "k3s_nodes" {
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
   security_group_id = aws_security_group.k3s_nodes.id
 
-  cidr_ipv4   = "0.0.0.0/0"
+  cidr_ipv4   = var.local_ip
   from_port   = 22
   to_port     = 22
   ip_protocol = "tcp"
@@ -188,7 +188,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
 resource "aws_vpc_security_group_ingress_rule" "k3s_api" {
   security_group_id = aws_security_group.k3s_nodes.id
 
-  cidr_ipv4   = "0.0.0.0/0"
+  cidr_ipv4   = var.local_ip
   from_port   = 6443
   to_port     = 6443
   ip_protocol = "tcp"
