@@ -332,13 +332,9 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 
 ## Deployment of application
 
-### Docker
+Each microservice is packaged as a Docker image and published to Docker Hub. A local script (`deploy-aws.sh`) provisions the AWS infrastructure with Terraform, updates the K3s host secret in GitHub, and triggers the deployment workflow automatically.
 
-For deployment, each microservice is packaged as a Docker image. GitHub Actions automates the build and publication of the images and applies the Kubernetes manifests to the K3s cluster.
-
-### CI/CD with GitHub Actions
-
-GitHub Actions builds and publishes the Docker images and deploys the Kubernetes resources required by the application.
+GitHub Actions builds and pushes the Docker images, then applies the Kubernetes manifests to the K3s cluster via SSH.
 
 ![Diagram of Deployment](docs/diagram-of-deployment.png)
 
@@ -392,11 +388,11 @@ terraform destroy
 
 ### AWS Evidence
 
-**1. The first is checking the deployment**
+**1. Verifying the successful deployment of all microservices on the AWS K3s cluster.**
 
 ![Services deployed](docs/services-deployed.png)
 
-**2. Scale to 3 replicas per microservice. Execute this command in control plane**
+**2. Scaling each microservice to 3 replicas to validate concurrent request handling across distributed instances.**
 
 ```bash
 sudo k3s kubectl scale deployment payment-service --replicas=3 &&
@@ -405,12 +401,12 @@ sudo k3s kubectl scale deployment account-service --replicas=3 &&
 sudo k3s kubectl scale deployment ledger-service --replicas=3
 ```
 
-**3. The capture**
+**3. Cluster state after scaling, showing all pods running across the K3s nodes**
 
 ![Services Replicated](docs/services-replicated.png)
 
 
-**4. Capture**
+**4. Database state captured after the concurrent load test, showing the results across all four services.**
 
 ![Cloud test results](docs/cloud-test-results.txt)
 
@@ -423,58 +419,42 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 
 ## References
 
-[1] C. Richardson, *Microservices Patterns: With Examples in Java*.
-Shelter Island, NY, USA: Manning Publications, 2019.
+[1] C. Richardson, *Microservices Patterns: With Examples in Java*. Shelter Island, NY, USA: Manning Publications, 2019.
 
-[2] E. Daraghmi, C.-P. Zhang, and S.-M. Yuan, “Enhancing Saga Pattern
-for Distributed Transactions within a Microservices Architecture,”
-*Applied Sciences*, vol. 12, no. 12, Art. no. 6242, Jun. 2022,
-doi: 10.3390/app12126242.
+[2] E. Daraghmi, C.-P. Zhang, and S.-M. Yuan, “Enhancing Saga Pattern for Distributed Transactions within a Microservices Architecture,” *Applied Sciences*, vol. 12, no. 12, Art. no. 6242, Jun. 2022, doi: 10.3390/app12126242.
 
-[3] GitHub, “Workflow syntax for GitHub Actions,” *GitHub Docs*.
-[Online]. Available:
+[3] GitHub, “Workflow syntax for GitHub Actions,” *GitHub Docs*. [Online]. Available:
 https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions
 
-[4] GitHub, “Publishing Docker images,” *GitHub Docs*. [Online].
-Available:
+[4] GitHub, “Publishing Docker images,” *GitHub Docs*. [Online]. Available:
 https://docs.github.com/actions/guides/publishing-docker-images
 
-[5] Apache Maven Project, “Maven Surefire Plugin.” [Online].
-Available:
+[5] Apache Maven Project, “Maven Surefire Plugin.” [Online]. Available:
 https://maven.apache.org/surefire/maven-surefire-plugin/.
 
-[6] Kubernetes Authors, “Deployments,” *Kubernetes Documentation*.
-[Online]. Available:
+[6] Kubernetes Authors, “Deployments,” *Kubernetes Documentation*. [Online]. Available:
 https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 
-[7] Kubernetes Authors, “kubectl port-forward,”
-*Kubernetes Documentation*. [Online]. Available:
+[7] Kubernetes Authors, “kubectl port-forward,” *Kubernetes Documentation*. [Online]. Available:
 https://kubernetes.io/docs/reference/kubectl/generated/kubectl_port-forward/
 
-[8] Spring, “Actuator endpoints,” *Spring Boot Reference Documentation*.
-[Online]. Available:
+[8] Spring, “Actuator endpoints,” *Spring Boot Reference Documentation*. [Online]. Available:
 https://docs.spring.io/spring-boot/reference/actuator/endpoints.html
 
-[9] K3s Project, “Architecture,” *K3s Documentation*. [Online].
-Available:
+[9] K3s Project, “Architecture,” *K3s Documentation*. [Online]. Available:
 https://docs.k3s.io/architecture.
 
-[10] HashiCorp, “What is Terraform?,” *Terraform Documentation*.
-[Online]. Available:
+[10] HashiCorp, “What is Terraform?,” *Terraform Documentation*. [Online]. Available:
 https://developer.hashicorp.com/terraform/intro.
 
-[11] Amazon Web Services, “What is Amazon VPC?,”
-*Amazon VPC User Guide*. [Online]. Available:
+[11] Amazon Web Services, “What is Amazon VPC?,” *Amazon VPC User Guide*. [Online]. Available:
 https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
 
-[12] Amazon Web Services, “What is Amazon EC2?,”
-*Amazon EC2 User Guide*. [Online]. Available:
+[12] Amazon Web Services, “What is Amazon EC2?,” *Amazon EC2 User Guide*. [Online]. Available:
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html
 
-[13] Working with objects, “Objects In Kubernetes,”
-*Kubernetes Documentation*. [Online]. Available:
+[13] Working with objects, “Objects In Kubernetes,” *Kubernetes Documentation*. [Online]. Available:
 https://kubernetes.io/docs/concepts/overview/working-with-objects/
 
-[14] FreeCodeCamp "Bash Scripting Tutorial – Linux Shell Script and Command Line for Beginners,”
-*Bash*. [Online]. Available:
+[14] FreeCodeCamp "Bash Scripting Tutorial – Linux Shell Script and Command Line for Beginners,” *FreeCodeCamp*. [Online]. Available:
 https://www.freecodecamp.org/news/bash-scripting-tutorial-linux-shell-script-and-command-line-for-beginners/
