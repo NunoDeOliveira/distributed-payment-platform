@@ -426,7 +426,7 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 |---:|---:|---:|
 | 204.00 | 14 | 2,856.00 |
 | 306.00 | 4 | 1,224.00 |
-| **Total** | **18** | **4,080.00** |
+| **Total CALCULATED** | **18** | **4,080.00** |
 
 The results confirm that the 2% commission was applied correctly.
 
@@ -438,7 +438,7 @@ The results confirm that the 2% commission was applied correctly.
 | `RECORDED` × -306.00 | 4 | -1,224.00 |
 | `WAITING` × -102.00 | 14 | -1,428.00 |
 | `RELEASED` × +102.00 | 14 | +1,428.00 |
-| **Net total** |  | **-4,080.00** |
+| **Total RECORD** |  | **-4,080.00** |
 
 **4. Concurrency anomaly**
 
