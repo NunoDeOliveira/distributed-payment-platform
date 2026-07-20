@@ -208,7 +208,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d accountdb -c
 ```
 
 
-**Ledger Service**: shows the immutable the record movements:
+**Ledger Service**: shows the record movements:
 
 ```bash
 docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -c "SELECT id, amount, correlation_id AS \"correlationId\", register FROM movements ORDER BY id DESC LIMIT 20;"
@@ -409,6 +409,44 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 **4. Database state captured after the concurrent load test, showing the results across all four services.**
 
 ![Cloud test results](docs/cloud-test-results.txt)
+
+## Concurrent execution results
+
+**1. Completed payments - Payment Service**
+
+| Payment amount | Operations | Subtotal |
+|---:|---:|---:|
+| 200.00 | 14 | 2,800.00 |
+| 300.00 | 4 | 1,200.00 |
+| **Total COMPLETED** | **18** | **4,000.00** |
+
+**2. Calculated commissions associated with completed payments**
+
+| Total amount including commission | Operations | Subtotal |
+|---:|---:|---:|
+| 204.00 | 14 | 2,856.00 |
+| 306.00 | 4 | 1,224.00 |
+| **Total** | **18** | **4,080.00** |
+
+The results confirm that the 2% commission was applied correctly.
+
+**3. Ledger movements**
+
+| Movement | Operations | Subtotal |
+|---|---:|---:|
+| `RECORDED` × -204.00 | 14 | -2,856.00 |
+| `RECORDED` × -306.00 | 4 | -1,224.00 |
+| `WAITING` × -102.00 | 14 | -1,428.00 |
+| `RELEASED` × +102.00 | 14 | +1,428.00 |
+| **Net total** |  | **-4,080.00** |
+
+**4. Concurrency anomaly**
+
+Rows 11-13, 23-24 and 47-48 in the Account Service show the same final balance for different concurrent operations.
+
+This may indicate a lost-update race condition. Two operations may have read the same balance and then saved the same new value, instead of updating the balance one after the other.
+
+The Payment, Commission and Ledger services remain consistent, but the Account Service shows an anomaly during concurrent execution.
 
 ---
 
