@@ -3,6 +3,7 @@ package com.tfg.accountservice.service;
 import com.tfg.accountservice.message.AccountPublish;
 import com.tfg.accountservice.model.*;
 import com.tfg.accountservice.repository.BalanceRepository;
+import com.tfg.accountservice.repository.AccountBalanceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
@@ -127,8 +128,7 @@ public class AccountService {
         //balance.setBalanceAccount(balanceAdded.abs());
         balance.setBalanceAccount(newBalance);
         balance.setCorrelationId(correlationId);
-        balance.setRegister(Register.DEPOSIT);
-        balance.setTime(LocalDateTime.now());
+        balance.deposit();
         
         // Save the the balance to the respository
         balanceRepo.save(balance);

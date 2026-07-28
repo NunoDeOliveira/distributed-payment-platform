@@ -25,6 +25,9 @@ public class Balance {
 
     @Column(unique = true)
     private String correlationId;
+    
+    @Column(precision = 15, scale = 2)
+    private BigDecimal amount;
 
     // balance of account
     @Column(nullable = false)
