@@ -26,10 +26,6 @@ public class Balance {
     @Column(unique = true)
     private String correlationId;
 
-    // Amount of operation
-    //@Column(nullable = false)
-    //private BigDecimal amount;
-
     // balance of account
     @Column(nullable = false)
     private BigDecimal balanceAccount;
@@ -88,5 +84,12 @@ public class Balance {
         this.state = BalanceState.CANCELED;
         this.time = now;
         this.register += "CANCELED " + now.toLocalTime() + " | ";
+    }
+    
+    public void deposit() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        this.state = BalanceState.DEPOSIT;
+        this.time = now;
+        this.register += "DEPOSIT " + now.toLocalTime() + " | ";
     }
 }

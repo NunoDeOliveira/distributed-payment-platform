@@ -7,7 +7,7 @@
 ![Orchestration](https://img.shields.io/badge/Orchestration-Kubernetes%20(K3s)-yellow)
 ![Deployment](https://img.shields.io/badge/Deployment-GitHub%20Actions-black)
 ![Containers](https://img.shields.io/badge/Containers-Docker-2496ED)
-![Asynchronous Commnunication](https://img.shields.io/badge/Asynchronous%20Commnunication-RabbitMQ-FF6600)
+![Commnunication](https://img.shields.io/badge/Asynchronous%20Commnunication-RabbitMQ-FF6600)
 ![Persistence](https://img.shields.io/badge/Persistence-PostgreSQL-4169E1)
 ![Microservices](https://img.shields.io/badge/Microservices-Spring%20Boot-6DB33F)
 ![Programming Language](https://img.shields.io/badge/Programming%20Language-Java-0074BD)

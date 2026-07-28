@@ -5,5 +5,6 @@ public enum BalanceState {
     CONFIRMED,
     REJECTED,
     RELEASED,
-    CANCELED
+    CANCELED,
+    DEPOSIT
 }

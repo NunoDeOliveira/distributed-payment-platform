@@ -18,11 +18,14 @@ import java.util.UUID;
 public class AccountService {
     private final AccountPublish accountPublish;
     private final BalanceRepository balanceRepo;
+    private static final Long ACCOUNT_ID = 1L;
+    private final AccountBalanceRepository accountBalanceRepo;
 
     // Constructor
-    public AccountService(AccountPublish accountPublish, BalanceRepository balanceRepo) {
+    public AccountService(AccountPublish accountPublish, BalanceRepository balanceRepo, AccountBalanceRepository accountBalanceRepo) {
         this.accountPublish = accountPublish;
         this.balanceRepo = balanceRepo;
+        this.accountBalanceRepo = accountBalanceRepo;
     }
     
 
@@ -90,35 +93,50 @@ public class AccountService {
 
     // Get the current balance stored in the account
     private BigDecimal getCurrentBalance() {
-        Optional<Balance> lastBalance = balanceRepo.findTopByOrderByIdDesc();
-        if (lastBalance.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-        return lastBalance.get().getBalanceAccount();
-
+    
+            return accountBalanceRepo.findById(ACCOUNT_ID).map(AccountBalance::getCurrentBalance)
+                    .orElseThrow(() -> new IllegalStateException("Account balance not initialized"));
     }
 
     // Given an amount deposit that amount into the account
-    @Transactional
-    public void addBalance(BigDecimal balanceAdded) {
+    @Transactional//(isolation = Isolation.SERIALIZABLE)
+    public String addBalance(BigDecimal balanceAdded) {
         // Check the input data
-        if (balanceAdded == null || balanceAdded.compareTo(BigDecimal.ZERO) <= 0) {
-            return;
+        if (balanceAdded == null) {
+            throw new IllegalArgumentException("Deposit cannot be null");
         }
+        if (balanceAdded.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Deposit must be greater than zero");
+        }
+        
+        /****** block account balances with id=1 *******/
+        AccountBalance accountBalance = accountBalanceRepo.findByIdForUpdate(ACCOUNT_ID)
+                                        .orElseThrow(() -> 
+                                        new IllegalStateException("Account balance not initialized"));
+        
 
         String correlationId = UUID.randomUUID().toString();
         // Get currentBalance and add balanceAdded to balance
         BigDecimal currentBalance = getCurrentBalance();
         BigDecimal newBalance = currentBalance.add(balanceAdded);
 
-        //
+        // Create a instance of balance 
         Balance balance = new Balance();
-        balance.setBalanceAccount(balanceAdded.abs());
+        
+        balance.setAmount(balanceAdded);
+        //balance.setBalanceAccount(balanceAdded.abs());
         balance.setBalanceAccount(newBalance);
+        balance.setCorrelationId(correlationId);
+        balance.setRegister(Register.DEPOSIT);
         balance.setTime(LocalDateTime.now());
+        
+        // Save the the balance to the respository
         balanceRepo.save(balance);
-
+        
+        // Publish to Ledger Service queue to register the movement
         accountPublish.publishDepositCreated(correlationId, balanceAdded);
+        
+        return correlationId;
     }
 
     // Get available balance

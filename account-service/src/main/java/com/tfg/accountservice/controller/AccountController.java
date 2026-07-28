@@ -20,9 +20,9 @@ public class AccountController {
     @PostMapping("/add")
     public Map<String, String> addBalance(@RequestParam BigDecimal balanceAccount) {
 
-        accountService.addBalance(balanceAccount);
+        String correlationId = accountService.addBalance(balanceAccount);
 
-        return Map.of("status", "successful");
+        return Map.of("status", "successful", "correlationId", correlationId);
     }
 
 }
