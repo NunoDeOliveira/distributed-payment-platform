@@ -110,7 +110,7 @@ public class AccountService {
             throw new IllegalArgumentException("Deposit must be greater than zero");
         }
         
-        /****** block account balances with id=1 *******/
+        /* block account balances with id=1 */
         AccountBalance accountBalance = accountBalanceRepo.findByIdForUpdate(ACCOUNT_ID)
                                         .orElseThrow(() -> 
                                         new IllegalStateException("Account balance not initialized"));
@@ -120,6 +120,8 @@ public class AccountService {
         // Get currentBalance and add balanceAdded to balance
         BigDecimal currentBalance = getCurrentBalance();
         BigDecimal newBalance = currentBalance.add(balanceAdded);
+        // Modify currente balance
+        //accountBalance.setCurrentBalance(newBalance);
 
         // Create a instance of balance 
         Balance balance = new Balance();

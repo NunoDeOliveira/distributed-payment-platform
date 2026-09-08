@@ -28,20 +28,21 @@
    - [Successful Payment Flow](#successful-payment-flow)
    - [Cancellation and Compensation Flow](#cancellation-and-compensation-flow)
    - [Insufficient Balance Flow](#insufficient-balance-flow)
-6. [Infrastructure Design](#infrastructure-design)
+6. [Deployement in Amazon Web Services](#deployement-in-amazon-web-services)
+   - [Infrastructure Design](#infrastructure-design)
    - [AWS Network and Compute](#aws-network-and-compute)
    - [Kubernetes K3s](#kubernetes-k3s)
-7. [Deployment of application](#deployment-of-application)
-8. [Testing and Validation in AWS](#testing-and-alidation-in-AWS)
+   - [Deployment of application](#deployment-of-application)
+7. [Testing and Validation in AWS](#testing-and-alidation-in-AWS)
    - [Run in AWS](#run-in-aws)
    - [AWS Evidence](#aws-evidence)
-9. [Conclusions and Current Limitations](#current-limitations)
+8. [Conclusions and Current Limitations](#current-limitations)
 10. [](#)
 12. [References](#references)
 
 
 
-## Overview
+## 1. Overview
 
 This project presents the design, deployment and evaluation of a distributed payment platform in a cloud environment.
 
@@ -53,7 +54,7 @@ Each application component is packaged as a Docker image and deployed on Kuberne
 
 ---
 
-## Application Architecture
+## 2. Application Architecture
 
 The application consists of an API Gateway and four independent microservices. The services communicate asynchronously through RabbitMQ, and each microservice owns its own PostgreSQL database.
 
@@ -74,7 +75,7 @@ The application consists of an API Gateway and four independent microservices. T
 ---
  
  
-## Application Behavior
+## 3. Application Behavior
 
 ### Events and Transactions
 
@@ -130,7 +131,7 @@ If one of the services rejects the operation or reports an error, the cancellati
 ---
   
   
-## Getting Started
+## 4. Getting Started
 
 ### Run locally
 
@@ -233,7 +234,7 @@ docker exec -e PGPASSWORD=postgres postgres-tfg psql -U postgres -d movementdb -
 > **Note:**: The refresh interval can be adjusted by changing the value of the `-n` parameter. The default time is 2 seconds.
 
 
-## Local evidency
+## 5. Local evidency
 
 The test results are shown below. For all tests, the database screenshots follow the same numerical order:
 
@@ -296,8 +297,12 @@ In the final scenario, the payment is rejected because the account balance is no
 
 ---
 
+## 6. Deployement in Amazon Web Services
 
-## Infrastructure Design
+
+
+
+### Infrastructure Design
 
 The infrastructure runs in the AWS `eu-west-2` region and is created with Terraform. It includes a network, three EC2 instances, and a K3s cluster distributed across three Availability Zones.
 
@@ -330,7 +335,7 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 ---  
 
 
-## Deployment of application
+### Deployment of application
 
 Each microservice is packaged as a Docker image and published to Docker Hub. A local script (`deploy-aws.sh`) provisions the AWS infrastructure with Terraform, updates the K3s host secret in GitHub, and triggers the deployment workflow automatically.
 
@@ -341,7 +346,7 @@ GitHub Actions builds and pushes the Docker images, then applies the Kubernetes 
 ---
 
 
-## Testing and Validation in AWS
+## 7. Testing and Validation in AWS
 
 ### Run in AWS
 
@@ -408,13 +413,17 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 
 **4. Database state captured after the concurrent load test, showing the results across all four services.**
 
+
 ![Cloud test results](docs/cloud-test-results.txt)
 
-## Concurrent execution results
+
+
+
+### Concurrent execution results
 
 **1. Completed payments - Payment Service**
 
-| Payment amount | Operations | Subtotal |
+| Total amount of Payments completed | Operations | Subtotal |
 |---:|---:|---:|
 | 200.00 | 14 | 2,800.00 |
 | 300.00 | 4 | 1,200.00 |
@@ -422,7 +431,7 @@ sudo k3s kubectl scale deployment ledger-service --replicas=3
 
 **2. Calculated commissions associated with completed payments**
 
-| Total amount including commission | Operations | Subtotal |
+| Total amount and commission calculated | Operations | Subtotal |
 |---:|---:|---:|
 | 204.00 | 14 | 2,856.00 |
 | 306.00 | 4 | 1,224.00 |
@@ -432,13 +441,13 @@ The results confirm that the 2% commission was applied correctly.
 
 **3. Ledger movements**
 
-| Movement | Operations | Subtotal |
+| Total of movements recorded | Operations | Subtotal |
 |---|---:|---:|
 | `RECORDED` × -204.00 | 14 | -2,856.00 |
 | `RECORDED` × -306.00 | 4 | -1,224.00 |
 | `WAITING` × -102.00 | 14 | -1,428.00 |
 | `RELEASED` × +102.00 | 14 | +1,428.00 |
-| **Total RECORD** |  | **-4,080.00** |
+| **Total RECORD** |  | **-4,080.00** |
 
 **4. Concurrency anomaly**
 
@@ -451,7 +460,7 @@ The Payment, Commission and Ledger services remain consistent, but the Account S
 ---
 
 
-## Conclusions and Current Limitations
+## 8. Conclusions and Current Limitations
 
 
 
