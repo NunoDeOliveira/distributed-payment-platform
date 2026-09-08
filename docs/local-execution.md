@@ -5,9 +5,7 @@ This document contains the detailed commands for running and testing theplatform
 ### Prerequisites
 
 - Docker Engine
-
 - Docker Compose
-
 - curl
 
 ### Start the Platform
@@ -25,16 +23,13 @@ docker compose ps
 **1. Add an Initial Balance**
 
 ```bash
-curl -X POST \
-  "http://localhost:8080/balances/add?balanceAccount=500.00"
+curl -X POST "http://localhost:8080/balances/add?balanceAccount=500.00"
 ```
 
 **2. Create a Payment**
 
 ```bash
-curl -X POST "http://localhost:8080/payments" \
-  -H "Content-Type: application/json" \
-  -d '{"amount":100.00,"method":"INTERNATIONAL_TRANSFER"}'
+curl -X POST "http://localhost:8080/payments" -H "Content-Type: application/json" -d '{"amount":100.00,"method":"INTERNATIONAL_TRANSFER"}'
 ```
 
 The response contains the payment ID.
@@ -81,4 +76,4 @@ docker compose down
 
 ## Reference
 
-Docker Compose documentation: https://docs.docker.com/compose/
+- Docker Compose documentation: https://docs.docker.com/compose/

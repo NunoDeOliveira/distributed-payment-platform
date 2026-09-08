@@ -37,8 +37,7 @@
    - [Run in AWS](#run-in-aws)
    - [AWS Evidence](#aws-evidence)
 8. [Conclusions and Current Limitations](#current-limitations)
-10. [](#)
-12. [References](#references)
+10. [References](#references)
 
 
 
@@ -331,8 +330,7 @@ The infrastructure runs in the AWS `eu-west-2` region and is created with Terraf
 - **Application workloads**: the API Gateway, microservices, RabbitMQ, and PostgreSQL databases run as Kubernetes workloads inside the cluster.
 
 - **Application access**: external test requests reach the API Gateway through a Kubernetes `NodePort` service on port `30000`. Internal Kubernetes Services allow the application components to communicate with each other.
-
----  
+ 
 
 
 ### Deployment of application
